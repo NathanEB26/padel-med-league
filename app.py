@@ -42,14 +42,24 @@ NIVEAUX = {
     7: ("Avancé +", "Maîtrise technique et tactique complète"),
 }
 
-STATUTS = [
-    "Médecin libéral", "Médecin hospitalier", "Interne", "Chef de clinique",
-    "Remplaçant", "Médecin retraité", "Étudiant en médecine",
-    "Autre profession de santé",
+# Profession de santé (ouvert à tous les soignants, pas seulement les médecins)
+PROFESSIONS = [
+    "Médecin", "Chirurgien-dentiste", "Pharmacien", "Sage-femme",
+    "Infirmier(ère)", "Masseur-kinésithérapeute", "Orthophoniste", "Orthoptiste",
+    "Psychologue", "Pédicure-podologue", "Ergothérapeute", "Diététicien(ne)",
+    "Manipulateur radio", "Ostéopathe", "Aide-soignant(e)", "Ambulancier",
+    "Étudiant en santé", "Autre profession de santé",
 ]
 
+# Mode / statut d'exercice (transversal à toutes les professions)
+STATUTS = [
+    "Libéral", "Hospitalier", "Salarié", "Interne", "Remplaçant",
+    "Étudiant", "Retraité",
+]
+
+# Spécialité / domaine (surtout pertinent pour les médecins — optionnel)
 SPECIALITES = [
-    "Cardiologie", "Médecine générale", "Anesthésie-réanimation", "Chirurgie",
+    "—", "Cardiologie", "Médecine générale", "Anesthésie-réanimation", "Chirurgie",
     "Radiologie", "Pédiatrie", "Gynécologie", "Dermatologie", "Ophtalmologie",
     "Psychiatrie", "Urgences", "Médecine interne", "Néphrologie",
     "Pneumologie", "Gastro-entérologie", "Endocrinologie", "Rhumatologie",
@@ -153,7 +163,7 @@ def init_db(reset=False):
             username TEXT UNIQUE,
             nom TEXT NOT NULL,
             email TEXT, telephone TEXT,
-            statut TEXT, specialite TEXT, structure TEXT,
+            profession TEXT, statut TEXT, specialite TEXT, structure TEXT,
             niveau INTEGER,
             zone TEXT, cp TEXT,
             equipe_id INTEGER REFERENCES equipes(id)   -- NULL = joueur libre
@@ -183,43 +193,43 @@ def init_db(reset=False):
 # ---------------------------------------------------------------------------
 
 SEED_EQUIPES = [
-    # (nom, zone, [(joueur, statut, specialite, structure, niveau) x2])
+    # (nom, zone, [(joueur, profession, statut, specialite, structure, niveau) x2])
     ("Les Coronaires", "Centre", [
-        ("Dr A. Lefort", "Médecin libéral", "Cardiologie", "Cabinet libéral Paris 8", 6),
-        ("Dr S. Mercier", "Médecin hospitalier", "Cardiologie", "Hôpital Pitié-Salpêtrière", 5)]),
+        ("Dr A. Lefort", "Médecin", "Libéral", "Cardiologie", "Cabinet libéral Paris 8", 6),
+        ("Dr S. Mercier", "Médecin", "Hospitalier", "Cardiologie", "Hôpital Pitié-Salpêtrière", 5)]),
     ("Smash Réa", "Nord-Est", [
-        ("Dr K. Benali", "Médecin hospitalier", "Anesthésie-réanimation", "Hôpital Avicenne (Bobigny)", 7),
-        ("Dr P. Aubry", "Chef de clinique", "Anesthésie-réanimation", "Hôpital Avicenne (Bobigny)", 6)]),
-    ("Volée Générale", "Sud", [
-        ("Dr M. Da Silva", "Médecin libéral", "Médecine générale", "Cabinet de groupe Massy", 4),
-        ("Dr L. Garnier", "Remplaçant", "Médecine générale", "Remplacements Essonne", 4)]),
-    ("Bandeja Bros", "Est", [
-        ("Dr T. Hadji", "Interne", "Urgences", "CH de Meaux", 5),
-        ("Dr R. Colin", "Interne", "Urgences", "CH de Meaux", 5)]),
+        ("Dr K. Benali", "Médecin", "Hospitalier", "Anesthésie-réanimation", "Hôpital Avicenne (Bobigny)", 7),
+        ("Dr P. Aubry", "Médecin", "Hospitalier", "Anesthésie-réanimation", "Hôpital Avicenne (Bobigny)", 6)]),
+    ("Kiné Vibora", "Sud", [
+        ("M. M. Da Silva", "Masseur-kinésithérapeute", "Libéral", "—", "Cabinet de kiné Massy", 4),
+        ("Mme L. Garnier", "Masseur-kinésithérapeute", "Libéral", "—", "Cabinet de kiné Massy", 4)]),
+    ("Les Perfusions", "Est", [
+        ("M. T. Hadji", "Infirmier(ère)", "Hospitalier", "Urgences", "CH de Meaux", 5),
+        ("Mme R. Colin", "Infirmier(ère)", "Hospitalier", "Urgences", "CH de Meaux", 5)]),
     ("Les Scanners", "Ouest", [
-        ("Dr E. Faure", "Médecin libéral", "Radiologie", "Centre d'imagerie Boulogne", 6),
-        ("Dr N. Petit", "Médecin libéral", "Radiologie", "Centre d'imagerie Boulogne", 6)]),
+        ("Dr E. Faure", "Médecin", "Libéral", "Radiologie", "Centre d'imagerie Boulogne", 6),
+        ("M. N. Petit", "Manipulateur radio", "Salarié", "Radiologie", "Centre d'imagerie Boulogne", 6)]),
     ("Padel Pédia", "Centre", [
-        ("Dr C. Roy", "Médecin hospitalier", "Pédiatrie", "Hôpital Necker", 4),
-        ("Dr V. Lambert", "Chef de clinique", "Pédiatrie", "Hôpital Necker", 5)]),
+        ("Dr C. Roy", "Médecin", "Hospitalier", "Pédiatrie", "Hôpital Necker", 4),
+        ("Dr V. Lambert", "Médecin", "Hospitalier", "Pédiatrie", "Hôpital Necker", 5)]),
     ("Net & Sutures", "Nord-Est", [
-        ("Dr O. Marchand", "Médecin hospitalier", "Chirurgie", "Hôpital Delafontaine (St-Denis)", 5),
-        ("Dr F. Girard", "Interne", "Chirurgie", "Hôpital Delafontaine (St-Denis)", 4)]),
+        ("Dr O. Marchand", "Médecin", "Hospitalier", "Chirurgie", "Hôpital Delafontaine (St-Denis)", 5),
+        ("Dr F. Girard", "Chirurgien-dentiste", "Libéral", "—", "Cabinet dentaire Saint-Denis", 4)]),
     ("Les Néphrons", "Sud", [
-        ("Dr H. Morel", "Médecin libéral", "Néphrologie", "Clinique privée Évry", 6),
-        ("Dr A. Texier", "Médecin hospitalier", "Néphrologie", "CHSF Corbeil", 7)]),
+        ("Dr H. Morel", "Médecin", "Libéral", "Néphrologie", "Clinique privée Évry", 6),
+        ("Dr A. Texier", "Médecin", "Hospitalier", "Néphrologie", "CHSF Corbeil", 7)]),
     ("Derm'Smash", "Sud-Est", [
-        ("Dr J. Bonnet", "Médecin libéral", "Dermatologie", "Cabinet libéral Créteil", 3),
-        ("Dr Y. Rousseau", "Médecin libéral", "Dermatologie", "Cabinet libéral Vincennes", 4)]),
+        ("Dr J. Bonnet", "Médecin", "Libéral", "Dermatologie", "Cabinet libéral Créteil", 3),
+        ("M. Y. Rousseau", "Pharmacien", "Libéral", "—", "Pharmacie Vincennes", 4)]),
     ("Vibora Vision", "Sud-Ouest", [
-        ("Dr B. Leroy", "Médecin libéral", "Ophtalmologie", "Cabinet Versailles", 5),
-        ("Dr D. Henry", "Médecin retraité", "Ophtalmologie", "Retraité", 5)]),
+        ("Dr B. Leroy", "Médecin", "Libéral", "Ophtalmologie", "Cabinet Versailles", 5),
+        ("Mme D. Henry", "Orthoptiste", "Libéral", "—", "Cabinet Versailles", 5)]),
     ("Les Synapses", "Nord-Ouest", [
-        ("Dr G. Picard", "Chef de clinique", "Neurologie", "Hôpital de Cergy-Pontoise", 6),
-        ("Dr I. Noël", "Interne", "Neurologie", "Hôpital de Cergy-Pontoise", 5)]),
-    ("Endo Drop", "Nord", [
-        ("Dr W. Sanchez", "Médecin hospitalier", "Endocrinologie", "CH de Gonesse", 4),
-        ("Dr Z. Fontaine", "Remplaçant", "Endocrinologie", "Remplacements Val-d'Oise", 3)]),
+        ("Dr G. Picard", "Médecin", "Hospitalier", "Neurologie", "Hôpital de Cergy-Pontoise", 6),
+        ("Mme I. Noël", "Psychologue", "Salarié", "—", "Hôpital de Cergy-Pontoise", 5)]),
+    ("Sages & Smash", "Nord", [
+        ("Mme W. Sanchez", "Sage-femme", "Hospitalier", "Gynécologie", "CH de Gonesse", 4),
+        ("Mme Z. Fontaine", "Sage-femme", "Hospitalier", "Gynécologie", "CH de Gonesse", 3)]),
 ]
 
 
@@ -257,11 +267,12 @@ def creer_joueur(conn, nom, **kw):
     if conn.execute("SELECT 1 FROM joueurs WHERE username=?", (un,)).fetchone():
         un = username_unique(conn, un)
     cur = conn.execute(
-        "INSERT INTO joueurs(username, nom, email, telephone, statut, specialite, "
-        "structure, niveau, zone, cp, equipe_id) VALUES (?,?,?,?,?,?,?,?,?,?,NULL)",
-        (un, nom, kw.get("email"), kw.get("telephone"), kw.get("statut"),
-         kw.get("specialite"), kw.get("structure"), kw.get("niveau"),
-         kw.get("zone"), kw.get("cp")))
+        "INSERT INTO joueurs(username, nom, email, telephone, profession, statut, "
+        "specialite, structure, niveau, zone, cp, equipe_id) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL)",
+        (un, nom, kw.get("email"), kw.get("telephone"), kw.get("profession"),
+         kw.get("statut"), kw.get("specialite"), kw.get("structure"),
+         kw.get("niveau"), kw.get("zone"), kw.get("cp")))
     return cur.lastrowid, un
 
 
@@ -283,10 +294,10 @@ def seed():
     conn = db()
     for nom, zone, joueurs in SEED_EQUIPES:
         pids = []
-        for (jn, statut, spe, structure, niv) in joueurs:
-            pid, un = creer_joueur(conn, jn, statut=statut, specialite=spe,
-                                   structure=structure, niveau=niv, zone=zone,
-                                   email=f"{slugify(jn)}@demo.fr")
+        for (jn, profession, statut, spe, structure, niv) in joueurs:
+            pid, un = creer_joueur(conn, jn, profession=profession, statut=statut,
+                                   specialite=spe, structure=structure, niveau=niv,
+                                   zone=zone, email=f"{slugify(jn)}@demo.fr")
             pids.append(pid)
         former_equipe(conn, nom, pids[0], pids[1], zone=zone)
     conn.commit()
@@ -602,10 +613,10 @@ def page(titre, corps, flash=None):
     fl = f'<div class="flash">{e(flash)}</div>' if flash else ""
     return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{e(titre)} — Padel Med League</title><style>{CSS}</style></head>
+<title>{e(titre)} — Ligue Padel Santé</title><style>{CSS}</style></head>
 <body><header>
 <div class="brand"><span class="ball">🎾</span>
-<span>Padel Med League<small>ÎLE-DE-FRANCE</small></span></div>
+<span>Ligue Padel Santé<small>ÎLE-DE-FRANCE</small></span></div>
 <nav>{nav}</nav></header>
 <main>{fl}{corps}</main></body></html>"""
 
@@ -647,7 +658,7 @@ def page_classement(flash=None):
         <td>{diff_sets:+d}</td>
         <td class="pts">{s['pts']}</td></tr>"""
     hero = f"""<div class="hero">
-    <h1>La ligue de padel<br>des <em>médecins</em> d'Île-de-France</h1>
+    <h1>La ligue de padel<br>des <em>soignants</em> d'Île-de-France</h1>
     <p>Un adversaire à votre niveau toutes les deux semaines, attribué
     automatiquement. Vous trouvez le terrain, vous jouez, vous entrez le score —
     le classement fait le reste.</p>
@@ -711,7 +722,9 @@ def page_equipe(eid):
     for j in joueurs:
         jl += f"""<tr><td><strong>{e(j['nom'])}</strong>
         <br><span class="tag">@{e(j['username'])}</span></td>
-        <td>{e(j['statut'])}</td><td>{e(j['specialite'])}</td>
+        <td><strong>{e(j['profession'] or '')}</strong>
+        <br><span class="tag">{e(j['statut'] or '')}</span></td>
+        <td>{e('' if j['specialite'] in (None,'—') else j['specialite'])}</td>
         <td>{e(j['structure'])}</td>
         <td>{badge_niveau(j['niveau'])}</td></tr>"""
     matchs = conn.execute(
@@ -734,7 +747,7 @@ def page_equipe(eid):
     {badge_niveau(eq['niveau'])}
     <span class="tag">cote actuelle {int(eq['rating'])}</span></p>
     <h3>Joueurs</h3>
-    <table><tr><th>Nom</th><th>Statut</th><th>Spécialité</th><th>Structure</th>
+    <table><tr><th>Nom</th><th>Profession</th><th>Spécialité</th><th>Structure</th>
     <th>Niveau</th></tr>{jl}</table></div>
     <div class="card"><h3>Historique des matchs</h3>
     <table><tr><th>Adversaire</th><th>Score</th><th>Issue</th></tr>{hist}</table></div>"""
@@ -756,13 +769,14 @@ def niveau_options():
 def page_inscription(flash=None):
     datalist = "".join(f'<option value="{e(s)}">' for s in EXEMPLES_STRUCTURES)
     corps = f"""<div class="card"><h2>S'inscrire (individuel)</h2>
-    <p class="muted">Chaque joueur s'inscrit seul. Une fois inscrit, trouvez votre
+    <p class="muted">Ouvert à <strong>tous les professionnels de santé</strong>.
+    Chaque joueur s'inscrit seul. Une fois inscrit, trouvez votre
     partenaire dans l'<a href="/joueurs">annuaire</a> et
     <a href="/equipe-former">formez votre équipe</a>. Pas sûr de votre niveau ?
     <a href="/niveau">Estimez-le avec le questionnaire</a>.</p>
     <form method="post" action="/inscription">
     <div class="grid2">
-      <div><label>Nom</label><input name="nom" required placeholder="Dr Prénom Nom"></div>
+      <div><label>Nom</label><input name="nom" required placeholder="Prénom Nom (Dr, M., Mme…)"></div>
       <div><label>Pseudo (pour être retrouvé par votre partenaire)</label>
         <input name="username" placeholder="ex. a.lefort"></div>
     </div>
@@ -770,9 +784,10 @@ def page_inscription(flash=None):
       <div><label>Email</label><input name="email" type="email" placeholder="vous@exemple.fr"></div>
       <div><label>Téléphone</label><input name="tel"></div>
     </div>
-    <div class="grid2">
-      <div><label>Statut</label><select name="statut">{opts(STATUTS)}</select></div>
-      <div><label>Spécialité</label><select name="spe">{opts(SPECIALITES)}</select></div>
+    <div class="row">
+      <div><label>Profession</label><select name="profession">{opts(PROFESSIONS)}</select></div>
+      <div><label>Statut d'exercice</label><select name="statut">{opts(STATUTS)}</select></div>
+      <div><label>Spécialité (optionnel)</label><select name="spe">{opts(SPECIALITES)}</select></div>
     </div>
     <label>Structure / lieu d'exercice</label>
     <input name="structure" list="dl_struct" placeholder="ex. Hôpital Pitié-Salpêtrière, Cabinet libéral Paris 15…">
@@ -801,9 +816,10 @@ def page_joueurs(q=None, flash=None):
     params, where = [], ""
     if q:
         where = ("WHERE lower(j.nom) LIKE ? OR lower(j.username) LIKE ? "
-                 "OR lower(j.email) LIKE ? OR lower(j.specialite) LIKE ?")
+                 "OR lower(j.email) LIKE ? OR lower(j.specialite) LIKE ? "
+                 "OR lower(j.profession) LIKE ?")
         like = f"%{q.lower()}%"
-        params = [like, like, like, like]
+        params = [like] * 5
     rows = conn.execute(
         f"SELECT j.*, e.nom AS equipe_nom FROM joueurs j "
         f"LEFT JOIN equipes e ON e.id=j.equipe_id {where} ORDER BY j.equipe_id IS NOT NULL, j.nom",
@@ -815,9 +831,13 @@ def page_joueurs(q=None, flash=None):
     def ligne(r):
         eq = (f'<a href="/equipe?id={r["equipe_id"]}">{e(r["equipe_nom"])}</a>'
               if r["equipe_id"] else '<span class="badge">Cherche partenaire</span>')
+        spe = r['specialite'] if r['specialite'] and r['specialite'] != '—' else ''
+        sous = " · ".join(x for x in (r['statut'], spe) if x)
         return f"""<tr><td><strong>{e(r['nom'])}</strong>
         <br><span class="tag">@{e(r['username'])}</span></td>
-        <td>{e(r['specialite'] or '')}<br><span class="tag">{e(r['structure'] or '')}</span></td>
+        <td><strong>{e(r['profession'] or '')}</strong>
+        <br><span class="tag">{e(sous)}</span>
+        <br><span class="tag">{e(r['structure'] or '')}</span></td>
         <td><span class="badge zone">{e(r['zone'] or '?')}</span></td>
         <td>{badge_niveau(r['niveau']) if r['niveau'] else ''}</td>
         <td>{eq}</td></tr>"""
@@ -826,7 +846,7 @@ def page_joueurs(q=None, flash=None):
                   or '<tr><td colspan="5" class="muted">Personne ne cherche de partenaire pour le moment.</td></tr>')
     tbl_pris = ("".join(ligne(r) for r in pris)
                 or '<tr><td colspan="5" class="muted">Aucune équipe formée.</td></tr>')
-    head = "<tr><th>Joueur</th><th>Spécialité / structure</th><th>Zone</th><th>Niveau</th><th>Équipe</th></tr>"
+    head = "<tr><th>Joueur</th><th>Profession / structure</th><th>Zone</th><th>Niveau</th><th>Équipe</th></tr>"
     corps = f"""<div class="card"><h2>Annuaire des joueurs</h2>
     <form method="get" action="/joueurs" class="row" style="align-items:flex-end">
       <div><label>Rechercher (nom, pseudo, email, spécialité)</label>
@@ -1016,8 +1036,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             _, un = creer_joueur(
                 conn, g("nom"), username=g("username") or None, email=g("email"),
-                telephone=g("tel"), statut=g("statut"), specialite=g("spe"),
-                structure=g("structure"), niveau=int(g("niv", 4)), zone=zone, cp=g("cp"))
+                telephone=g("tel"), profession=g("profession"), statut=g("statut"),
+                specialite=g("spe"), structure=g("structure"),
+                niveau=int(g("niv", 4)), zone=zone, cp=g("cp"))
             conn.commit(); conn.close()
             self._redirect("/joueurs?flash=" + urllib.parse.quote(
                 f"Inscription réussie ! Votre pseudo : @{un} (zone {zone}). "
@@ -1082,7 +1103,7 @@ def main():
         seed()
     server = http.server.ThreadingHTTPServer((HOST, PORT), Handler)
     print("=" * 60)
-    print("  Ligue de Padel des Médecins d'Île-de-France — PROTOTYPE")
+    print("  Ligue Padel Santé Île-de-France — PROTOTYPE")
     print("=" * 60)
     print(f"  En écoute sur {HOST}:{PORT}")
     print(f"  En local, ouvrez :  http://localhost:{PORT}")
