@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(python3 -c \"import sqlite3; print\\('sqlite3 OK', sqlite3.sqlite_version\\)\")",
+      "Bash(python3 app.py)",
+      "Bash(curl -s localhost:8000/)",
+      "Bash(curl -s localhost:8000/calendrier)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" localhost:8000/inscription)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" localhost:8000/niveau)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" localhost:8000/admin)",
+      "Bash(curl -s localhost:8000/equipe?id=1)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" -X POST localhost:8000/admin/generer)",
+      "Bash(curl -s -X POST localhost:8000/niveau --data \"anciennete=2&freq=2&vitre=1&tete=2&tournoi=1\")",
+      "Bash(curl -s -o /dev/null -w \"Reset HTTP %{http_code}\\\\n\" -X POST localhost:8000/admin/reset)",
+      "Bash(chmod +x \"Lancer la ligue.command\")",
+      "Bash(curl -s -o /dev/null -w \"Serveur: HTTP %{http_code} sur http://localhost:8000\\\\n\" localhost:8000/)",
+      "Bash(python3 -m py_compile app.py)",
+      "Bash(pkill -f \"app.py\")",
+      "Bash(rm -f ligue.db)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" localhost:8000/)",
+      "Bash(python3 -c \"import app; print\\('75014->',app.zone_from_cp\\('75014'\\),'| 93200->',app.zone_from_cp\\('93200'\\),'| 95300->',app.zone_from_cp\\('95300'\\),'| 78200->',app.zone_from_cp\\('78200'\\),'| 91000->',app.zone_from_cp\\('91000'\\),'| 92100->',app.zone_from_cp\\('92100'\\)\\)\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" -X POST localhost:8000/inscription --data \"equipe=Cergy%20Padel&cp=95300&zone=auto&zone2=&nom1=Dr%20A&niv1=5&statut1=Interne&spe1=Cardiologie&nom2=Dr%20B&niv2=5&statut2=Interne&spe2=Urgences\")",
+      "Bash(curl -s -o /dev/null -w \"Accueil HTTP %{http_code} — prêt sur http://localhost:8000\\\\n\" localhost:8000/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" -X POST localhost:8000/inscription --data \"nom=Dr%20Paul%20Martin&username=p.martin&email=paul@test.fr&statut=Interne&spe=Urgences&structure=CHU&cp=75012&zone=auto&niv=5\")",
+      "Bash(curl -s \"localhost:8000/joueurs\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" -X POST localhost:8000/equipe-former --data \"equipe=Les%20Test%20Boys&moi=n.elbeze&partenaire=paul@test.fr&zone=auto&zone2=\")",
+      "Bash(curl -s -X POST localhost:8000/equipe-former --data \"equipe=X&moi=n.elbeze&partenaire=a.lefort&zone=auto\")",
+      "Bash(curl -s -o /dev/null -w \"Accueil HTTP %{http_code} — prêt\\\\n\" localhost:8000/)",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'Prototype Ligue Padel Médecins IdF — prêt pour déploiement Render *)"
+    ]
+  }
+}

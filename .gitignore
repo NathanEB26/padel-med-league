@@ -1,0 +1,9 @@
+# Base de données locale (régénérée automatiquement au démarrage)
+ligue.db
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

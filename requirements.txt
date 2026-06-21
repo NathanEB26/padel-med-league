@@ -1,0 +1,3 @@
+# Aucune dépendance externe : l'application n'utilise que la bibliothèque
+# standard de Python (http.server + sqlite3). Ce fichier (même vide) indique
+# à Render qu'il s'agit d'un projet Python.
