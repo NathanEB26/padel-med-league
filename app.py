@@ -146,6 +146,8 @@ def init_db(reset=False):
     if reset:
         conn.executescript("""
             DROP TABLE IF EXISTS scores;
+            DROP TABLE IF EXISTS matchs_solo;
+            DROP TABLE IF EXISTS journees_solo;
             DROP TABLE IF EXISTS matchs;
             DROP TABLE IF EXISTS journees;
             DROP TABLE IF EXISTS joueurs;
@@ -168,6 +170,7 @@ def init_db(reset=False):
             profession TEXT, statut TEXT, specialite TEXT, structure TEXT,
             niveau INTEGER,
             rating REAL DEFAULT 1100,   -- cote Elo individuelle
+            mode TEXT DEFAULT 'classique',  -- 'classique' (binôme fixe) ou 'solo' (tournant)
             zone TEXT, cp TEXT,
             equipe_id INTEGER REFERENCES equipes(id)   -- NULL = joueur libre
         );
@@ -185,6 +188,20 @@ def init_db(reset=False):
             jeux_a INTEGER, jeux_b INTEGER,
             detail TEXT,
             vainqueur INTEGER
+        );
+        -- Mode tournant (Americano) : journées et matchs entre 4 joueurs solo
+        CREATE TABLE IF NOT EXISTS journees_solo (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            numero INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS matchs_solo (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            journee_id INTEGER NOT NULL REFERENCES journees_solo(id),
+            a1 INTEGER REFERENCES joueurs(id), a2 INTEGER REFERENCES joueurs(id),
+            b1 INTEGER REFERENCES joueurs(id), b2 INTEGER REFERENCES joueurs(id),
+            statut TEXT NOT NULL DEFAULT 'a_jouer',  -- a_jouer / valide / repos
+            sets_a INTEGER, sets_b INTEGER, jeux_a INTEGER, jeux_b INTEGER,
+            detail TEXT, vainqueur_side TEXT
         );
         -- Liste d'attente (pré-lancement) : conservée même quand on réinitialise la démo
         CREATE TABLE IF NOT EXISTS waitlist (
@@ -437,11 +454,11 @@ def creer_joueur(conn, nom, **kw):
     rating = niveau_to_rating(niveau) if niveau else 1100
     cur = conn.execute(
         "INSERT INTO joueurs(username, nom, email, telephone, profession, statut, "
-        "specialite, structure, niveau, rating, zone, cp, equipe_id) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,NULL)",
+        "specialite, structure, niveau, rating, mode, zone, cp, equipe_id) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL)",
         (un, nom, kw.get("email"), kw.get("telephone"), kw.get("profession"),
          kw.get("statut"), kw.get("specialite"), kw.get("structure"),
-         niveau, rating, kw.get("zone"), kw.get("cp")))
+         niveau, rating, kw.get("mode", "classique"), kw.get("zone"), kw.get("cp")))
     return cur.lastrowid, un
 
 
@@ -456,6 +473,23 @@ def former_equipe(conn, nom_equipe, jid1, jid2, zone=None, zone2=None):
         (nom_equipe, z, zone2, nv, niveau_to_rating(nv))).lastrowid
     conn.execute("UPDATE joueurs SET equipe_id=? WHERE id IN (?,?)", (eid, jid1, jid2))
     return eid
+
+
+SEED_SOLO = [
+    # (nom, profession, statut, specialite, structure, niveau, zone)
+    ("Dr Inès Moreau", "Médecin", "Hospitalier", "Cardiologie", "HEGP", 6, "Centre"),
+    ("Mme Sarah Lopez", "Infirmier(ère)", "Hospitalier", "—", "Hôpital Cochin", 5, "Centre"),
+    ("M. Karim Sow", "Masseur-kinésithérapeute", "Libéral", "—", "Cabinet Montreuil", 4, "Nord-Est"),
+    ("Dr Hugo Berger", "Médecin", "Interne", "Urgences", "CHU Bicêtre", 5, "Sud"),
+    ("Mme Chloé Marchetti", "Sage-femme", "Hospitalier", "Gynécologie", "Maternité Port-Royal", 4, "Centre"),
+    ("Dr Antoine Rey", "Chirurgien-dentiste", "Libéral", "—", "Cabinet Neuilly", 6, "Ouest"),
+    ("Mme Léa Dubois", "Orthophoniste", "Libéral", "—", "Cabinet Vincennes", 3, "Sud-Est"),
+    ("Dr Yanis Cohen", "Médecin", "Libéral", "Dermatologie", "Cabinet Paris 16", 7, "Ouest"),
+    ("M. Paul Girard", "Pharmacien", "Libéral", "—", "Pharmacie Créteil", 5, "Sud-Est"),
+    ("Dr Nadia Haddad", "Médecin", "Hospitalier", "Pédiatrie", "Hôpital Trousseau", 6, "Est"),
+    ("Mme Emma Roux", "Psychologue", "Salarié", "—", "CMP Nanterre", 4, "Ouest"),
+    ("M. Lucas Petit", "Étudiant en santé", "Étudiant", "—", "Université Paris Cité", 5, "Centre"),
+]
 
 
 def seed():
@@ -478,11 +512,27 @@ def seed():
         "SELECT id, equipe_a, equipe_b FROM matchs WHERE statut='a_jouer'").fetchall()
     conn.close()
     random.seed(42)
+    scores_demo = [("6-3", "6-4"), ("6-2", "4-6", "7-5"),
+                   ("3-6", "6-4", "6-2"), ("6-1", "6-3")]
     for i, m in enumerate(matchs):
         if i % 2 == 0:  # on ne joue qu'un match sur deux pour montrer les 2 états
-            s = random.choice([("6-3", "6-4"), ("6-2", "4-6", "7-5"),
-                                ("3-6", "6-4", "6-2"), ("6-1", "6-3")])
-            enregistrer_score(m["id"], s)
+            enregistrer_score(m["id"], random.choice(scores_demo))
+
+    # Mode tournant (Americano) : joueurs solo + une journée jouée
+    conn = db()
+    for (jn, prof, stat, spe, struct, niv, zone) in SEED_SOLO:
+        creer_joueur(conn, jn, profession=prof, statut=stat, specialite=spe,
+                     structure=struct, niveau=niv, zone=zone, mode="solo",
+                     email=f"{slugify(jn)}@demo.fr")
+    conn.commit()
+    conn.close()
+    generer_journee_solo()
+    conn = db()
+    ms = conn.execute("SELECT id FROM matchs_solo WHERE statut='a_jouer'").fetchall()
+    conn.close()
+    for i, m in enumerate(ms):
+        if i % 2 == 0:
+            enregistrer_score_solo(m["id"], random.choice(scores_demo))
 
 
 # ---------------------------------------------------------------------------
@@ -529,7 +579,17 @@ def stats_joueurs():
     partagent le résultat du match). Base des classements individuels et de groupe."""
     conn = db()
     joueurs = {j["id"]: dict(joueur=j, j=0, v=0, pts=0)
-               for j in conn.execute("SELECT * FROM joueurs WHERE equipe_id IS NOT NULL")}
+               for j in conn.execute(
+                   "SELECT * FROM joueurs WHERE equipe_id IS NOT NULL OR mode='solo'")}
+
+    def crediter(pid, sp, sc):
+        if pid in joueurs:
+            st = joueurs[pid]
+            st["j"] += 1
+            st["pts"] += points_match(sp, sc)
+            if sp > sc:
+                st["v"] += 1
+
     membres = {}  # equipe_id -> [player_id]
     for j in conn.execute("SELECT id, equipe_id FROM joueurs WHERE equipe_id IS NOT NULL"):
         membres.setdefault(j["equipe_id"], []).append(j["id"])
@@ -537,11 +597,13 @@ def stats_joueurs():
         for (eq, sp, sc) in ((m["equipe_a"], m["sets_a"], m["sets_b"]),
                              (m["equipe_b"], m["sets_b"], m["sets_a"])):
             for pid in membres.get(eq, []):
-                st = joueurs[pid]
-                st["j"] += 1
-                st["pts"] += points_match(sp, sc)
-                if sp > sc:
-                    st["v"] += 1
+                crediter(pid, sp, sc)
+    # matchs tournants (mode solo)
+    for m in conn.execute("SELECT * FROM matchs_solo WHERE statut='valide'"):
+        for (joueurs_cote, sp, sc) in (([m["a1"], m["a2"]], m["sets_a"], m["sets_b"]),
+                                       ([m["b1"], m["b2"]], m["sets_b"], m["sets_a"])):
+            for pid in joueurs_cote:
+                crediter(pid, sp, sc)
     conn.close()
     return joueurs
 
@@ -713,6 +775,106 @@ def enregistrer_score(match_id, sets):
         (sa, sb, ja, jb, detail, vainqueur, match_id))
     maj_elo(conn, m["equipe_a"], m["equipe_b"], 1 if sa > sb else 0)
     maj_elo_joueurs(conn, m["equipe_a"], m["equipe_b"], 1 if sa > sb else 0)
+    conn.commit()
+    conn.close()
+    return True
+
+
+# ---------------------------------------------------------------------------
+# MODE TOURNANT (AMERICANO) — partenaires & adversaires changeants
+# ---------------------------------------------------------------------------
+
+PEN_PARTENAIRE = 500  # pénalité si deux joueurs ont déjà été partenaires
+
+
+def nb_partenaires(conn, a, b):
+    """Combien de fois a et b ont déjà été partenaires (même côté) en tournant."""
+    return conn.execute(
+        "SELECT COUNT(*) c FROM matchs_solo WHERE statut!='repos' AND "
+        "((a1=? AND a2=?) OR (a1=? AND a2=?) OR (b1=? AND b2=?) OR (b1=? AND b2=?))",
+        (a, b, b, a, a, b, b, a)).fetchone()["c"]
+
+
+def deja_repos_solo(conn, pid):
+    return conn.execute(
+        "SELECT COUNT(*) c FROM matchs_solo WHERE statut='repos' AND a1=?",
+        (pid,)).fetchone()["c"]
+
+
+def maj_elo_solo(conn, A, B, score_a):
+    """Cote individuelle pour un match tournant : A et B = listes de 2 joueurs."""
+    ra = {i: conn.execute("SELECT rating FROM joueurs WHERE id=?", (i,)).fetchone()["rating"] for i in A + B}
+    moy_a = (ra[A[0]] + ra[A[1]]) / 2
+    moy_b = (ra[B[0]] + ra[B[1]]) / 2
+    att_a = 1 / (1 + 10 ** ((moy_b - moy_a) / 400))
+    delta = K_ELO * (score_a - att_a)
+    for i in A:
+        conn.execute("UPDATE joueurs SET rating=? WHERE id=?", (round(ra[i] + delta, 1), i))
+    for i in B:
+        conn.execute("UPDATE joueurs SET rating=? WHERE id=?", (round(ra[i] - delta, 1), i))
+
+
+def generer_journee_solo():
+    """Crée une journée tournante (Americano) : courts de 4 par niveau, paires
+    équilibrées et renouvelées (anti même partenaire)."""
+    conn = db()
+    players = conn.execute(
+        "SELECT id, rating FROM joueurs WHERE mode='solo'").fetchall()
+    if len(players) < 4:
+        conn.close()
+        return None
+    rating = {p["id"]: p["rating"] for p in players}
+    ids = sorted(rating, key=lambda i: rating[i], reverse=True)
+
+    # Journée de repos pour le reste (n % 4) : priorité à ceux qui ont le moins reposé
+    reste = len(ids) % 4
+    byes = sorted(ids, key=lambda i: (deja_repos_solo(conn, i), rating[i]))[:reste]
+    restants = [i for i in ids if i not in byes]
+    restants.sort(key=lambda i: rating[i], reverse=True)
+
+    numero = (conn.execute("SELECT COALESCE(MAX(numero),0) m FROM journees_solo")
+              .fetchone()["m"]) + 1
+    jid = conn.execute("INSERT INTO journees_solo(numero) VALUES (?)", (numero,)).lastrowid
+
+    for k in range(0, len(restants), 4):
+        q = restants[k:k + 4]
+        splits = [((q[0], q[3]), (q[1], q[2])),
+                  ((q[0], q[2]), (q[1], q[3])),
+                  ((q[0], q[1]), (q[2], q[3]))]
+        best, best_cout = None, float("inf")
+        for (pa, pb) in splits:
+            desequilibre = abs((rating[pa[0]] + rating[pa[1]]) - (rating[pb[0]] + rating[pb[1]]))
+            repeats = nb_partenaires(conn, *pa) + nb_partenaires(conn, *pb)
+            c = desequilibre + PEN_PARTENAIRE * repeats
+            if c < best_cout:
+                best_cout, best = c, (pa, pb)
+        (a1, a2), (b1, b2) = best
+        conn.execute(
+            "INSERT INTO matchs_solo(journee_id, a1, a2, b1, b2, statut) "
+            "VALUES (?,?,?,?,?, 'a_jouer')", (jid, a1, a2, b1, b2))
+
+    for pid in byes:
+        conn.execute(
+            "INSERT INTO matchs_solo(journee_id, a1, statut) VALUES (?,?, 'repos')",
+            (jid, pid))
+    conn.commit()
+    conn.close()
+    return numero
+
+
+def enregistrer_score_solo(match_id, sets):
+    conn = db()
+    m = conn.execute("SELECT * FROM matchs_solo WHERE id=?", (match_id,)).fetchone()
+    if not m or m["statut"] == "repos":
+        conn.close()
+        return False
+    sa, sb, ja, jb = parse_sets(sets)
+    side = "A" if sa > sb else "B"
+    conn.execute(
+        "UPDATE matchs_solo SET statut='valide', sets_a=?, sets_b=?, jeux_a=?, "
+        "jeux_b=?, detail=?, vainqueur_side=? WHERE id=?",
+        (sa, sb, ja, jb, " / ".join(sets), side, match_id))
+    maj_elo_solo(conn, [m["a1"], m["a2"]], [m["b1"], m["b2"]], 1 if sa > sb else 0)
     conn.commit()
     conn.close()
     return True
@@ -930,6 +1092,7 @@ def page(titre, corps, flash=None):
     <a href="/">Accueil</a>
     <a href="/classements">Classements</a>
     <a href="/calendrier">Calendrier</a>
+    <a href="/tournant">Tournant</a>
     <a href="/joueurs">Joueurs</a>
     <a href="/inscription">S'inscrire</a>
     <a href="/admin">Admin</a>"""
@@ -1285,6 +1448,79 @@ def page_calendrier(flash=None):
     return page("Calendrier", corps, flash)
 
 
+def joueur_nom(conn, pid):
+    if pid is None:
+        return "—"
+    r = conn.execute("SELECT nom, username FROM joueurs WHERE id=?", (pid,)).fetchone()
+    return f"{r['nom']}" if r else "?"
+
+
+def page_tournant(flash=None):
+    conn = db()
+    nb_solo = conn.execute("SELECT COUNT(*) c FROM joueurs WHERE mode='solo'").fetchone()["c"]
+    journees = conn.execute("SELECT * FROM journees_solo ORDER BY numero DESC").fetchall()
+    intro = f"""<div class="card"><h2>Mode tournant (Americano)</h2>
+    <p class="muted">Pas de binôme fixe : à chaque journée, le système te donne un
+    <strong>partenaire</strong> et des <strong>adversaires différents</strong>,
+    regroupés par niveau (4 joueurs par terrain). Ton score est individuel — tu
+    grimpes à <a href="/classements?par=individuel">La Cote d'Or</a>.
+    <br><strong>{nb_solo}</strong> joueur·s inscrits en solo.
+    <a href="/inscription">S'inscrire en solo →</a></p></div>"""
+    corps = intro
+    if not journees:
+        corps += """<div class="card"><p>Aucune journée tournante générée. Allez
+        dans <a href="/admin">Admin</a> pour en générer une.</p></div>"""
+    for j in journees:
+        ms = conn.execute("SELECT * FROM matchs_solo WHERE journee_id=? ORDER BY id",
+                          (j["id"],)).fetchall()
+        lignes = ""
+        for m in ms:
+            if m["statut"] == "repos":
+                lignes += (f'<tr><td colspan="2">{e(joueur_nom(conn, m["a1"]))}</td>'
+                           f'<td class="tag">journée de repos</td></tr>')
+                continue
+            a = f'{e(joueur_nom(conn, m["a1"]))} & {e(joueur_nom(conn, m["a2"]))}'
+            b = f'{e(joueur_nom(conn, m["b1"]))} & {e(joueur_nom(conn, m["b2"]))}'
+            if m["statut"] == "valide":
+                wa = '<span class="win">' if m["vainqueur_side"] == "A" else "<span>"
+                wb = '<span class="win">' if m["vainqueur_side"] == "B" else "<span>"
+                lignes += (f'<tr><td colspan="2">{wa}{a}</span> '
+                           f'<span class="vs">{m["sets_a"]}-{m["sets_b"]}</span> '
+                           f'{wb}{b}</span></td><td class="tag">{e(m["detail"])}</td></tr>')
+            else:
+                lignes += (f'<tr><td>{a} <span class="vs">vs</span> {b}</td><td></td>'
+                           f'<td><a class="btn sec" href="/score-solo?match={m["id"]}">'
+                           f'Saisir le score</a></td></tr>')
+        corps += (f'<div class="card"><h2>Journée tournante {j["numero"]}</h2>'
+                  f'<table>{lignes}</table></div>')
+    conn.close()
+    return page("Tournant", corps, flash)
+
+
+def page_score_solo(match_id, flash=None):
+    conn = db()
+    m = conn.execute("SELECT * FROM matchs_solo WHERE id=?", (match_id,)).fetchone()
+    if not m or m["statut"] != "a_jouer":
+        conn.close()
+        return page("Score", "<div class='card'>Match introuvable ou déjà saisi.</div>")
+    a = f'{e(joueur_nom(conn, m["a1"]))} & {e(joueur_nom(conn, m["a2"]))}'
+    b = f'{e(joueur_nom(conn, m["b1"]))} & {e(joueur_nom(conn, m["b2"]))}'
+    conn.close()
+    corps = f"""<div class="card"><h2>Saisir le score (tournant)</h2>
+    <p><strong>{a}</strong> <span class="vs">vs</span> <strong>{b}</strong></p>
+    <form method="post" action="/score-solo">
+    <input type="hidden" name="match" value="{match_id}">
+    <table><tr><th></th><th>Équipe A</th><th>Équipe B</th></tr>
+    <tr><td>Set 1</td><td><input name="s1a" type="number" min="0" max="9" required></td>
+        <td><input name="s1b" type="number" min="0" max="9" required></td></tr>
+    <tr><td>Set 2</td><td><input name="s2a" type="number" min="0" max="9" required></td>
+        <td><input name="s2b" type="number" min="0" max="9" required></td></tr>
+    <tr><td>Set 3</td><td><input name="s3a" type="number" min="0" max="9"></td>
+        <td><input name="s3b" type="number" min="0" max="9"></td></tr></table>
+    <br><button class="btn" type="submit">Valider le score</button></form></div>"""
+    return page("Saisir le score", corps, flash)
+
+
 def page_equipe(eid):
     conn = db()
     eq = conn.execute("SELECT * FROM equipes WHERE id=?", (eid,)).fetchone()
@@ -1344,11 +1580,17 @@ def page_inscription(flash=None):
     datalist = "".join(f'<option value="{e(s)}">' for s in EXEMPLES_STRUCTURES)
     corps = f"""<div class="card"><h2>S'inscrire (individuel)</h2>
     <p class="muted">Ouvert à <strong>tous les professionnels de santé</strong>.
-    Chaque joueur s'inscrit seul. Une fois inscrit, trouvez votre
-    partenaire dans l'<a href="/joueurs">annuaire</a> et
-    <a href="/equipe-former">formez votre équipe</a>. Pas sûr de votre niveau ?
-    <a href="/niveau">Estimez-le avec le questionnaire</a>.</p>
+    Pas sûr de votre niveau ? <a href="/niveau">Estimez-le avec le questionnaire</a>.</p>
     <form method="post" action="/inscription">
+    <fieldset><legend>Comment veux-tu jouer ?</legend>
+      <label class="opt"><input type="radio" name="mode" value="classique" checked>
+        <strong>Avec mon binôme</strong> — équipe fixe toute la saison
+        (tu trouves ton partenaire dans l'annuaire)</label>
+      <label class="opt"><input type="radio" name="mode" value="solo">
+        <strong>En solo (tournant)</strong> — pas de partenaire fixe : à chaque
+        journée, le système te donne un partenaire ET des adversaires différents.
+        Classement individuel.</label>
+    </fieldset>
     <div class="grid2">
       <div><label>Nom</label><input name="nom" required placeholder="Prénom Nom (Dr, M., Mme…)"></div>
       <div><label>Pseudo (pour être retrouvé par votre partenaire)</label>
@@ -1543,8 +1785,10 @@ def page_admin(flash=None):
     <p class="muted">Lance l'appariement suisse : chaque équipe reçoit un adversaire
     de niveau proche (cote Elo), géographiquement proche, qu'elle n'a pas déjà
     rencontré. 100 % automatique.</p>
-    <form method="post" action="/admin/generer">
-    <button class="btn" type="submit">⚙️ Générer la journée</button></form>
+    <form method="post" action="/admin/generer" style="display:inline">
+    <button class="btn" type="submit">⚙️ Générer la journée (équipes)</button></form>
+    <form method="post" action="/admin/generer-solo" style="display:inline;margin-left:8px">
+    <button class="btn sec" type="submit">🔄 Générer la journée tournante (solo)</button></form>
     <h3 style="margin-top:24px">Réinitialiser la démo</h3>
     <p class="muted">Recharge les équipes de démonstration et rejoue la journée 1.</p>
     <form method="post" action="/admin/reset" onsubmit="return confirm('Réinitialiser toute la base ?')">
@@ -1594,6 +1838,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send(page_classements(q.get("par", ["equipe"])[0], flash))
             elif u.path == "/calendrier":
                 self._send(page_calendrier(flash))
+            elif u.path == "/tournant":
+                self._send(page_tournant(flash))
+            elif u.path == "/score-solo":
+                self._send(page_score_solo(int(q.get("match", [0])[0]), flash))
             elif u.path == "/equipe":
                 self._send(page_equipe(int(q.get("id", [0])[0])))
             elif u.path == "/inscription":
@@ -1633,15 +1881,22 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send(page_inscription(
                     f"Le pseudo « {g('username')} » est déjà pris, choisissez-en un autre."))
                 return
+            mode = "solo" if g("mode") == "solo" else "classique"
             _, un = creer_joueur(
                 conn, g("nom"), username=g("username") or None, email=g("email"),
                 telephone=g("tel"), profession=g("profession"), statut=g("statut"),
                 specialite=g("spe"), structure=g("structure"),
-                niveau=int(g("niv", 4)), zone=zone, cp=g("cp"))
+                niveau=int(g("niv", 4)), zone=zone, cp=g("cp"), mode=mode)
             conn.commit(); conn.close()
-            self._redirect("/joueurs?flash=" + urllib.parse.quote(
-                f"Inscription réussie ! Votre pseudo : @{un} (zone {zone}). "
-                f"Trouvez un partenaire puis formez votre équipe."))
+            if mode == "solo":
+                self._redirect("/tournant?flash=" + urllib.parse.quote(
+                    f"Inscription réussie en mode tournant ! Pseudo : @{un} (zone "
+                    f"{zone}). À chaque journée, tu recevras un partenaire et des "
+                    f"adversaires différents."))
+            else:
+                self._redirect("/joueurs?flash=" + urllib.parse.quote(
+                    f"Inscription réussie ! Votre pseudo : @{un} (zone {zone}). "
+                    f"Trouvez un partenaire puis formez votre équipe."))
 
         elif u.path == "/equipe-former":
             conn = db()
@@ -1684,10 +1939,31 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 enregistrer_score(mid, sets)
                 self._redirect("/calendrier?flash=" + urllib.parse.quote("Score enregistré, cotes mises à jour."))
 
+        elif u.path == "/score-solo":
+            mid = int(g("match", 0))
+            sets = []
+            for a, b in (("s1a", "s1b"), ("s2a", "s2b"), ("s3a", "s3b")):
+                va, vb = g(a), g(b)
+                if va != "" and vb != "":
+                    sets.append(f"{int(va)}-{int(vb)}")
+            sa, sb, _, _ = parse_sets(sets) if sets else (0, 0, 0, 0)
+            if max(sa, sb) < 2:
+                self._send(page_score_solo(mid,
+                    "Score incomplet : il faut un vainqueur à 2 sets gagnants."))
+            else:
+                enregistrer_score_solo(mid, sets)
+                self._redirect("/tournant?flash=" + urllib.parse.quote("Score enregistré, cotes mises à jour."))
+
         elif u.path == "/admin/generer":
             num = generer_journee()
             msg = f"Journée {num} générée par appariement suisse." if num else "Pas assez d'équipes."
             self._redirect("/calendrier?flash=" + urllib.parse.quote(msg))
+
+        elif u.path == "/admin/generer-solo":
+            num = generer_journee_solo()
+            msg = (f"Journée tournante {num} générée (Americano)." if num
+                   else "Il faut au moins 4 joueurs inscrits en solo.")
+            self._redirect("/tournant?flash=" + urllib.parse.quote(msg))
 
         elif u.path == "/rejoindre":
             email = g("email")
