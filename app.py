@@ -74,6 +74,20 @@ EXEMPLES_STRUCTURES = [
     "Centre de santé", "ESPIC", "Médecine du travail", "Internat / CCA",
 ]
 
+# Sondage liste d'attente : préférence de mode de jeu (stocké dans waitlist.a_partenaire)
+PREF_OPTIONS = [
+    "En équipe — j'ai déjà un binôme",
+    "En équipe — j'en cherche un",
+    "En solo (partenaires tournants)",
+    "Peu importe / les deux",
+]
+# Regroupement pour l'affichage des résultats (3 buckets)
+PREF_BUCKETS = [
+    ("Équipe", (PREF_OPTIONS[0], PREF_OPTIONS[1])),
+    ("Solo", (PREF_OPTIONS[2],)),
+    ("Peu importe", (PREF_OPTIONS[3],)),
+]
+
 # Quadrillage fin : 8 directions + Centre, placées sur une boussole.
 ZONE_COORDS = {
     "Centre":     (0, 0),
@@ -370,6 +384,22 @@ def waitlist_nb_parraines():
                      "WHERE referred_by IS NOT NULL").fetchone()["c"]
     conn.close()
     return n
+
+
+def waitlist_pref_counts():
+    """Compte les votes du sondage (préférence de mode), par valeur brute."""
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            rows = c.execute("SELECT a_partenaire AS v, COUNT(*) AS n FROM waitlist "
+                             "WHERE a_partenaire IS NOT NULL GROUP BY a_partenaire").fetchall()
+            return {r["v"]: r["n"] for r in rows}
+    conn = db()
+    init_db()
+    rows = conn.execute("SELECT a_partenaire v, COUNT(*) n FROM waitlist "
+                        "WHERE a_partenaire IS NOT NULL GROUP BY a_partenaire").fetchall()
+    conn.close()
+    return {r["v"]: r["n"] for r in rows}
 
 
 # ---------------------------------------------------------------------------
@@ -1151,12 +1181,31 @@ def page_landing(sent_code=None, ref_from=None):
                 f"&body={msg}")
         filleuls = (f'<p class="muted">🎉 Déjà <strong>{nb_f}</strong> personne(s) '
                     f'inscrite(s) grâce à toi !</p>' if nb_f else '')
+        # Résultats du sondage (révélés après le vote)
+        counts = waitlist_pref_counts()
+        total_votes = sum(counts.values())
+        bars = ""
+        for label, vals in PREF_BUCKETS:
+            n = sum(counts.get(v, 0) for v in vals)
+            pct = round(100 * n / total_votes) if total_votes else 0
+            bars += (f'<div style="margin:9px 0"><div style="display:flex;'
+                     f'justify-content:space-between;font-size:13px;margin-bottom:4px">'
+                     f'<span>{label}</span><span class="muted">{pct}% · {n}</span></div>'
+                     f'<div style="background:var(--bg2);border:1px solid var(--line);'
+                     f'border-radius:6px;height:12px;overflow:hidden">'
+                     f'<div style="width:{pct}%;height:100%;background:var(--lime)"></div>'
+                     f'</div></div>')
+        sondage = (f'<div style="text-align:left;background:var(--bg2);border:1px solid '
+                   f'var(--line);border-radius:12px;padding:16px 18px;margin:18px 0">'
+                   f'<strong>🗳️ Ce que préfèrent les {total_votes} inscrit·e·s :</strong>'
+                   f'{bars}</div>') if total_votes else ""
         form_section = f"""<div class="success" id="rejoindre">
         <div class="big">🎾</div>
         <h2>Tu es sur la liste. Bienvenue !</h2>
         <p class="muted">On te préviendra par email dès l'ouverture — tu seras
         prioritaire pour le <strong>Club des Fondateurs</strong>.</p>
-        <p style="margin-top:18px"><strong>Invite ton binôme &amp; tes collègues</strong>
+        {sondage}
+        <p style="margin-top:6px"><strong>Invite ton binôme &amp; tes collègues</strong>
         avec ton lien de parrainage 👇 (plus tu invites, plus tu montes dans la file)</p>
         <div class="reflink"><span>{e(lien)}</span></div>
         <div class="share-row">
@@ -1178,9 +1227,8 @@ def page_landing(sent_code=None, ref_from=None):
           </div>
           <div class="grid2">
             <div><label>Ta zone</label><select name="zone">{opts(ZONES)}</select></div>
-            <div><label>As-tu déjà un binôme ?</label>
-              <select name="a_partenaire"><option>Pas encore</option>
-              <option>Oui, on est deux</option></select></div>
+            <div><label>Comment préfères-tu jouer ?</label>
+              <select name="a_partenaire">{opts(PREF_OPTIONS)}</select></div>
           </div>
           <br><button class="btn btn-xl" type="submit"
             style="width:100%">Je réserve ma place →</button>
@@ -1778,7 +1826,7 @@ def page_admin(flash=None):
     relances de lancement. « Code » = lien de parrainage personnel ; « Parrain » =
     code de celui qui l'a invité.</p>
     <table><tr><th>Email</th><th>Prénom</th><th>Profession</th><th>Zone</th>
-    <th>Binôme ?</th><th>Code</th><th>Parrain</th><th>Date</th></tr>{wl_rows}</table></div>
+    <th>Préférence</th><th>Code</th><th>Parrain</th><th>Date</th></tr>{wl_rows}</table></div>
     <div class="card">
     <h3 style="margin-top:0">Outils de simulation</h3>
     <h3>Générer la prochaine journée</h3>
