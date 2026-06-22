@@ -1,9 +1,23 @@
-# Kit Instagram — Ligue Padel Santé IdF
+# Kit Instagram — Ligue Padel Santé IdF (@padelmedleague)
 
-Tout est prêt pour publier. **Une seule chose que je ne peux pas faire à votre
-place : créer le compte** (Instagram exige votre numéro de téléphone et la
-validation d'identité — c'est votre compte). Le reste est ci-dessous, prêt à
-copier-coller.
+Tout est prêt à publier. Modèle de fonctionnement retenu : **je produis, tu
+publies/programmes** (via Meta Business Suite, gratuit).
+
+## 📅 Calendrier de publication (3 premiers posts)
+
+| Quand | Post | Action |
+|---|---|---|
+| **Jour J** | `01-annonce.png` | Publie-le et **épingle-le**. Mets le lien d'inscription **en bio**. |
+| **J + 2-3** | `03-binome.png` | « Tag ton binôme » — pousse au partage. |
+| **J + 5-6** | `02-fondateurs.png` | « Club des Fondateurs » — crée l'urgence quand la liste grossit. |
+
+**Meilleurs créneaux** (audience FR) : en semaine, **12 h-13 h** ou **18 h-21 h**.
+
+**Pour programmer (Option A)** : va sur **business.facebook.com** → **Planner** →
+*Créer une publication* → choisis Instagram → importe le `.png` → colle la légende
+([LEGENDES.md](visuels-instagram/LEGENDES.md)) → **planifie** la date/heure.
+*(La programmation Instagram nécessite que le compte soit lié à une Page Facebook ;
+sinon, publication manuelle depuis l'app Instagram — ça marche aussi très bien.)*
 
 ---
 
