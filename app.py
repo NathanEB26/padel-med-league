@@ -1432,7 +1432,8 @@ def page_landing(sent_code=None, ref_from=None):
       <h2>Prêt à entrer dans la ligue ?</h2>
       <a class="btn btn-xl" href="#rejoindre">Rejoindre la liste d'attente →</a>
       <div class="lp-foot">Ligue Padel Santé · Île-de-France — un projet par et pour
-      les soignants. 🎾🩺</div>
+      les soignants. 🎾🩺<br>📸 Suis-nous sur Instagram :
+      <a href="https://instagram.com/padelmedleague">@padelmedleague</a></div>
     </div>
     </div>"""
     return page("Accueil", corps)

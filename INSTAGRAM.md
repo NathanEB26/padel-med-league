@@ -7,18 +7,13 @@ copier-coller.
 
 ---
 
-## 1. Créer le compte (5 min — votre action)
+## 1. Le compte — ✅ créé
 
-1. App **Instagram** → **Créer un compte** → choisir **compte professionnel**
-   (gratuit : donne les statistiques + les boutons de contact).
-2. Catégorie : *Équipe sportive* ou *Organisation*.
-3. **Nom d'utilisateur** (par ordre de préférence, prenez le 1ᵉʳ libre) :
-   - `padelsante.idf`
-   - `liguepadelsante`
-   - `padel.sante.iledefrance`
-4. **Nom affiché** : `Ligue Padel Santé · IDF`
-5. Une fois créé, **envoyez-moi le @** : je l'ajoute sur le site (lien + icône)
-   et dans tous les visuels.
+- **Pseudo : `@padelmedleague`** → https://instagram.com/padelmedleague
+- **Nom affiché conseillé** : `Ligue Padel Santé · IDF`
+- Passe-le en **compte professionnel** (Réglages → Type de compte) pour avoir les
+  statistiques + le bouton « Contact ». Catégorie : *Équipe sportive* / *Organisation*.
+- Le `@padelmedleague` est déjà intégré aux **3 visuels** et sur la **landing**.
 
 ---
 
@@ -93,7 +88,7 @@ Créez ces 4 bulles permanentes :
 ```
 #padel #padelfrance #padeladdict #padelparis #iledefrance
 #santé #médecin #internat #kiné #infirmier #hopital
-#sportsanté #padellovers #liguepadelsante
+#sportsanté #padellovers #padelmedleague
 ```
 *(8-12 par post, varier un peu à chaque fois.)*
 

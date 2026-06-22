@@ -2,7 +2,7 @@
 
 3 visuels carrés (1080×1080), prêts à poster, aux couleurs de la ligue.
 Chaque visuel existe en **`.png`** (à publier directement) et en **`.svg`**
-(modifiable). Remplace `@padelsante.idf` par ton vrai pseudo une fois le compte créé.
+(modifiable). Compte : **@padelmedleague**.
 
 > Astuce ordre de publication : **01 (annonce)** en post épinglé → **03 (binôme)**
 > 2-3 jours après → **02 (fondateurs)** pour créer l'urgence quand la liste grossit.
@@ -20,7 +20,7 @@ Chaque visuel existe en **`.png`** (à publier directement) et en **`.svg`**
 > Tag un·e collègue avec qui tu jouerais 🎾
 
 **Hashtags :**
-`#padel #padelfrance #padelparis #iledefrance #santé #médecin #kiné #infirmier #internat #hopital #sportsanté #padeladdict #liguepadelsante`
+`#padel #padelfrance #padelparis #iledefrance #santé #médecin #kiné #infirmier #internat #hopital #sportsanté #padeladdict #padelmedleague`
 
 ---
 
@@ -34,7 +34,7 @@ Chaque visuel existe en **`.png`** (à publier directement) et en **`.svg`**
 > Tu connais le binôme parfait ? Tague-le 👇
 
 **Hashtags :**
-`#padel #padelfrance #padelparis #iledefrance #santé #médecin #soignants #internat #sportsanté #padeladdict #padellovers #liguepadelsante`
+`#padel #padelfrance #padelparis #iledefrance #santé #médecin #soignants #internat #sportsanté #padeladdict #padellovers #padelmedleague`
 
 ---
 
@@ -47,7 +47,7 @@ Chaque visuel existe en **`.png`** (à publier directement) et en **`.svg`**
 > Ouvert à tous les pros de santé d'Île-de-France. **Lien en bio.**
 
 **Hashtags :**
-`#padel #padelfrance #padelparis #iledefrance #santé #kiné #infirmier #dentiste #pharmacien #sagefemme #internat #sportsanté #liguepadelsante`
+`#padel #padelfrance #padelparis #iledefrance #santé #kiné #infirmier #dentiste #pharmacien #sagefemme #internat #sportsanté #padelmedleague`
 
 ---
 
