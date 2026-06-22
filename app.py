@@ -1149,6 +1149,8 @@ def page(titre, corps, flash=None):
 <meta property="og:url" content="{BASE_URL}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="build-marker" content="neon-verify-7c3">
+
 <style>{CSS}</style></head>
 <body><header>
 <div class="brand"><span class="ball">🎾</span>
