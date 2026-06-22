@@ -399,6 +399,23 @@ def waitlist_nb_parraines():
     return n
 
 
+def waitlist_delete(email):
+    """Supprime une entrée de la liste d'attente (par email)."""
+    email = (email or "").strip().lower()
+    if not email:
+        return
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            c.execute("DELETE FROM waitlist WHERE email=%s", (email,))
+        return
+    conn = db()
+    init_db()
+    conn.execute("DELETE FROM waitlist WHERE email=?", (email,))
+    conn.commit()
+    conn.close()
+
+
 def waitlist_pref_counts():
     """Compte les votes du sondage (préférence de mode), par valeur brute."""
     if PG_URL:
@@ -1149,7 +1166,6 @@ def page(titre, corps, flash=None):
 <meta property="og:url" content="{BASE_URL}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="build-marker" content="neon-verify-7c3">
 
 <style>{CSS}</style></head>
 <body><header>
@@ -1896,7 +1912,13 @@ def page_admin(flash=None):
     relances de lancement. « Code » = lien de parrainage personnel ; « Parrain » =
     code de celui qui l'a invité.</p>
     <table><tr><th>Email</th><th>Prénom</th><th>Profession</th><th>Zone</th>
-    <th>Préférence</th><th>Code</th><th>Parrain</th><th>Date</th></tr>{wl_rows}</table></div>
+    <th>Préférence</th><th>Code</th><th>Parrain</th><th>Date</th></tr>{wl_rows}</table>
+    <form method="post" action="/admin/wl-delete" class="row" style="align-items:flex-end;margin-top:14px"
+      onsubmit="return confirm('Supprimer cette entrée de la liste d\\'attente ?')">
+      <div><label>Supprimer une entrée (email)</label>
+        <input name="email" type="email" placeholder="email à retirer"></div>
+      <div style="flex:0 0 auto"><button class="btn danger" type="submit">Supprimer</button></div>
+    </form></div>
     <div class="card">
     <h3 style="margin-top:0">Outils de simulation</h3>
     <h3>Générer la prochaine journée</h3>
@@ -2094,6 +2116,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     a_partenaire=g("a_partenaire") or None,
                     referred_by=g("referred_by") or None)
                 self._redirect("/?ok=" + code + "#rejoindre")
+
+        elif u.path == "/admin/wl-delete":
+            waitlist_delete(g("email"))
+            self._redirect("/admin?flash=" + urllib.parse.quote(
+                f"Entrée « {g('email')} » supprimée de la liste d'attente."))
 
         elif u.path == "/admin/reset":
             seed()
