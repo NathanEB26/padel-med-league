@@ -33,6 +33,8 @@ DB_PATH = os.environ.get(
 BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.onrender.com")
 # « Inscription avec Google » : actif seulement si un Client ID Google est fourni
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+# Lien d'invitation de la communauté WhatsApp (affiché si défini)
+WHATSAPP_URL = os.environ.get("WHATSAPP_URL", "")
 # Persistance : liste d'attente + parrainages stockés dans Neon (PostgreSQL) si
 # DATABASE_URL est défini — sinon repli SQLite local.
 
@@ -1258,11 +1260,17 @@ def page_landing(sent_code=None, ref_from=None):
                    f'var(--line);border-radius:12px;padding:16px 18px;margin:18px 0">'
                    f'<strong>🗳️ Ce que préfèrent les {total_votes} inscrit·e·s :</strong>'
                    f'{bars}</div>') if total_votes else ""
+        whatsapp_cta = (f'<p style="margin:16px 0 6px"><strong>Rejoins la communauté '
+                        f'WhatsApp</strong> pour les annonces et trouver des joueurs '
+                        f'de ta zone 👇</p><a class="btn share-wa btn-xl" '
+                        f'href="{e(WHATSAPP_URL)}">💬 Rejoindre la communauté WhatsApp</a>'
+                        ) if WHATSAPP_URL else ""
         form_section = f"""<div class="success" id="rejoindre">
         <div class="big">🎾</div>
         <h2>Tu es sur la liste. Bienvenue !</h2>
         <p class="muted">On te préviendra par email dès l'ouverture — tu seras
         prioritaire pour le <strong>Club des Fondateurs</strong>.</p>
+        {whatsapp_cta}
         {sondage}
         <p style="margin-top:6px"><strong>Fais grandir la ligue — et débloque des
         avantages 👇</strong><br><span class="muted">Plus tu invites de collègues,
@@ -1450,8 +1458,9 @@ def page_landing(sent_code=None, ref_from=None):
       <h2>Prêt à entrer dans la ligue ?</h2>
       <a class="btn btn-xl" href="#rejoindre">Rejoindre la liste d'attente →</a>
       <div class="lp-foot">Ligue Padel Santé · Île-de-France — un projet par et pour
-      les soignants. 🎾🩺<br>📸 Suis-nous sur Instagram :
-      <a href="https://instagram.com/padelmedleague">@padelmedleague</a></div>
+      les soignants. 🎾🩺<br>📸 Instagram :
+      <a href="https://instagram.com/padelmedleague">@padelmedleague</a>
+      {('· 💬 <a href="' + e(WHATSAPP_URL) + '">Communauté WhatsApp</a>') if WHATSAPP_URL else ''}</div>
     </div>
     </div>"""
     return page("Accueil", corps)
