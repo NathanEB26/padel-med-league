@@ -74,6 +74,17 @@ EXEMPLES_STRUCTURES = [
     "Centre de santé", "ESPIC", "Médecine du travail", "Internat / CCA",
 ]
 
+# Programme de parrainage : paliers de récompense (statut / priorité, sans coût)
+REF_MILESTONES = [
+    (1, "🎖️ Membre du Club des Fondateurs", "badge exclusif + mise en avant"),
+    (3, "⭐ Accès prioritaire", "aux créneaux & avantages de nos clubs partenaires"),
+    (5, "🏅 Statut Ambassadeur", "ton nom mis en avant sur notre Instagram"),
+    (10, "👑 Capitaine de zone", "tu co-animes ta zone + un lot des clubs partenaires"),
+]
+# Image de partage (Open Graph) — hébergée sur le dépôt public GitHub
+OG_IMAGE = ("https://raw.githubusercontent.com/NathanEB26/padel-med-league/"
+            "main/visuels-instagram/01-annonce.png")
+
 # Sondage liste d'attente : préférence de mode de jeu (stocké dans waitlist.a_partenaire)
 PREF_OPTIONS = [
     "En équipe — j'ai déjà un binôme",
@@ -1129,7 +1140,14 @@ def page(titre, corps, flash=None):
     fl = f'<div class="flash">{e(flash)}</div>' if flash else ""
     return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{e(titre)} — Ligue Padel Santé</title><style>{CSS}</style></head>
+<title>{e(titre)} — Ligue Padel Santé</title>
+<meta property="og:title" content="Ligue Padel Santé — Île-de-France">
+<meta property="og:description" content="Le championnat de padel des soignants d'Île-de-France. Un adversaire à ton niveau, près de chez toi. Inscription gratuite.">
+<meta property="og:image" content="{OG_IMAGE}">
+<meta property="og:url" content="{BASE_URL}">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<style>{CSS}</style></head>
 <body><header>
 <div class="brand"><span class="ball">🎾</span>
 <span>Ligue Padel Santé<small>ÎLE-DE-FRANCE</small></span></div>
@@ -1179,8 +1197,27 @@ def page_landing(sent_code=None, ref_from=None):
         wa = f"https://wa.me/?text={msg}"
         mail = (f"mailto:?subject={urllib.parse.quote('Rejoins-moi sur la Ligue Padel Santé')}"
                 f"&body={msg}")
-        filleuls = (f'<p class="muted">🎉 Déjà <strong>{nb_f}</strong> personne(s) '
-                    f'inscrite(s) grâce à toi !</p>' if nb_f else '')
+        linkedin = f"https://www.linkedin.com/sharing/share-offsite/?url={urllib.parse.quote(lien)}"
+        # Paliers de récompense du parrainage
+        items, prochain = "", None
+        for seuil, titre, detail in REF_MILESTONES:
+            atteint = nb_f >= seuil
+            if not atteint and prochain is None:
+                prochain = (seuil, titre)
+            coche = "✅" if atteint else f'<span class="tag">{seuil}&nbsp;inv.</span>'
+            items += (f'<div style="display:flex;gap:10px;align-items:flex-start;margin:7px 0;'
+                      f'{"" if atteint else "opacity:.55"}"><span>{coche}</span>'
+                      f'<span><strong>{titre}</strong> '
+                      f'<span class="muted">— {detail}</span></span></div>')
+        if prochain:
+            reste = prochain[0] - nb_f
+            entete = (f'<strong>Tu as parrainé {nb_f} personne·s.</strong> Plus que '
+                      f'<strong>{reste}</strong> pour débloquer « {e(prochain[1])} » 🔓')
+        else:
+            entete = f'<strong>🏆 Tu as tout débloqué ({nb_f} parrainages) — merci !</strong>'
+        incentive = (f'<div style="text-align:left;background:var(--bg2);border:1px solid '
+                     f'var(--line);border-radius:12px;padding:16px 18px;margin:14px 0">'
+                     f'<p style="margin:0 0 10px">{entete}</p>{items}</div>')
         # Résultats du sondage (révélés après le vote)
         counts = waitlist_pref_counts()
         total_votes = sum(counts.values())
@@ -1205,14 +1242,21 @@ def page_landing(sent_code=None, ref_from=None):
         <p class="muted">On te préviendra par email dès l'ouverture — tu seras
         prioritaire pour le <strong>Club des Fondateurs</strong>.</p>
         {sondage}
-        <p style="margin-top:6px"><strong>Invite ton binôme &amp; tes collègues</strong>
-        avec ton lien de parrainage 👇 (plus tu invites, plus tu montes dans la file)</p>
+        <p style="margin-top:6px"><strong>Fais grandir la ligue — et débloque des
+        avantages 👇</strong><br><span class="muted">Plus tu invites de collègues,
+        plus tu montes dans la file et plus tu débloques de paliers.</span></p>
+        {incentive}
         <div class="reflink"><span>{e(lien)}</span></div>
         <div class="share-row">
-          <a class="btn share-wa" href="{wa}">📲 Partager sur WhatsApp</a>
-          <a class="btn sec" href="{mail}">✉️ Par email</a>
-        </div>{filleuls}
-        <p style="margin-top:18px"><a class="btn sec" href="/classement">Voir la démo de la ligue →</a></p></div>"""
+          <a class="btn share-wa" href="{wa}">📲 WhatsApp</a>
+          <a class="btn sec" href="{linkedin}">💼 LinkedIn</a>
+          <a class="btn sec" href="{mail}">✉️ Email</a>
+          <button type="button" class="btn sec"
+            onclick="navigator.clipboard.writeText('{lien}');this.textContent='✓ Copié !'">📋 Copier le lien</button>
+        </div>
+        <p class="muted" style="margin-top:10px;font-size:13px">📸 <strong>Instagram :</strong>
+        copie ton lien et partage-le en story — tu peux y poster un de nos visuels prêts à l'emploi.</p>
+        <p style="margin-top:16px"><a class="btn sec" href="/classement">Voir la démo de la ligue →</a></p></div>"""
     else:
         form_section = f"""<div class="lp-form-wrap" id="rejoindre">
         <h2>Rejoins la liste d'attente</h2>
