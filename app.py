@@ -167,6 +167,7 @@ def init_db(reset=False):
             email TEXT, telephone TEXT,
             profession TEXT, statut TEXT, specialite TEXT, structure TEXT,
             niveau INTEGER,
+            rating REAL DEFAULT 1100,   -- cote Elo individuelle
             zone TEXT, cp TEXT,
             equipe_id INTEGER REFERENCES equipes(id)   -- NULL = joueur libre
         );
@@ -200,39 +201,89 @@ def init_db(reset=False):
     conn.close()
 
 
+# ---------------------------------------------------------------------------
+# LISTE D'ATTENTE & PARRAINAGE — persistance
+# Si la variable d'environnement DATABASE_URL est définie (PostgreSQL, ex. Neon),
+# la liste d'attente y est stockée durablement. Sinon, repli sur SQLite (local /
+# démo, éphémère). Le reste de l'app (démo) reste sur SQLite.
+# ---------------------------------------------------------------------------
+
+PG_URL = os.environ.get("DATABASE_URL")
+_pg_ready = False
+
+
+def _pg():
+    import psycopg
+    from psycopg.rows import dict_row
+    return psycopg.connect(PG_URL, autocommit=True, row_factory=dict_row)
+
+
+def _pg_ensure():
+    global _pg_ready
+    if _pg_ready:
+        return
+    with _pg() as c:
+        c.execute("""CREATE TABLE IF NOT EXISTS waitlist (
+            id SERIAL PRIMARY KEY, email TEXT UNIQUE NOT NULL, prenom TEXT,
+            profession TEXT, zone TEXT, niveau INTEGER, a_partenaire TEXT,
+            ref_code TEXT UNIQUE, referred_by TEXT,
+            created TIMESTAMP DEFAULT now())""")
+    _pg_ready = True
+
+
+def _new_code(existe):
+    """Génère un code de parrainage unique. `existe(code)` -> bool."""
+    import secrets
+    alpha = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # sans caractères ambigus
+    while True:
+        code = "".join(secrets.choice(alpha) for _ in range(6))
+        if not existe(code):
+            return code
+
+
 def count_waitlist():
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            return c.execute("SELECT COUNT(*) AS n FROM waitlist").fetchone()["n"]
     conn = db()
-    init_db()  # garantit l'existence de la table
+    init_db()
     n = conn.execute("SELECT COUNT(*) c FROM waitlist").fetchone()["c"]
     conn.close()
     return n
 
 
-def _gen_ref_code(conn):
-    import secrets
-    alpha = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # sans caractères ambigus
-    while True:
-        code = "".join(secrets.choice(alpha) for _ in range(6))
-        if not conn.execute("SELECT 1 FROM waitlist WHERE ref_code=?", (code,)).fetchone():
-            return code
-
-
 def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
                  a_partenaire=None, referred_by=None):
     """Ajoute un email à la liste d'attente. Renvoie (nouveau, ref_code)."""
-    conn = db()
     email = email.strip().lower()
-    existant = conn.execute(
-        "SELECT ref_code FROM waitlist WHERE email=?", (email,)).fetchone()
+    referred_by = referred_by or None
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            row = c.execute("SELECT ref_code FROM waitlist WHERE email=%s",
+                            (email,)).fetchone()
+            if row:
+                return False, row["ref_code"]
+            code = _new_code(lambda x: c.execute(
+                "SELECT 1 FROM waitlist WHERE ref_code=%s", (x,)).fetchone())
+            c.execute(
+                "INSERT INTO waitlist(email,prenom,profession,zone,niveau,"
+                "a_partenaire,ref_code,referred_by) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+                (email, prenom, profession, zone, niveau, a_partenaire, code, referred_by))
+            return True, code
+    conn = db()
+    existant = conn.execute("SELECT ref_code FROM waitlist WHERE email=?",
+                            (email,)).fetchone()
     if existant:
         conn.close()
-        return False, existant["ref_code"]  # déjà inscrit → on renvoie son code
-    code = _gen_ref_code(conn)
+        return False, existant["ref_code"]
+    code = _new_code(lambda x: conn.execute(
+        "SELECT 1 FROM waitlist WHERE ref_code=?", (x,)).fetchone())
     conn.execute(
         "INSERT INTO waitlist(email, prenom, profession, zone, niveau, a_partenaire, "
         "ref_code, referred_by) VALUES (?,?,?,?,?,?,?,?)",
-        (email, prenom, profession, zone, niveau, a_partenaire, code,
-         (referred_by or None)))
+        (email, prenom, profession, zone, niveau, a_partenaire, code, referred_by))
     conn.commit()
     conn.close()
     return True, code
@@ -242,10 +293,15 @@ def waitlist_par_code(code):
     """Renvoie l'inscrit correspondant à un code de parrainage (ou None)."""
     if not code:
         return None
+    code = code.strip().upper()
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            return c.execute("SELECT * FROM waitlist WHERE ref_code=%s",
+                             (code,)).fetchone()
     conn = db()
     init_db()
-    r = conn.execute("SELECT * FROM waitlist WHERE ref_code=?",
-                     (code.strip().upper(),)).fetchone()
+    r = conn.execute("SELECT * FROM waitlist WHERE ref_code=?", (code,)).fetchone()
     conn.close()
     return r
 
@@ -254,9 +310,47 @@ def compte_filleuls(code):
     """Nombre de personnes inscrites grâce à ce code de parrainage."""
     if not code:
         return 0
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            return c.execute("SELECT COUNT(*) AS n FROM waitlist WHERE referred_by=%s",
+                             (code,)).fetchone()["n"]
     conn = db()
     n = conn.execute("SELECT COUNT(*) c FROM waitlist WHERE referred_by=?",
                      (code,)).fetchone()["c"]
+    conn.close()
+    return n
+
+
+def waitlist_all():
+    """Toute la liste d'attente (pour l'admin), liste de dicts."""
+    cols = ("email", "prenom", "profession", "zone", "a_partenaire",
+            "ref_code", "referred_by", "created")
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            return c.execute(
+                "SELECT email,prenom,profession,zone,a_partenaire,ref_code,"
+                "referred_by,created FROM waitlist ORDER BY created DESC").fetchall()
+    conn = db()
+    init_db()
+    rows = conn.execute(
+        "SELECT email,prenom,profession,zone,a_partenaire,ref_code,referred_by,"
+        "created FROM waitlist ORDER BY created DESC").fetchall()
+    conn.close()
+    return [{k: r[k] for k in cols} for r in rows]
+
+
+def waitlist_nb_parraines():
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            return c.execute("SELECT COUNT(*) AS n FROM waitlist "
+                             "WHERE referred_by IS NOT NULL").fetchone()["n"]
+    conn = db()
+    init_db()
+    n = conn.execute("SELECT COUNT(*) c FROM waitlist "
+                     "WHERE referred_by IS NOT NULL").fetchone()["c"]
     conn.close()
     return n
 
@@ -339,13 +433,15 @@ def creer_joueur(conn, nom, **kw):
     un = kw.get("username") or username_unique(conn, nom)
     if conn.execute("SELECT 1 FROM joueurs WHERE username=?", (un,)).fetchone():
         un = username_unique(conn, un)
+    niveau = kw.get("niveau")
+    rating = niveau_to_rating(niveau) if niveau else 1100
     cur = conn.execute(
         "INSERT INTO joueurs(username, nom, email, telephone, profession, statut, "
-        "specialite, structure, niveau, zone, cp, equipe_id) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL)",
+        "specialite, structure, niveau, rating, zone, cp, equipe_id) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,NULL)",
         (un, nom, kw.get("email"), kw.get("telephone"), kw.get("profession"),
          kw.get("statut"), kw.get("specialite"), kw.get("structure"),
-         kw.get("niveau"), kw.get("zone"), kw.get("cp")))
+         niveau, rating, kw.get("zone"), kw.get("cp")))
     return cur.lastrowid, un
 
 
@@ -425,6 +521,58 @@ def classement():
     table = list(stats.values())
     table.sort(key=lambda s: (s["pts"], s["sg"] - s["sp"], s["jg"] - s["jp"]),
                reverse=True)
+    return table
+
+
+def stats_joueurs():
+    """Agrège les résultats au niveau de chaque JOUEUR (les 2 d'une équipe
+    partagent le résultat du match). Base des classements individuels et de groupe."""
+    conn = db()
+    joueurs = {j["id"]: dict(joueur=j, j=0, v=0, pts=0)
+               for j in conn.execute("SELECT * FROM joueurs WHERE equipe_id IS NOT NULL")}
+    membres = {}  # equipe_id -> [player_id]
+    for j in conn.execute("SELECT id, equipe_id FROM joueurs WHERE equipe_id IS NOT NULL"):
+        membres.setdefault(j["equipe_id"], []).append(j["id"])
+    for m in conn.execute("SELECT * FROM matchs WHERE statut='valide'"):
+        for (eq, sp, sc) in ((m["equipe_a"], m["sets_a"], m["sets_b"]),
+                             (m["equipe_b"], m["sets_b"], m["sets_a"])):
+            for pid in membres.get(eq, []):
+                st = joueurs[pid]
+                st["j"] += 1
+                st["pts"] += points_match(sp, sc)
+                if sp > sc:
+                    st["v"] += 1
+    conn.close()
+    return joueurs
+
+
+def classement_joueurs():
+    table = list(stats_joueurs().values())
+    table.sort(key=lambda s: (s["pts"], s["joueur"]["rating"]), reverse=True)
+    return table
+
+
+def classement_par(attribut):
+    """Classement de groupe (profession / specialite / structure / zone),
+    par attribution individuelle. Renvoie une liste triée par points par tête."""
+    groupes = {}
+    for st in stats_joueurs().values():
+        if st["j"] == 0:
+            continue  # n'a pas encore joué
+        cle = st["joueur"][attribut]
+        if not cle or cle == "—":
+            continue
+        g = groupes.setdefault(cle, dict(nom=cle, joueurs=0, j=0, v=0, pts=0, somme_cote=0))
+        g["joueurs"] += 1
+        g["j"] += st["j"]
+        g["v"] += st["v"]
+        g["pts"] += st["pts"]
+        g["somme_cote"] += st["joueur"]["rating"]
+    table = list(groupes.values())
+    for g in table:
+        g["pts_par_tete"] = round(g["pts"] / g["joueurs"], 2) if g["joueurs"] else 0
+        g["cote_moy"] = round(g["somme_cote"] / g["joueurs"]) if g["joueurs"] else 0
+    table.sort(key=lambda g: (g["pts_par_tete"], g["cote_moy"]), reverse=True)
     return table
 
 
@@ -518,6 +666,25 @@ def maj_elo(conn, a, b, score_a):
     conn.execute("UPDATE equipes SET rating=? WHERE id=?", (round(nb, 1), b))
 
 
+def maj_elo_joueurs(conn, a, b, score_a):
+    """Cote Elo individuelle (2v2) : chaque joueur d'une paire prend le même delta,
+    calculé sur la moyenne des cotes de chaque paire."""
+    ja = conn.execute("SELECT id, rating FROM joueurs WHERE equipe_id=?", (a,)).fetchall()
+    jb = conn.execute("SELECT id, rating FROM joueurs WHERE equipe_id=?", (b,)).fetchall()
+    if not ja or not jb:
+        return
+    moy_a = sum(j["rating"] for j in ja) / len(ja)
+    moy_b = sum(j["rating"] for j in jb) / len(jb)
+    att_a = 1 / (1 + 10 ** ((moy_b - moy_a) / 400))
+    delta = K_ELO * (score_a - att_a)
+    for j in ja:
+        conn.execute("UPDATE joueurs SET rating=? WHERE id=?",
+                     (round(j["rating"] + delta, 1), j["id"]))
+    for j in jb:
+        conn.execute("UPDATE joueurs SET rating=? WHERE id=?",
+                     (round(j["rating"] - delta, 1), j["id"]))
+
+
 def parse_sets(sets):
     """sets : liste de chaînes '6-3'. Renvoie (sets_a, sets_b, jeux_a, jeux_b)."""
     sa = sb = ja = jb = 0
@@ -545,6 +712,7 @@ def enregistrer_score(match_id, sets):
         "detail=?, vainqueur=? WHERE id=?",
         (sa, sb, ja, jb, detail, vainqueur, match_id))
     maj_elo(conn, m["equipe_a"], m["equipe_b"], 1 if sa > sb else 0)
+    maj_elo_joueurs(conn, m["equipe_a"], m["equipe_b"], 1 if sa > sb else 0)
     conn.commit()
     conn.close()
     return True
@@ -754,7 +922,7 @@ font-size:14px;word-break:break-all;color:var(--txt)}
 def page(titre, corps, flash=None):
     nav = """
     <a href="/">Accueil</a>
-    <a href="/classement">Classement</a>
+    <a href="/classements">Classements</a>
     <a href="/calendrier">Calendrier</a>
     <a href="/joueurs">Joueurs</a>
     <a href="/inscription">S'inscrire</a>
@@ -989,6 +1157,75 @@ def page_classement(flash=None):
     <table><tr><th>#</th><th>Équipe</th><th>J</th><th>V</th>
     <th>Δ sets</th><th>Pts</th></tr>{lignes}</table></div>"""
     return page("Classement", corps, flash)
+
+
+CLASSEMENTS_VUES = [
+    ("equipe", "Équipes", "Classement des équipes"),
+    ("individuel", "Individuel", "La Cote d'Or — classement individuel"),
+    ("profession", "Profession", "Le Trophée des Blouses — par profession"),
+    ("specialite", "Spécialité", "Le Stéthoscope d'Or — par spécialité"),
+    ("structure", "Établissement", "Le Derby des Établissements"),
+    ("zone", "Zone", "La Carte aux Trophées — par zone"),
+]
+
+
+def page_classements(par="equipe", flash=None):
+    titre = next((t for k, _, t in CLASSEMENTS_VUES if k == par), "Classements")
+    subnav = " ".join(
+        f'<a class="btn {"" if k==par else "sec"}" href="/classements?par={k}" '
+        f'style="font-size:12px;padding:8px 13px">{e(lib)}</a>'
+        for k, lib, _ in CLASSEMENTS_VUES)
+
+    if par == "equipe":
+        rows = ""
+        for i, s in enumerate(classement(), 1):
+            eq = s["equipe"]; cls = f"lead-{i}" if i <= 3 else ""
+            rows += (f'<tr class="{cls}"><td class="rank">{i}</td>'
+                     f'<td><a href="/equipe?id={eq["id"]}" style="text-decoration:none;color:inherit">'
+                     f'<span class="tname">{e(eq["nom"])}</span></a> '
+                     f'<span class="badge zone">{e(eq["zone"])}</span> '
+                     f'<span class="tag">cote {int(eq["rating"])}</span></td>'
+                     f'<td>{s["j"]}</td><td>{s["v"]}</td>'
+                     f'<td>{s["sg"]-s["sp"]:+d}</td><td class="pts">{s["pts"]}</td></tr>')
+        head = "<th>#</th><th>Équipe</th><th>J</th><th>V</th><th>Δ sets</th><th>Pts</th>"
+        intro = "Système suisse · barème 3/2/1/0 · cliquez une équipe pour le détail."
+
+    elif par == "individuel":
+        _c = db()
+        noms_eq = {r["id"]: r["nom"] for r in _c.execute("SELECT id, nom FROM equipes")}
+        _c.close()
+        rows = ""
+        for i, s in enumerate(classement_joueurs(), 1):
+            j = s["joueur"]; cls = f"lead-{i}" if i <= 3 else ""
+            eqn = noms_eq.get(j["equipe_id"], "—")
+            rows += (f'<tr class="{cls}"><td class="rank">{i}</td>'
+                     f'<td><span class="tname">{e(j["nom"])}</span> '
+                     f'<span class="tag">@{e(j["username"])} · {e(j["profession"] or "")} · {e(eqn)}</span></td>'
+                     f'<td class="pts">{int(j["rating"])}</td>'
+                     f'<td>{s["j"]}</td><td>{s["v"]}</td><td class="pts">{s["pts"]}</td></tr>')
+        head = "<th>#</th><th>Joueur</th><th>Cote</th><th>J</th><th>V</th><th>Pts</th>"
+        intro = "Chaque joueur porte les résultats de ses matchs. Cote = Elo individuel."
+
+    else:  # profession / specialite / structure / zone
+        rows = ""
+        for i, g in enumerate(classement_par(par), 1):
+            cls = f"lead-{i}" if i <= 3 else ""
+            rows += (f'<tr class="{cls}"><td class="rank">{i}</td>'
+                     f'<td><span class="tname">{e(g["nom"])}</span> '
+                     f'<span class="tag">{g["joueurs"]} joueur·s · {g["v"]} victoires</span></td>'
+                     f'<td>{g["cote_moy"]}</td><td class="pts">{g["pts_par_tete"]}</td></tr>')
+        if not rows:
+            rows = '<tr><td colspan="4" class="muted">Pas encore de résultats dans cette catégorie.</td></tr>'
+        head = "<th>#</th><th>Groupe</th><th>Cote moy</th><th>Pts / joueur</th>"
+        intro = ("Classement « par tête » (points moyens par joueur) : équitable quelle "
+                 "que soit la taille du groupe.")
+
+    corps = f"""<div class="card"><h2>Classements</h2>
+    <div class="row" style="gap:6px;margin-bottom:8px">{subnav}</div></div>
+    <div class="card"><h2 style="font-size:19px">{e(titre)}</h2>
+    <p class="muted">{intro}</p>
+    <table><tr>{head}</tr>{rows}</table></div>"""
+    return page("Classements", corps, flash)
 
 
 def page_calendrier(flash=None):
@@ -1258,14 +1495,9 @@ def page_admin(flash=None):
     nb_j = conn.execute("SELECT COUNT(*) c FROM journees").fetchone()["c"]
     nb_att = conn.execute(
         "SELECT COUNT(*) c FROM matchs WHERE statut='a_jouer'").fetchone()["c"]
-    wl = conn.execute(
-        "SELECT email, prenom, profession, zone, a_partenaire, ref_code, "
-        "referred_by, created FROM waitlist ORDER BY created DESC").fetchall()
-    parrains = conn.execute(
-        "SELECT referred_by, COUNT(*) c FROM waitlist WHERE referred_by IS NOT NULL "
-        "GROUP BY referred_by ORDER BY c DESC").fetchall()
-    nb_parraines = sum(p["c"] for p in parrains)
     conn.close()
+    wl = waitlist_all()
+    nb_parraines = waitlist_nb_parraines()
     wl_rows = "".join(
         f"<tr><td>{e(w['email'])}</td><td>{e(w['prenom'] or '')}</td>"
         f"<td>{e(w['profession'] or '')}</td><td>{e(w['zone'] or '')}</td>"
@@ -1336,6 +1568,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                                         ref_from=waitlist_par_code(ref)))
             elif u.path == "/classement":
                 self._send(page_classement(flash))
+            elif u.path == "/classements":
+                self._send(page_classements(q.get("par", ["equipe"])[0], flash))
             elif u.path == "/calendrier":
                 self._send(page_calendrier(flash))
             elif u.path == "/equipe":

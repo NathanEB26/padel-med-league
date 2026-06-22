@@ -1,3 +1,5 @@
-# Aucune dépendance externe : l'application n'utilise que la bibliothèque
-# standard de Python (http.server + sqlite3). Ce fichier (même vide) indique
-# à Render qu'il s'agit d'un projet Python.
+# L'application fonctionne avec la seule bibliothèque standard de Python
+# (http.server + sqlite3). La dépendance ci-dessous n'est utilisée QUE si la
+# variable d'environnement DATABASE_URL est définie : la liste d'attente et les
+# parrainages sont alors stockés durablement dans PostgreSQL (ex. Neon).
+psycopg[binary]>=3.1
