@@ -31,6 +31,8 @@ DB_PATH = os.environ.get(
     "DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ligue.db"))
 # URL publique de base (pour fabriquer les liens de parrainage partageables)
 BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.onrender.com")
+# Persistance : liste d'attente + parrainages stockés dans Neon (PostgreSQL) si
+# DATABASE_URL est défini — sinon repli SQLite local.
 
 # ---------------------------------------------------------------------------
 # CONFIGURATION MÉTIER (reprend les décisions du PLAN.md)
