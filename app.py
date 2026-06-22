@@ -29,6 +29,8 @@ PORT = int(os.environ.get("PORT", "8000"))
 HOST = os.environ.get("HOST", "127.0.0.1")
 DB_PATH = os.environ.get(
     "DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ligue.db"))
+# URL publique de base (pour fabriquer les liens de parrainage partageables)
+BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.onrender.com")
 
 # ---------------------------------------------------------------------------
 # CONFIGURATION MÉTIER (reprend les décisions du PLAN.md)
@@ -189,6 +191,8 @@ def init_db(reset=False):
             email TEXT UNIQUE NOT NULL,
             prenom TEXT, profession TEXT, zone TEXT, niveau INTEGER,
             a_partenaire TEXT,
+            ref_code TEXT UNIQUE,       -- code de parrainage personnel
+            referred_by TEXT,           -- code du parrain (si invité)
             created TEXT DEFAULT (datetime('now'))
         );
     """)
@@ -204,21 +208,57 @@ def count_waitlist():
     return n
 
 
+def _gen_ref_code(conn):
+    import secrets
+    alpha = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # sans caractères ambigus
+    while True:
+        code = "".join(secrets.choice(alpha) for _ in range(6))
+        if not conn.execute("SELECT 1 FROM waitlist WHERE ref_code=?", (code,)).fetchone():
+            return code
+
+
 def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
-                 a_partenaire=None):
-    """Ajoute un email à la liste d'attente. Renvoie True si nouveau, False si déjà présent."""
+                 a_partenaire=None, referred_by=None):
+    """Ajoute un email à la liste d'attente. Renvoie (nouveau, ref_code)."""
     conn = db()
-    try:
-        conn.execute(
-            "INSERT INTO waitlist(email, prenom, profession, zone, niveau, a_partenaire) "
-            "VALUES (?,?,?,?,?,?)",
-            (email.strip().lower(), prenom, profession, zone, niveau, a_partenaire))
-        conn.commit()
-        nouveau = True
-    except sqlite3.IntegrityError:
-        nouveau = False  # email déjà inscrit
+    email = email.strip().lower()
+    existant = conn.execute(
+        "SELECT ref_code FROM waitlist WHERE email=?", (email,)).fetchone()
+    if existant:
+        conn.close()
+        return False, existant["ref_code"]  # déjà inscrit → on renvoie son code
+    code = _gen_ref_code(conn)
+    conn.execute(
+        "INSERT INTO waitlist(email, prenom, profession, zone, niveau, a_partenaire, "
+        "ref_code, referred_by) VALUES (?,?,?,?,?,?,?,?)",
+        (email, prenom, profession, zone, niveau, a_partenaire, code,
+         (referred_by or None)))
+    conn.commit()
     conn.close()
-    return nouveau
+    return True, code
+
+
+def waitlist_par_code(code):
+    """Renvoie l'inscrit correspondant à un code de parrainage (ou None)."""
+    if not code:
+        return None
+    conn = db()
+    init_db()
+    r = conn.execute("SELECT * FROM waitlist WHERE ref_code=?",
+                     (code.strip().upper(),)).fetchone()
+    conn.close()
+    return r
+
+
+def compte_filleuls(code):
+    """Nombre de personnes inscrites grâce à ce code de parrainage."""
+    if not code:
+        return 0
+    conn = db()
+    n = conn.execute("SELECT COUNT(*) c FROM waitlist WHERE referred_by=?",
+                     (code,)).fetchone()["c"]
+    conn.close()
+    return n
 
 
 # ---------------------------------------------------------------------------
@@ -697,6 +737,15 @@ font-weight:800;margin:0 0 6px}
 padding:40px;text-align:center;max-width:560px;margin:0 auto}
 .success .big{font-size:54px}
 .success h2{font-size:26px;margin:10px 0}
+.ref-banner{position:relative;background:rgba(198,255,0,.12);border:1px solid var(--lime);
+border-radius:12px;padding:12px 18px;margin-bottom:22px;font-weight:700;color:var(--lime)}
+.reflink{display:flex;gap:8px;align-items:center;background:var(--bg2);border:1px solid var(--line);
+border-radius:10px;padding:12px 14px;margin:14px 0;font-family:var(--font-mono,monospace);
+font-size:14px;word-break:break-all;color:var(--txt)}
+.share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.share-row a{text-decoration:none}
+.share-wa{background:#25D366;color:#06210f}
+.share-wa:hover{box-shadow:0 0 22px rgba(37,211,102,.45)}
 @media(max-width:600px){.lp-hero{padding:40px 24px}.lp-hero h1{font-size:38px}.lp-sub{font-size:17px}
 .lp-section>h2{font-size:24px}.lp-final h2{font-size:26px}}
 """
@@ -736,29 +785,54 @@ def nom_equipe(conn, eid):
 
 # ---- Pages -----------------------------------------------------------------
 
-def page_landing(sent=False):
+def page_landing(sent_code=None, ref_from=None):
     n = count_waitlist()
     compteur = (f'<span class="lp-counter"><span class="dot"></span>'
                 f'{n} soignant·e·s déjà sur la liste</span>' if n >= 1
                 else '<span class="lp-counter"><span class="dot"></span>'
                      'Sois parmi les tout premiers inscrits</span>')
 
-    if sent:
-        form_section = """<div class="success">
+    # Bandeau d'invitation si on arrive via un lien de parrainage
+    ref_banner = ""
+    referred_field = ""
+    if ref_from:
+        qui = e(ref_from["prenom"]) if ref_from["prenom"] else "Un·e collègue"
+        ref_banner = (f'<div class="ref-banner">👋 {qui} t\'invite à rejoindre la '
+                      f'Ligue Padel Santé — vous pourrez jouer ensemble !</div>')
+        referred_field = (f'<input type="hidden" name="referred_by" '
+                          f'value="{e(ref_from["ref_code"])}">')
+
+    if sent_code:
+        lien = f"{BASE_URL}/?ref={e(sent_code)}"
+        nb_f = compte_filleuls(sent_code)
+        msg = urllib.parse.quote(
+            f"Je rejoins la Ligue Padel Santé d'Île-de-France 🎾🩺 "
+            f"(le championnat de padel des soignants). Rejoins-moi sur la liste "
+            f"d'attente : {lien}")
+        wa = f"https://wa.me/?text={msg}"
+        mail = (f"mailto:?subject={urllib.parse.quote('Rejoins-moi sur la Ligue Padel Santé')}"
+                f"&body={msg}")
+        filleuls = (f'<p class="muted">🎉 Déjà <strong>{nb_f}</strong> personne(s) '
+                    f'inscrite(s) grâce à toi !</p>' if nb_f else '')
+        form_section = f"""<div class="success" id="rejoindre">
         <div class="big">🎾</div>
         <h2>Tu es sur la liste. Bienvenue !</h2>
-        <p class="muted">On te préviendra par email dès l'ouverture des inscriptions
-        — tu seras prioritaire pour le <strong>Club des Fondateurs</strong>.</p>
-        <p style="margin-top:18px"><strong>Fais grimper la ligue :</strong> envoie ce
-        lien à ton futur binôme 👇</p>
-        <p><code>https://padel-med-league.onrender.com</code></p>
-        <a class="btn sec" href="/classement">Voir la démo de la ligue →</a></div>"""
+        <p class="muted">On te préviendra par email dès l'ouverture — tu seras
+        prioritaire pour le <strong>Club des Fondateurs</strong>.</p>
+        <p style="margin-top:18px"><strong>Invite ton binôme &amp; tes collègues</strong>
+        avec ton lien de parrainage 👇 (plus tu invites, plus tu montes dans la file)</p>
+        <div class="reflink"><span>{e(lien)}</span></div>
+        <div class="share-row">
+          <a class="btn share-wa" href="{wa}">📲 Partager sur WhatsApp</a>
+          <a class="btn sec" href="{mail}">✉️ Par email</a>
+        </div>{filleuls}
+        <p style="margin-top:18px"><a class="btn sec" href="/classement">Voir la démo de la ligue →</a></p></div>"""
     else:
         form_section = f"""<div class="lp-form-wrap" id="rejoindre">
         <h2>Rejoins la liste d'attente</h2>
         <p class="muted" style="text-align:center;margin:0 0 18px">
         Gratuit · 30 secondes · zéro engagement. On te prévient au lancement.</p>
-        <form method="post" action="/rejoindre">
+        <form method="post" action="/rejoindre">{referred_field}
           <label>Email *</label>
           <input name="email" type="email" required placeholder="toi@exemple.fr">
           <div class="grid2">
@@ -778,6 +852,7 @@ def page_landing(sent=False):
         On ne partage jamais ton email. Désinscription en 1 clic.</p></div>"""
 
     corps = f"""<div class="lp">
+    {ref_banner}
     <div class="lp-hero">
       <span class="lp-eyebrow">Pré-lancement · Saison 1</span>
       <h1>Le championnat de padel des <em>soignants</em> d'Île-de-France</h1>
@@ -1184,22 +1259,30 @@ def page_admin(flash=None):
     nb_att = conn.execute(
         "SELECT COUNT(*) c FROM matchs WHERE statut='a_jouer'").fetchone()["c"]
     wl = conn.execute(
-        "SELECT email, prenom, profession, zone, a_partenaire, created "
-        "FROM waitlist ORDER BY created DESC").fetchall()
+        "SELECT email, prenom, profession, zone, a_partenaire, ref_code, "
+        "referred_by, created FROM waitlist ORDER BY created DESC").fetchall()
+    parrains = conn.execute(
+        "SELECT referred_by, COUNT(*) c FROM waitlist WHERE referred_by IS NOT NULL "
+        "GROUP BY referred_by ORDER BY c DESC").fetchall()
+    nb_parraines = sum(p["c"] for p in parrains)
     conn.close()
     wl_rows = "".join(
         f"<tr><td>{e(w['email'])}</td><td>{e(w['prenom'] or '')}</td>"
         f"<td>{e(w['profession'] or '')}</td><td>{e(w['zone'] or '')}</td>"
-        f"<td>{e(w['a_partenaire'] or '')}</td><td class='tag'>{e(w['created'] or '')}</td></tr>"
-        for w in wl) or '<tr><td colspan="6" class="muted">Aucune inscription pour l\'instant.</td></tr>'
+        f"<td>{e(w['a_partenaire'] or '')}</td>"
+        f"<td><span class='tag'>{e(w['ref_code'] or '')}</span></td>"
+        f"<td>{e(w['referred_by'] or '—')}</td>"
+        f"<td class='tag'>{e(w['created'] or '')}</td></tr>"
+        for w in wl) or '<tr><td colspan="8" class="muted">Aucune inscription pour l\'instant.</td></tr>'
     corps = f"""<div class="card"><h2>Administration</h2>
     <p class="muted">{nb_eq} équipes · {nb_j} journées générées · {nb_att} matchs
     en attente de score.</p>
-    <h3>📋 Liste d'attente ({len(wl)})</h3>
+    <h3>📋 Liste d'attente ({len(wl)}) · dont {nb_parraines} par parrainage</h3>
     <p class="muted">Inscrits via la landing page. Exportez les emails pour vos
-    relances de lancement.</p>
+    relances de lancement. « Code » = lien de parrainage personnel ; « Parrain » =
+    code de celui qui l'a invité.</p>
     <table><tr><th>Email</th><th>Prénom</th><th>Profession</th><th>Zone</th>
-    <th>Binôme ?</th><th>Date</th></tr>{wl_rows}</table></div>
+    <th>Binôme ?</th><th>Code</th><th>Parrain</th><th>Date</th></tr>{wl_rows}</table></div>
     <div class="card">
     <h3 style="margin-top:0">Outils de simulation</h3>
     <h3>Générer la prochaine journée</h3>
@@ -1247,7 +1330,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         flash = q.get("flash", [None])[0]
         try:
             if u.path == "/":
-                self._send(page_landing(sent=bool(q.get("ok"))))
+                ok = q.get("ok", [None])[0]
+                ref = q.get("ref", [None])[0]
+                self._send(page_landing(sent_code=ok,
+                                        ref_from=waitlist_par_code(ref)))
             elif u.path == "/classement":
                 self._send(page_classement(flash))
             elif u.path == "/calendrier":
@@ -1352,10 +1438,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if "@" not in email:
                 self._send(page_landing())
             else:
-                add_waitlist(email, prenom=g("prenom") or None,
-                             profession=g("profession") or None, zone=g("zone") or None,
-                             a_partenaire=g("a_partenaire") or None)
-                self._redirect("/?ok=1")
+                _, code = add_waitlist(
+                    email, prenom=g("prenom") or None,
+                    profession=g("profession") or None, zone=g("zone") or None,
+                    a_partenaire=g("a_partenaire") or None,
+                    referred_by=g("referred_by") or None)
+                self._redirect("/?ok=" + code + "#rejoindre")
 
         elif u.path == "/admin/reset":
             seed()
