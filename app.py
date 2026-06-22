@@ -886,6 +886,12 @@ width:38px;height:38px;border-radius:10px;background:var(--lime);color:#06120a;
 font-weight:900;font-style:italic;font-size:20px;display:flex;align-items:center;justify-content:center}
 .step h3{margin:10px 0 6px;text-transform:none;letter-spacing:0;color:var(--txt);font-size:16px;font-weight:800}
 .step p{margin:0;color:var(--muted);font-size:14px}
+.manifesto{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--lime);
+border-radius:0 16px 16px 0;padding:30px 34px;max-width:760px;margin:0 auto}
+.manifesto h2{font-size:24px;font-style:italic;text-transform:uppercase;font-weight:900;margin:0 0 12px}
+.manifesto h2 em{color:var(--lime)}
+.manifesto p{margin:0;color:#c2ccd4;font-size:16px;line-height:1.6}
+.manifesto .sign{margin-top:14px;color:var(--muted);font-size:14px;font-style:italic}
 .founders{background:linear-gradient(125deg,#171108,#1f1407);border:1px solid #5a4412;
 border-radius:16px;padding:32px;text-align:center;margin-top:10px}
 .founders h2{color:var(--gold);font-style:italic;text-transform:uppercase;margin:0 0 8px;font-size:26px}
@@ -1032,11 +1038,24 @@ def page_landing(sent_code=None, ref_from=None):
         <a class="btn sec btn-xl" href="/classement">Voir la démo</a>
       </div>
       <div class="lp-trust">
-        <span>✅ <b>Gratuit</b></span>
+        <span>✅ <b>100% gratuit</b></span>
+        <span>✅ <b>Sans but lucratif</b></span>
         <span>✅ Tous les <b>professionnels de santé</b></span>
-        <span>✅ <b>9 zones</b> en Île-de-France</span>
+        <span>✅ <b>9 zones</b> en IDF</span>
       </div>
       {compteur}
+    </div>
+
+    <div class="lp-section">
+      <div class="manifesto">
+        <h2>100% gratuit. <em>0% business.</em></h2>
+        <p>On n'est pas une boîte. La Ligue Padel Santé, c'est juste une bande de
+        soignants qui aiment le padel et qui voulaient jouer plus souvent, contre
+        des gens sympas. <strong>Pas de pub, on ne revend pas tes données, on ne
+        gagne pas un centime là-dessus.</strong> On l'a monté pour le plaisir de
+        jouer et de rencontrer du monde. C'est tout. 🎾</p>
+        <p class="sign">— Des soignants, pour des soignants.</p>
+      </div>
     </div>
 
     <div class="lp-section">
@@ -1089,9 +1108,12 @@ def page_landing(sent_code=None, ref_from=None):
     <div class="lp-section">
       <h2>Questions fréquentes</h2>
       <div style="max-width:680px;margin:0 auto">
-        <div class="faq-item"><h3>C'est vraiment gratuit ?</h3><p>Oui. L'inscription à
-          la ligue est gratuite. Seul le terrain (réservé par les joueurs) est à votre
-          charge, comme d'habitude.</p></div>
+        <div class="faq-item"><h3>C'est vraiment gratuit ? Où est l'arnaque ?</h3>
+          <p>Pas d'arnaque : c'est <strong>100% gratuit et ça le restera</strong>. On
+          ne gagne rien là-dessus — pas de pub, pas de revente de données. C'est un
+          projet de soignants, monté pour le plaisir de jouer et de se rencontrer.
+          Seul le terrain (réservé par les joueurs) est à votre charge, comme
+          d'habitude.</p></div>
         <div class="faq-item"><h3>Je suis débutant, c'est pour moi ?</h3><p>Absolument.
           L'appariement par niveau fait que tu joues contre des gens comme toi. On
           part de 3/7 (« je tiens l'échange »).</p></div>
