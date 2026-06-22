@@ -183,9 +183,42 @@ def init_db(reset=False):
             detail TEXT,
             vainqueur INTEGER
         );
+        -- Liste d'attente (pré-lancement) : conservée même quand on réinitialise la démo
+        CREATE TABLE IF NOT EXISTS waitlist (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            prenom TEXT, profession TEXT, zone TEXT, niveau INTEGER,
+            a_partenaire TEXT,
+            created TEXT DEFAULT (datetime('now'))
+        );
     """)
     conn.commit()
     conn.close()
+
+
+def count_waitlist():
+    conn = db()
+    init_db()  # garantit l'existence de la table
+    n = conn.execute("SELECT COUNT(*) c FROM waitlist").fetchone()["c"]
+    conn.close()
+    return n
+
+
+def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
+                 a_partenaire=None):
+    """Ajoute un email à la liste d'attente. Renvoie True si nouveau, False si déjà présent."""
+    conn = db()
+    try:
+        conn.execute(
+            "INSERT INTO waitlist(email, prenom, profession, zone, niveau, a_partenaire) "
+            "VALUES (?,?,?,?,?,?)",
+            (email.strip().lower(), prenom, profession, zone, niveau, a_partenaire))
+        conn.commit()
+        nouveau = True
+    except sqlite3.IntegrityError:
+        nouveau = False  # email déjà inscrit
+    conn.close()
+    return nouveau
 
 
 # ---------------------------------------------------------------------------
@@ -599,16 +632,83 @@ padding:13px 17px;border-radius:10px;margin-bottom:20px;font-weight:700}
 .hint{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px;
 font-size:13px;color:var(--muted)}
 a{color:var(--lime)}
+
+/* ===================== LANDING PAGE ===================== */
+.lp{max-width:1000px;margin:0 auto;padding:0 18px}
+.lp-hero{position:relative;overflow:hidden;border-radius:20px;margin:22px 0;
+padding:60px 40px;border:1px solid var(--line);
+background:linear-gradient(125deg,#0b141d,#16242f 55%,#0b141d)}
+.lp-hero:before{content:"";position:absolute;top:-50%;right:-12%;width:60%;height:200%;
+background:linear-gradient(180deg,var(--lime),transparent);opacity:.12;transform:skewX(-18deg)}
+.lp-hero:after{content:"";position:absolute;top:-50%;right:10%;width:14%;height:200%;
+background:var(--mag);opacity:.14;transform:skewX(-18deg)}
+.lp-eyebrow{position:relative;display:inline-block;font-size:12px;font-weight:800;
+letter-spacing:2px;text-transform:uppercase;color:#06120a;background:var(--lime);
+padding:5px 12px;border-radius:6px;margin-bottom:18px}
+.lp-hero h1{position:relative;margin:0;font-size:54px;line-height:.95;font-weight:900;
+font-style:italic;text-transform:uppercase;letter-spacing:-1px;max-width:760px}
+.lp-hero h1 em{color:var(--lime)}
+.lp-sub{position:relative;margin:18px 0 0;font-size:19px;color:#cdd8e0;max-width:600px;line-height:1.45}
+.lp-cta-row{position:relative;display:flex;gap:14px;align-items:center;margin-top:28px;flex-wrap:wrap}
+.btn-xl{font-size:16px;padding:16px 30px;border-radius:10px}
+.lp-trust{position:relative;margin-top:18px;font-size:13px;color:var(--muted);
+display:flex;gap:18px;flex-wrap:wrap}
+.lp-trust b{color:var(--lime)}
+.lp-counter{position:relative;display:inline-flex;align-items:center;gap:9px;margin-top:22px;
+background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:30px;
+padding:8px 16px;font-size:14px;font-weight:700}
+.lp-counter .dot{width:9px;height:9px;border-radius:50%;background:var(--lime);
+box-shadow:0 0 10px var(--lime);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.lp-section{padding:46px 0;border-top:1px solid var(--line)}
+.lp-section>h2{text-align:center;font-size:30px;font-weight:900;font-style:italic;
+text-transform:uppercase;margin:0 0 8px}
+.lp-section .lead{text-align:center;color:var(--muted);max-width:620px;margin:0 auto 34px;font-size:16px}
+.lp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.benefit{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
+.benefit .ic{font-size:30px;line-height:1}
+.benefit h3{color:var(--txt);text-transform:none;letter-spacing:0;font-size:17px;
+font-weight:800;margin:14px 0 6px}
+.benefit p{margin:0;color:var(--muted);font-size:14px}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.step{position:relative;background:var(--panel);border:1px solid var(--line);
+border-radius:14px;padding:26px 22px 22px}
+.step:before{counter-increment:s;content:counter(s);position:absolute;top:-16px;left:22px;
+width:38px;height:38px;border-radius:10px;background:var(--lime);color:#06120a;
+font-weight:900;font-style:italic;font-size:20px;display:flex;align-items:center;justify-content:center}
+.step h3{margin:10px 0 6px;text-transform:none;letter-spacing:0;color:var(--txt);font-size:16px;font-weight:800}
+.step p{margin:0;color:var(--muted);font-size:14px}
+.founders{background:linear-gradient(125deg,#171108,#1f1407);border:1px solid #5a4412;
+border-radius:16px;padding:32px;text-align:center;margin-top:10px}
+.founders h2{color:var(--gold);font-style:italic;text-transform:uppercase;margin:0 0 8px;font-size:26px}
+.founders p{color:#e8d9b0;max-width:620px;margin:0 auto;font-size:15px}
+.lp-form-wrap{background:var(--panel);border:1px solid var(--line);border-radius:18px;
+padding:32px;max-width:560px;margin:0 auto}
+.lp-form-wrap h2{font-size:26px;margin:0 0 6px;text-align:center}
+.faq-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+padding:18px 20px;margin-bottom:12px}
+.faq-item h3{color:var(--txt);text-transform:none;letter-spacing:0;font-size:16px;
+font-weight:800;margin:0 0 6px}
+.faq-item p{margin:0;color:var(--muted);font-size:14px}
+.lp-final{text-align:center;padding:54px 0}
+.lp-final h2{font-size:34px;font-style:italic;text-transform:uppercase;font-weight:900;margin:0 0 22px}
+.lp-foot{text-align:center;color:var(--muted);font-size:13px;padding:30px 0 10px;border-top:1px solid var(--line)}
+.success{background:rgba(198,255,0,.08);border:1px solid var(--lime);border-radius:18px;
+padding:40px;text-align:center;max-width:560px;margin:0 auto}
+.success .big{font-size:54px}
+.success h2{font-size:26px;margin:10px 0}
+@media(max-width:600px){.lp-hero{padding:40px 24px}.lp-hero h1{font-size:38px}.lp-sub{font-size:17px}
+.lp-section>h2{font-size:24px}.lp-final h2{font-size:26px}}
 """
 
 
 def page(titre, corps, flash=None):
     nav = """
-    <a href="/">Classement</a>
+    <a href="/">Accueil</a>
+    <a href="/classement">Classement</a>
     <a href="/calendrier">Calendrier</a>
     <a href="/joueurs">Joueurs</a>
     <a href="/inscription">S'inscrire</a>
-    <a href="/equipe-former">Former une équipe</a>
     <a href="/admin">Admin</a>"""
     fl = f'<div class="flash">{e(flash)}</div>' if flash else ""
     return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
@@ -635,6 +735,146 @@ def nom_equipe(conn, eid):
 
 
 # ---- Pages -----------------------------------------------------------------
+
+def page_landing(sent=False):
+    n = count_waitlist()
+    compteur = (f'<span class="lp-counter"><span class="dot"></span>'
+                f'{n} soignant·e·s déjà sur la liste</span>' if n >= 1
+                else '<span class="lp-counter"><span class="dot"></span>'
+                     'Sois parmi les tout premiers inscrits</span>')
+
+    if sent:
+        form_section = """<div class="success">
+        <div class="big">🎾</div>
+        <h2>Tu es sur la liste. Bienvenue !</h2>
+        <p class="muted">On te préviendra par email dès l'ouverture des inscriptions
+        — tu seras prioritaire pour le <strong>Club des Fondateurs</strong>.</p>
+        <p style="margin-top:18px"><strong>Fais grimper la ligue :</strong> envoie ce
+        lien à ton futur binôme 👇</p>
+        <p><code>https://padel-med-league.onrender.com</code></p>
+        <a class="btn sec" href="/classement">Voir la démo de la ligue →</a></div>"""
+    else:
+        form_section = f"""<div class="lp-form-wrap" id="rejoindre">
+        <h2>Rejoins la liste d'attente</h2>
+        <p class="muted" style="text-align:center;margin:0 0 18px">
+        Gratuit · 30 secondes · zéro engagement. On te prévient au lancement.</p>
+        <form method="post" action="/rejoindre">
+          <label>Email *</label>
+          <input name="email" type="email" required placeholder="toi@exemple.fr">
+          <div class="grid2">
+            <div><label>Prénom (optionnel)</label><input name="prenom" placeholder="Camille"></div>
+            <div><label>Profession</label><select name="profession">{opts(PROFESSIONS)}</select></div>
+          </div>
+          <div class="grid2">
+            <div><label>Ta zone</label><select name="zone">{opts(ZONES)}</select></div>
+            <div><label>As-tu déjà un binôme ?</label>
+              <select name="a_partenaire"><option>Pas encore</option>
+              <option>Oui, on est deux</option></select></div>
+          </div>
+          <br><button class="btn btn-xl" type="submit"
+            style="width:100%">Je réserve ma place →</button>
+        </form>
+        <p class="muted" style="text-align:center;margin:14px 0 0;font-size:12px">
+        On ne partage jamais ton email. Désinscription en 1 clic.</p></div>"""
+
+    corps = f"""<div class="lp">
+    <div class="lp-hero">
+      <span class="lp-eyebrow">Pré-lancement · Saison 1</span>
+      <h1>Le championnat de padel des <em>soignants</em> d'Île-de-France</h1>
+      <p class="lp-sub">Un adversaire <strong>à ton niveau</strong>, <strong>près de
+      chez toi</strong>, toutes les 2 semaines. Tu trouves le créneau, tu joues —
+      on s'occupe de tout le reste.</p>
+      <div class="lp-cta-row">
+        <a class="btn btn-xl" href="#rejoindre">Rejoindre la liste d'attente →</a>
+        <a class="btn sec btn-xl" href="/classement">Voir la démo</a>
+      </div>
+      <div class="lp-trust">
+        <span>✅ <b>Gratuit</b></span>
+        <span>✅ Tous les <b>professionnels de santé</b></span>
+        <span>✅ <b>9 zones</b> en Île-de-France</span>
+      </div>
+      {compteur}
+    </div>
+
+    <div class="lp-section">
+      <h2>Le padel, sans la prise de tête</h2>
+      <p class="lead">Organiser des matchs réguliers, trouver des adversaires de son
+      niveau, gérer un classement… c'est pénible. La ligue fait tout ça pour toi.</p>
+      <div class="lp-grid">
+        <div class="benefit"><div class="ic">🎯</div><h3>Adversaire à ta mesure</h3>
+          <p>Un algorithme t'apparie par niveau et par zone géographique. Des matchs
+          serrés, jamais ridicules ni perdus d'avance.</p></div>
+        <div class="benefit"><div class="ic">🤙</div><h3>Zéro logistique</h3>
+          <p>Pas de planning rigide. Tu reçois ton adversaire et ses coordonnées,
+          vous calez le créneau qui vous arrange.</p></div>
+        <div class="benefit"><div class="ic">📈</div><h3>Une vraie progression</h3>
+          <p>Classement en direct et cote qui évolue à chaque match. De quoi
+          se prendre au jeu sur toute la saison.</p></div>
+        <div class="benefit"><div class="ic">🩺</div><h3>Entre soignants</h3>
+          <p>Médecins, kinés, infirmiers, dentistes, étudiants… On décompresse,
+          on réseaute, on se chambre. Bonne ambiance garantie.</p></div>
+      </div>
+    </div>
+
+    <div class="lp-section">
+      <h2>Comment ça marche</h2>
+      <p class="lead">Quatre étapes, et tu joues.</p>
+      <div class="steps">
+        <div class="step"><h3>Inscris-toi</h3><p>Rejoins la liste d'attente
+          maintenant. On t'écrit dès l'ouverture.</p></div>
+        <div class="step"><h3>Trouve ton binôme</h3><p>Tu as déjà un partenaire ?
+          Parfait. Sinon, trouve-en un dans l'annuaire des joueurs.</p></div>
+        <div class="step"><h3>Reçois ton match</h3><p>Toutes les 2 semaines, un
+          adversaire à ton niveau, dans ta zone.</p></div>
+        <div class="step"><h3>Joue & grimpe</h3><p>Vous jouez, tu entres le score,
+          le classement se met à jour tout seul.</p></div>
+      </div>
+    </div>
+
+    <div class="lp-section">
+      <div class="founders">
+        <h2>🏆 Club des Fondateurs</h2>
+        <p>Les <strong>50 premières équipes</strong> inscrites rejoignent le Club des
+        Fondateurs : badge exclusif sur leur profil, mise en avant sur notre Instagram,
+        et avantages chez nos clubs partenaires. La liste d'attente te donne la
+        priorité. <strong>Ne traîne pas.</strong></p>
+      </div>
+    </div>
+
+    <div class="lp-section">{form_section}</div>
+
+    <div class="lp-section">
+      <h2>Questions fréquentes</h2>
+      <div style="max-width:680px;margin:0 auto">
+        <div class="faq-item"><h3>C'est vraiment gratuit ?</h3><p>Oui. L'inscription à
+          la ligue est gratuite. Seul le terrain (réservé par les joueurs) est à votre
+          charge, comme d'habitude.</p></div>
+        <div class="faq-item"><h3>Je suis débutant, c'est pour moi ?</h3><p>Absolument.
+          L'appariement par niveau fait que tu joues contre des gens comme toi. On
+          part de 3/7 (« je tiens l'échange »).</p></div>
+        <div class="faq-item"><h3>Je ne suis pas médecin.</h3><p>Aucun souci : la ligue
+          est ouverte à <strong>tous les professionnels de santé</strong> — kinés,
+          infirmiers, dentistes, pharmaciens, sages-femmes, étudiants en santé…</p></div>
+        <div class="faq-item"><h3>Je n'ai pas de partenaire.</h3><p>Tu t'inscris seul·e
+          et tu trouves ton binôme dans l'annuaire des joueurs « en recherche de
+          partenaire ». C'est même une bonne façon de rencontrer du monde.</p></div>
+        <div class="faq-item"><h3>Ça prend combien de temps ?</h3><p>Un match toutes les
+          2 semaines, au créneau que vous choisissez. Tenable même avec des gardes.</p></div>
+        <div class="faq-item"><h3>Qui réserve le terrain ?</h3><p>Les joueurs, dans le
+          club de leur choix (4Padel, Casa Padel, Padel Horizon…). On vous met en
+          relation et on suggère les clubs proches.</p></div>
+      </div>
+    </div>
+
+    <div class="lp-final">
+      <h2>Prêt à entrer dans la ligue ?</h2>
+      <a class="btn btn-xl" href="#rejoindre">Rejoindre la liste d'attente →</a>
+      <div class="lp-foot">Ligue Padel Santé · Île-de-France — un projet par et pour
+      les soignants. 🎾🩺</div>
+    </div>
+    </div>"""
+    return page("Accueil", corps)
+
 
 def page_classement(flash=None):
     table = classement()
@@ -943,10 +1183,25 @@ def page_admin(flash=None):
     nb_j = conn.execute("SELECT COUNT(*) c FROM journees").fetchone()["c"]
     nb_att = conn.execute(
         "SELECT COUNT(*) c FROM matchs WHERE statut='a_jouer'").fetchone()["c"]
+    wl = conn.execute(
+        "SELECT email, prenom, profession, zone, a_partenaire, created "
+        "FROM waitlist ORDER BY created DESC").fetchall()
     conn.close()
+    wl_rows = "".join(
+        f"<tr><td>{e(w['email'])}</td><td>{e(w['prenom'] or '')}</td>"
+        f"<td>{e(w['profession'] or '')}</td><td>{e(w['zone'] or '')}</td>"
+        f"<td>{e(w['a_partenaire'] or '')}</td><td class='tag'>{e(w['created'] or '')}</td></tr>"
+        for w in wl) or '<tr><td colspan="6" class="muted">Aucune inscription pour l\'instant.</td></tr>'
     corps = f"""<div class="card"><h2>Administration</h2>
     <p class="muted">{nb_eq} équipes · {nb_j} journées générées · {nb_att} matchs
     en attente de score.</p>
+    <h3>📋 Liste d'attente ({len(wl)})</h3>
+    <p class="muted">Inscrits via la landing page. Exportez les emails pour vos
+    relances de lancement.</p>
+    <table><tr><th>Email</th><th>Prénom</th><th>Profession</th><th>Zone</th>
+    <th>Binôme ?</th><th>Date</th></tr>{wl_rows}</table></div>
+    <div class="card">
+    <h3 style="margin-top:0">Outils de simulation</h3>
     <h3>Générer la prochaine journée</h3>
     <p class="muted">Lance l'appariement suisse : chaque équipe reçoit un adversaire
     de niveau proche (cote Elo), géographiquement proche, qu'elle n'a pas déjà
@@ -992,6 +1247,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         flash = q.get("flash", [None])[0]
         try:
             if u.path == "/":
+                self._send(page_landing(sent=bool(q.get("ok"))))
+            elif u.path == "/classement":
                 self._send(page_classement(flash))
             elif u.path == "/calendrier":
                 self._send(page_calendrier(flash))
@@ -1090,9 +1347,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
             msg = f"Journée {num} générée par appariement suisse." if num else "Pas assez d'équipes."
             self._redirect("/calendrier?flash=" + urllib.parse.quote(msg))
 
+        elif u.path == "/rejoindre":
+            email = g("email")
+            if "@" not in email:
+                self._send(page_landing())
+            else:
+                add_waitlist(email, prenom=g("prenom") or None,
+                             profession=g("profession") or None, zone=g("zone") or None,
+                             a_partenaire=g("a_partenaire") or None)
+                self._redirect("/?ok=1")
+
         elif u.path == "/admin/reset":
             seed()
-            self._redirect("/?flash=" + urllib.parse.quote("Démo réinitialisée."))
+            self._redirect("/classement?flash=" + urllib.parse.quote("Démo réinitialisée."))
         else:
             self._send(page("404", "<div class='card'>Inconnu.</div>"), 404)
 
