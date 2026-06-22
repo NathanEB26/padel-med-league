@@ -1,0 +1,19 @@
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <title>Logo icône Ligue Padel Santé (photo de profil)</title>
+  <rect width="1080" height="1080" fill="#070b10"/>
+
+  <!-- Balle (remplit le cadre, idéal en rond) -->
+  <circle cx="540" cy="540" r="408" fill="#c6ff00"/>
+
+  <!-- Raquette de padel -->
+  <ellipse cx="540" cy="470" rx="182" ry="232" fill="#070b10"/>
+  <g fill="#c6ff00">
+    <circle cx="540" cy="330" r="21"/>
+    <circle cx="475" cy="403" r="21"/><circle cx="540" cy="403" r="21"/><circle cx="605" cy="403" r="21"/>
+    <circle cx="453" cy="476" r="21"/><circle cx="511" cy="476" r="21"/><circle cx="569" cy="476" r="21"/><circle cx="627" cy="476" r="21"/>
+    <circle cx="475" cy="549" r="21"/><circle cx="540" cy="549" r="21"/><circle cx="605" cy="549" r="21"/>
+    <circle cx="540" cy="620" r="21"/>
+  </g>
+  <rect x="503" y="660" width="74" height="250" rx="34" fill="#070b10"/>
+  <rect x="523" y="720" width="34" height="150" rx="17" fill="#c6ff00" opacity="0.35"/>
+</svg>

@@ -1,0 +1,27 @@
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <title>Logo Ligue Padel Santé</title>
+  <rect width="1080" height="1080" fill="#070b10"/>
+
+  <!-- Balle (cercle vert acide) -->
+  <circle cx="540" cy="430" r="252" fill="#c6ff00"/>
+
+  <!-- Raquette de padel (silhouette sombre) -->
+  <ellipse cx="540" cy="385" rx="112" ry="143" fill="#070b10"/>
+  <!-- Perforations (la balle apparaît au travers) -->
+  <g fill="#c6ff00">
+    <circle cx="540" cy="300" r="13"/>
+    <circle cx="500" cy="345" r="13"/><circle cx="540" cy="345" r="13"/><circle cx="580" cy="345" r="13"/>
+    <circle cx="486" cy="390" r="13"/><circle cx="523" cy="390" r="13"/><circle cx="557" cy="390" r="13"/><circle cx="594" cy="390" r="13"/>
+    <circle cx="500" cy="435" r="13"/><circle cx="540" cy="435" r="13"/><circle cx="580" cy="435" r="13"/>
+    <circle cx="540" cy="478" r="13"/>
+  </g>
+  <!-- Manche -->
+  <rect x="516" y="500" width="48" height="172" rx="22" fill="#070b10"/>
+  <rect x="529" y="540" width="22" height="100" rx="11" fill="#c6ff00" opacity="0.35"/>
+
+  <!-- Wordmark -->
+  <text x="540" y="812" text-anchor="middle" font-size="92" font-weight="900" font-style="italic"
+        fill="#ffffff" letter-spacing="-1">PADEL SANTÉ</text>
+  <text x="540" y="864" text-anchor="middle" font-size="30" font-weight="800"
+        fill="#c6ff00" letter-spacing="11">ÎLE-DE-FRANCE</text>
+</svg>
