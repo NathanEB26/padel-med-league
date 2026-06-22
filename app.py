@@ -1290,6 +1290,25 @@ def page_landing(sent_code=None, ref_from=None):
     </div>
 
     <div class="lp-section">
+      <h2>Quel que soit ton niveau</h2>
+      <p class="lead">Tout le monde joue contre des gens de son niveau. Une seule
+      ligue, en équipe ou en solo — tu choisis, et tu peux changer.</p>
+      <div class="lp-grid">
+        <div class="benefit" style="border-color:rgba(198,255,0,.35)">
+          <div class="ic">🌱</div><h3>Débutant ?</h3>
+          <p>C'est <strong>l'occasion de t'y mettre</strong>. Tu joues face à des
+          gens comme toi, dans une ambiance bienveillante — <strong>zéro match
+          humiliant</strong>. Pas de partenaire ? On t'en attribue un.</p></div>
+        <div class="benefit" style="border-color:rgba(255,47,122,.35)">
+          <div class="ic">🔥</div><h3>Joueur confirmé ?</h3>
+          <p><strong>Fini les matchs déséquilibrés et ennuyeux.</strong> Tu trouves
+          des partenaires et adversaires <strong>à ta hauteur</strong> — et des
+          soignants avec qui tu as de vraies <strong>affinités</strong>, sur le
+          terrain comme en dehors.</p></div>
+      </div>
+    </div>
+
+    <div class="lp-section">
       <h2>Comment ça marche</h2>
       <p class="lead">Quatre étapes, et tu joues.</p>
       <div class="steps">
@@ -1331,9 +1350,12 @@ def page_landing(sent_code=None, ref_from=None):
         <div class="faq-item"><h3>Je ne suis pas médecin.</h3><p>Aucun souci : la ligue
           est ouverte à <strong>tous les professionnels de santé</strong> — kinés,
           infirmiers, dentistes, pharmaciens, sages-femmes, étudiants en santé…</p></div>
-        <div class="faq-item"><h3>Je n'ai pas de partenaire.</h3><p>Tu t'inscris seul·e
-          et tu trouves ton binôme dans l'annuaire des joueurs « en recherche de
-          partenaire ». C'est même une bonne façon de rencontrer du monde.</p></div>
+        <div class="faq-item"><h3>Je n'ai pas de partenaire.</h3><p>Aucun problème :
+          tu peux jouer <strong>en solo</strong> — à chaque journée, on t'attribue
+          un·e partenaire (et des adversaires) à ton niveau. Tu as un binôme ?
+          Inscrivez-vous en <strong>équipe</strong>. Et tu peux <strong>changer de
+          formule à chaque journée</strong> : c'est une seule et même ligue, avec
+          un classement individuel <em>et</em> un classement par équipe.</p></div>
         <div class="faq-item"><h3>Ça prend combien de temps ?</h3><p>Un match toutes les
           2 semaines, au créneau que vous choisissez. Tenable même avec des gardes.</p></div>
         <div class="faq-item"><h3>Qui réserve le terrain ?</h3><p>Les joueurs, dans le

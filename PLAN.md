@@ -190,6 +190,52 @@ entre divisions). Documenté mais **non retenu** comme mode principal.
 
 ---
 
+## 5 bis. Ligue unifiée — solo OU équipe, au choix *(modèle retenu)*
+
+> Plutôt que deux ligues séparées, **une seule ligue**. On dissout le faux
+> dilemme « solo ou équipe ».
+
+**Principe.** Au padel, l'unité sur le terrain est toujours une **paire**. Une
+journée mélange donc sans effort :
+1. les **équipes fixes** (duos inscrits, paire verrouillée) ;
+2. les **solos**, que le système **apparie en paires ad-hoc** (par niveau, zone,
+   affinité, anti-même-partenaire).
+
+On lance ensuite l'appariement **paire contre paire** (le coût du §5 s'applique
+aux paires) : une équipe fixe peut affronter une paire de solos, et inversement.
+
+**Choix par journée.** Avant chaque journée, le joueur déclare : *je joue avec
+mon binôme* / *je joue en solo* / *je passe*. Il peut **changer à chaque
+journée** (suppose des comptes connectés → Saison 1).
+
+**Deux classements complémentaires :**
+- **Individuel (Cote d'Or)** — tout le monde, à chaque match (fixe ou solo).
+- **Par équipe** — uniquement les **duos fixes inscrits**. Une paire de solos
+  formée pour un soir ne crée pas d'entrée au classement équipe.
+- *Technique :* chaque côté d'un match porte un `team_id` (si duo inscrit) ou
+  reste ad-hoc. Le classement équipe ne compte que les côtés avec `team_id`.
+
+**Décisions actées :**
+- Si **un seul membre** d'un duo se présente une journée → il joue **en solo**
+  ce tour-là (l'équipe ne marque pas de point équipe cette journée).
+- **Classement équipe** affiché avec **points + nb de journées jouées** (pour ne
+  pas pénaliser un duo qui joue moins ; départage à la moyenne si besoin).
+- Léger avantage de complicité des duos rodés sur les paires de solos :
+  **assumé** (l'Elo individuel lisse, et ça fait le sel des matchs).
+
+**Inclusivité — l'appariement par niveau répond aux 2 peurs symétriques :**
+- **Débutants** : l'occasion de se mettre au padel sans matchs humiliants — on
+  joue contre des gens de son niveau, ambiance bienveillante.
+- **Joueurs confirmés** : fini les matchs déséquilibrés ; ils trouvent des
+  partenaires/adversaires **à leur hauteur**, et des soignants avec qui ils ont
+  des **affinités** (réseau). Voir §10 ter (affinité).
+
+*Conséquence sur le prototype actuel : les deux structures séparées (matchs
+équipe / matchs solo) seront **fusionnées** en une seule « match = paire vs
+paire » lors de la vraie version. Non prioritaire avant le lancement.*
+
+---
+
 ## 6. Scores et classement
 
 ### Format d'un match
@@ -308,6 +354,34 @@ gratuites pour démarrer). **Décision verrouillée plus tard**, comme convenu.
 **Niveau d'équipe** : par défaut **moyenne des 2 joueurs** (option : tirer un peu
 vers le plus fort, qui « porte » souvent la paire). À trancher.
 
+## 10 ter. Affinité & ressenti de match *(Saison 1-2)*
+
+Pour renforcer le réseautage **sans enfermer** les gens dans un petit groupe.
+
+**On ne note jamais les collègues.** En fin de match, chaque joueur note
+seulement **son propre ressenti** (1 tap, optionnel, privé) :
+> « Tu t'es éclaté·e sur ce match ? » → 😄 Génial · 🙂 Sympa · 😐 Bof
+
+**Usage par l'algo (jamais affiché, jamais nominatif) :**
+- Match « Génial » → légère **affinité privée** entre toi et les joueurs de ce
+  match → petite hausse de la probabilité de les recroiser.
+- Match « Bof » → aucun effet négatif sur les gens (pas de pénalité, pas de
+  blacklist) ; au plus, pas de bonus.
+- Signal **directionnel** : ton ressenti ne dit rien de celui des autres.
+
+**Affinité « déclarée » (jour 1)** : zone · métier · structure · niveau. À
+**moduler** (même métier = complicité ; métiers différents = brassage) — pas
+« plus c'est pareil, mieux c'est ».
+
+**Garde-fou anti-bulle = quota d'exploration** : règle type *« ≥ 1 nouveau
+visage par journée »* (≈ ⅓ exploration / ⅔ affinité), curseur réglable, plus
+d'exploration pour les nouveaux inscrits.
+
+**Intégration** : tout s'ajoute au coût d'appariement (§5) comme un **bonus
+d'affinité** (préférence douce, jamais une règle rigide). Cold-start : on
+démarre sur l'affinité déclarée, l'affinité apprise prend le relais avec le
+volume.
+
 ## 11. Décisions — cadrage (Lot 0) bouclé ✅
 
 | Sujet | Décision |
@@ -315,7 +389,9 @@ vers le plus fort, qui « porte » souvent la paire). À trancher.
 | Livrable | Plan d'abord |
 | Inscription | Ouverte, sans vérification |
 | Profil | Statut **+ spécialité** en listes déroulantes (§4.3) |
-| Appariement | 100 % auto, **système suisse** (§5) |
+| Format | **Ligue unifiée** : solo OU équipe au choix par journée, paire vs paire, **2 classements** individuel + équipe (§5 bis) |
+| Appariement | 100 % auto, **système suisse** par niveau/zone (§5) |
+| Affinité | Ressenti de match privé (jamais noter les collègues) + **quota d'exploration** anti-bulle (§10 ter, Saison 1-2) |
 | Niveau | 4 portes d'entrée + **cote dynamique Elo** (§4.1, §4.5) |
 | Conversions | Valeurs par défaut, à corriger au fil de l'eau (§10 bis) |
 | Cadence | **Tous les 15 jours** au départ |
