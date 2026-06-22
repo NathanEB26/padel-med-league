@@ -55,7 +55,12 @@ Chaque visuel existe en **`.png`** (à publier directement) et en **`.svg`**
 1. Ouvre le fichier `.png` correspondant, enregistre-le sur ton téléphone.
 2. Nouveau post Instagram → choisis l'image → colle la légende ci-dessus.
 3. Mets le lien d'inscription dans ta **bio** (Instagram n'autorise pas les liens
-   cliquables dans les légendes) : `https://padel-med-league.onrender.com`
+   cliquables dans les légendes).
+
+> ⚠️ **Domaine** : les visuels affichent `padel-med-league.fr` (le futur domaine, plus
+> propre). Mais tant qu'il n'est pas configuré, le **lien qui fonctionne** est
+> `https://padel-med-league.onrender.com` → c'est **celui-ci** qu'il faut mettre en bio
+> pour l'instant. Une fois le `.fr` branché sur le site, on bascule la bio dessus.
 
 ## Pour modifier un visuel
 Les `.svg` sont éditables (texte, couleurs) dans n'importe quel éditeur ou sur
