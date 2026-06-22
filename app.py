@@ -31,6 +31,8 @@ DB_PATH = os.environ.get(
     "DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ligue.db"))
 # URL publique de base (pour fabriquer les liens de parrainage partageables)
 BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.onrender.com")
+# « Inscription avec Google » : actif seulement si un Client ID Google est fourni
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 # Persistance : liste d'attente + parrainages stockés dans Neon (PostgreSQL) si
 # DATABASE_URL est défini — sinon repli SQLite local.
 
@@ -1278,10 +1280,26 @@ def page_landing(sent_code=None, ref_from=None):
         copie ton lien et partage-le en story — tu peux y poster un de nos visuels prêts à l'emploi.</p>
         <p style="margin-top:16px"><a class="btn sec" href="/classement">Voir la démo de la ligue →</a></p></div>"""
     else:
+        # Bouton « S'inscrire avec Google » (si configuré)
+        google_block = ""
+        if GOOGLE_CLIENT_ID:
+            login_uri = f"{BASE_URL}/auth/google"
+            if ref_from:
+                login_uri += f"?ref={e(ref_from['ref_code'])}"
+            google_block = f"""
+            <div id="g_id_onload" data-client_id="{e(GOOGLE_CLIENT_ID)}"
+                 data-login_uri="{login_uri}" data-ux_mode="redirect"></div>
+            <div class="g_id_signin" data-type="standard" data-text="signup_with"
+                 data-shape="pill" data-logo_alignment="center"
+                 style="display:flex;justify-content:center"></div>
+            <script src="https://accounts.google.com/gsi/client" async></script>
+            <div style="text-align:center;color:var(--muted);margin:16px 0;font-size:13px">
+            — ou avec ton email —</div>"""
         form_section = f"""<div class="lp-form-wrap" id="rejoindre">
         <h2>Rejoins la liste d'attente</h2>
         <p class="muted" style="text-align:center;margin:0 0 18px">
         Gratuit · 30 secondes · zéro engagement. On te prévient au lancement.</p>
+        {google_block}
         <form method="post" action="/rejoindre">{referred_field}
           <label>Email *</label>
           <input name="email" type="email" required placeholder="toi@exemple.fr">
@@ -1960,6 +1978,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
         raw = self.rfile.read(length).decode("utf-8")
         return urllib.parse.parse_qs(raw, keep_blank_values=True)
 
+    def _cookie(self, name):
+        for part in (self.headers.get("Cookie", "") or "").split(";"):
+            k, _, v = part.strip().partition("=")
+            if k == name:
+                return v
+        return None
+
     def log_message(self, *args):
         pass  # silence
 
@@ -2117,6 +2142,31 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     a_partenaire=g("a_partenaire") or None,
                     referred_by=g("referred_by") or None)
                 self._redirect("/?ok=" + code + "#rejoindre")
+
+        elif u.path == "/auth/google":
+            # Connexion Google : Google POST le jeton d'identité ici (mode redirect)
+            ref = urllib.parse.parse_qs(u.query).get("ref", [None])[0]
+            cred = g("credential")
+            csrf_ok = (self._cookie("g_csrf_token") == g("g_csrf_token")
+                       if self._cookie("g_csrf_token") else True)
+            email = prenom = None
+            if cred and csrf_ok and GOOGLE_CLIENT_ID:
+                try:
+                    from google.oauth2 import id_token
+                    from google.auth.transport import requests as g_requests
+                    info = id_token.verify_oauth2_token(
+                        cred, g_requests.Request(), GOOGLE_CLIENT_ID)
+                    if info.get("email_verified"):
+                        email = info.get("email")
+                        prenom = info.get("given_name")
+                except Exception:
+                    email = None
+            if email:
+                _, code = add_waitlist(email, prenom=prenom, referred_by=ref)
+                self._redirect("/?ok=" + code + "#rejoindre")
+            else:
+                self._redirect("/?flash=" + urllib.parse.quote(
+                    "La connexion Google a échoué, réessaie ou utilise ton email."))
 
         elif u.path == "/admin/wl-delete":
             waitlist_delete(g("email"))

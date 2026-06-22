@@ -3,3 +3,6 @@
 # variable d'environnement DATABASE_URL est définie : la liste d'attente et les
 # parrainages sont alors stockés durablement dans PostgreSQL (ex. Neon).
 psycopg[binary]>=3.1
+# « Inscription avec Google » : vérifie le jeton d'identité Google côté serveur.
+# Activé seulement si GOOGLE_CLIENT_ID est défini.
+google-auth>=2.0
