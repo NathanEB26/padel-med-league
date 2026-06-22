@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" role="img" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <title>Post Instagram — annonce ouverture de la liste d'attente</title>
+  <rect width="1080" height="1080" fill="#070b10"/>
+  <polygon points="760,0 1080,0 1080,1080 960,1080" fill="#c6ff00" opacity="0.09"/>
+  <polygon points="980,0 1045,0 1045,1080 945,1080" fill="#ff2f7a" opacity="0.16"/>
+
+  <circle cx="118" cy="116" r="26" fill="#c6ff00"/>
+  <text x="158" y="110" font-size="30" font-weight="900" font-style="italic" fill="#ffffff" letter-spacing="1">LIGUE PADEL SANTÉ</text>
+  <text x="160" y="144" font-size="17" font-weight="700" fill="#c6ff00" letter-spacing="7">ÎLE-DE-FRANCE</text>
+
+  <rect x="90" y="316" width="556" height="50" rx="9" fill="#c6ff00"/>
+  <text x="115" y="350" font-size="24" font-weight="800" fill="#06120a" letter-spacing="3">PRÉ-LANCEMENT · SAISON 1</text>
+
+  <text x="86" y="500" font-size="118" font-weight="900" font-style="italic" fill="#ffffff" letter-spacing="-2">LA LISTE</text>
+  <text x="86" y="620" font-size="118" font-weight="900" font-style="italic" fill="#ffffff" letter-spacing="-2">D'ATTENTE</text>
+  <text x="86" y="740" font-size="118" font-weight="900" font-style="italic" fill="#c6ff00" letter-spacing="-2">EST OUVERTE.</text>
+
+  <text x="90" y="820" font-size="33" font-weight="500" fill="#aab4be">Le championnat de padel des soignants</text>
+  <text x="90" y="864" font-size="33" font-weight="500" fill="#aab4be">d'Île-de-France. Médecins, kinés, infirmiers…</text>
+
+  <rect x="90" y="918" width="905" height="74" rx="12" fill="#c6ff00"/>
+  <text x="120" y="966" font-size="27" font-weight="900" fill="#06120a" letter-spacing="0">INSCRIPTION GRATUITE — LIEN EN BIO →</text>
+
+  <text x="90" y="1038" font-size="24" font-weight="700" fill="#8595a6" letter-spacing="1">padel-med-league.onrender.com</text>
+  <text x="990" y="1038" font-size="24" font-weight="700" fill="#c6ff00" text-anchor="end">@padelsante.idf</text>
+</svg>
