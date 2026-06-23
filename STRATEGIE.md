@@ -175,7 +175,8 @@ remplir des appariements crédibles au lancement.
 - [ ] **Brancher le domaine** sur Render (Custom Domain + 2 enregistrements DNS),
       puis basculer `BASE_URL` / Open Graph / bio Instagram sur le `.fr`. → *Nathan
       fait le DNS ; Claude bascule la config.*
-- [ ] **Compte à rebours 1er sept 2026** sur la landing *(S3)*. → *Claude.*
+- [x] **Compte à rebours 1er sept 2026** sur la landing *(S3)* — countdown live dans le
+      hero, responsive, « C'est parti ! » à l'échéance. ✅ *fait & déployé.*
 - [ ] **Communauté WhatsApp** : la créer → fournir le lien → définir `WHATSAPP_URL`.
       → *Nathan.* (Penser confidentialité : communauté vs canal pour des soignants.)
 - [ ] **Publier le post Instagram 01** (annonce) ; photo de profil = `logo-icon.jpg` ;
@@ -194,8 +195,9 @@ remplir des appariements crédibles au lancement.
 - [ ] Dérouler le **calendrier Instagram** (01 épinglé → 03 à J+2-3 → 02 pour l'urgence).
 - [ ] **Démarchage institutionnel** (route à fort levier ET conforme) : URPS IdF,
       Ordres, internat/SIHP, **associations sportives AP-HP**, BDE des facs de santé.
-- [ ] Préparer un **kit ambassadeur** (visuels + texte prêt à transférer) pour que des
-      relais diffusent dans **leurs** réseaux. *(Remplace l'idée de scraping — voir ⛔.)*
+- [x] Préparer un **kit ambassadeur** (textes WhatsApp/LinkedIn/SMS prêts à transférer +
+      one-pager institutionnel + liste de cibles + réponses aux objections) → voir
+      `KIT-AMBASSADEUR.md`. ✅ *fait — prêt à diffuser (swap lien `.fr` après branchement).*
 
 ### 🟢 Backlog produit (Saison 1+)
 - [ ] **Modèle « open match »** *(S2)* : ouverture de match par un joueur + sollicitation
