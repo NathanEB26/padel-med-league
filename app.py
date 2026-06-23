@@ -240,11 +240,16 @@ def init_db(reset=False):
             email TEXT UNIQUE NOT NULL,
             prenom TEXT, profession TEXT, zone TEXT, niveau INTEGER,
             a_partenaire TEXT,
+            consent INTEGER DEFAULT 0,  -- consentement RGPD recueilli (1) ou non (0)
             ref_code TEXT UNIQUE,       -- code de parrainage personnel
             referred_by TEXT,           -- code du parrain (si invité)
             created TEXT DEFAULT (datetime('now'))
         );
     """)
+    # Migration : ajoute la colonne de consentement aux bases déjà créées
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(waitlist)").fetchall()]
+    if "consent" not in cols:
+        conn.execute("ALTER TABLE waitlist ADD COLUMN consent INTEGER DEFAULT 0")
     conn.commit()
     conn.close()
 
@@ -276,6 +281,9 @@ def _pg_ensure():
             profession TEXT, zone TEXT, niveau INTEGER, a_partenaire TEXT,
             ref_code TEXT UNIQUE, referred_by TEXT,
             created TIMESTAMP DEFAULT now())""")
+        # Migration : consentement RGPD sur les tables déjà déployées
+        c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS "
+                  "consent BOOLEAN DEFAULT FALSE")
     _pg_ready = True
 
 
@@ -302,8 +310,11 @@ def count_waitlist():
 
 
 def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
-                 a_partenaire=None, referred_by=None):
-    """Ajoute un email à la liste d'attente. Renvoie (nouveau, ref_code)."""
+                 a_partenaire=None, referred_by=None, consent=False):
+    """Ajoute un email à la liste d'attente. Renvoie (nouveau, ref_code).
+
+    `consent` : True si l'utilisateur a explicitement coché la case RGPD.
+    """
     email = email.strip().lower()
     referred_by = referred_by or None
     if PG_URL:
@@ -317,8 +328,10 @@ def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
                 "SELECT 1 FROM waitlist WHERE ref_code=%s", (x,)).fetchone())
             c.execute(
                 "INSERT INTO waitlist(email,prenom,profession,zone,niveau,"
-                "a_partenaire,ref_code,referred_by) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
-                (email, prenom, profession, zone, niveau, a_partenaire, code, referred_by))
+                "a_partenaire,consent,ref_code,referred_by) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                (email, prenom, profession, zone, niveau, a_partenaire,
+                 bool(consent), code, referred_by))
             return True, code
     conn = db()
     existant = conn.execute("SELECT ref_code FROM waitlist WHERE email=?",
@@ -330,8 +343,9 @@ def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
         "SELECT 1 FROM waitlist WHERE ref_code=?", (x,)).fetchone())
     conn.execute(
         "INSERT INTO waitlist(email, prenom, profession, zone, niveau, a_partenaire, "
-        "ref_code, referred_by) VALUES (?,?,?,?,?,?,?,?)",
-        (email, prenom, profession, zone, niveau, a_partenaire, code, referred_by))
+        "consent, ref_code, referred_by) VALUES (?,?,?,?,?,?,?,?,?)",
+        (email, prenom, profession, zone, niveau, a_partenaire,
+         1 if consent else 0, code, referred_by))
     conn.commit()
     conn.close()
     return True, code
@@ -1146,8 +1160,29 @@ font-size:14px;word-break:break-all;color:var(--txt)}
 .share-row a{text-decoration:none}
 .share-wa{background:#25D366;color:#06210f}
 .share-wa:hover{box-shadow:0 0 22px rgba(37,211,102,.45)}
-@media(max-width:600px){.lp-hero{padding:40px 24px}.lp-hero h1{font-size:38px}.lp-sub{font-size:17px}
-.lp-section>h2{font-size:24px}.lp-final h2{font-size:26px}}
+.consent{display:flex;gap:10px;align-items:flex-start;margin-top:18px;text-transform:none;
+letter-spacing:0;font-weight:500;font-size:12.5px;color:var(--muted);line-height:1.45}
+.consent input{width:auto;flex:0 0 auto;margin-top:2px}
+.consent a{color:var(--lime)}
+.legal{max-width:760px;margin:0 auto;color:#c2ccd4;font-size:15px;line-height:1.65}
+.legal h3{color:var(--lime);margin-top:26px}
+.legal a{color:var(--lime)}
+
+@media(max-width:600px){
+.lp-hero{padding:40px 22px}.lp-hero h1{font-size:36px}.lp-sub{font-size:16px}
+.lp-section>h2{font-size:24px}.lp-final h2{font-size:26px}.lp-final{padding:38px 0}
+.lp-section{padding:36px 0}
+.hero{padding:32px 22px}.hero h1{font-size:32px}
+main{padding:20px 14px 48px}
+.card{padding:18px}.card h2{font-size:20px}
+.lp-form-wrap{padding:22px 18px}
+.grid2{grid-template-columns:1fr}
+.lp-hero h1,.hero h1{letter-spacing:-.5px}
+nav a{padding:7px 10px;font-size:11px}
+table{font-size:13px}th,td{padding:9px 7px}
+.hero .stats{gap:18px}.hero .stats b{font-size:23px}
+.btn-xl{font-size:15px;padding:14px 22px}
+}
 """
 
 
@@ -1194,8 +1229,14 @@ def nom_equipe(conn, eid):
 
 # ---- Pages -----------------------------------------------------------------
 
-def page_landing(sent_code=None, ref_from=None):
+def page_landing(sent_code=None, ref_from=None, error=None):
     n = count_waitlist()
+    err_banner = ""
+    if error:
+        err_banner = ('<div class="ref-banner" style="background:rgba(255,47,122,.12);'
+                      'border-color:var(--mag);color:var(--mag)">⚠️ Pour t\'inscrire, '
+                      'merci de cocher la case d\'accord sur l\'utilisation de ton '
+                      'email (et de renseigner un email valide).</div>')
     compteur = (f'<span class="lp-counter"><span class="dot"></span>'
                 f'{n} soignant·e·s déjà sur la liste</span>' if n >= 1
                 else '<span class="lp-counter"><span class="dot"></span>'
@@ -1307,6 +1348,7 @@ def page_landing(sent_code=None, ref_from=None):
         <h2>Rejoins la liste d'attente</h2>
         <p class="muted" style="text-align:center;margin:0 0 18px">
         Gratuit · 30 secondes · zéro engagement. On te prévient au lancement.</p>
+        {err_banner}
         {google_block}
         <form method="post" action="/rejoindre">{referred_field}
           <label>Email *</label>
@@ -1320,11 +1362,18 @@ def page_landing(sent_code=None, ref_from=None):
             <div><label>Comment préfères-tu jouer ?</label>
               <select name="a_partenaire">{opts(PREF_OPTIONS)}</select></div>
           </div>
-          <br><button class="btn btn-xl" type="submit"
-            style="width:100%">Je réserve ma place →</button>
+          <label class="consent">
+            <input type="checkbox" name="consent" value="1" required>
+            <span>J'accepte que mon email soit utilisé pour me prévenir du lancement
+            de la Ligue Padel Santé et organiser la ligue. Je peux me désinscrire à tout
+            moment. Voir la <a href="/confidentialite" target="_blank">politique de
+            confidentialité</a>.</span>
+          </label>
+          <button class="btn btn-xl" type="submit"
+            style="width:100%;margin-top:18px">Je réserve ma place →</button>
         </form>
         <p class="muted" style="text-align:center;margin:14px 0 0;font-size:12px">
-        On ne partage jamais ton email. Désinscription en 1 clic.</p></div>"""
+        On ne partage et ne revend jamais ton email. Désinscription en 1 clic.</p></div>"""
 
     corps = f"""<div class="lp">
     {ref_banner}
@@ -1460,10 +1509,73 @@ def page_landing(sent_code=None, ref_from=None):
       <div class="lp-foot">Ligue Padel Santé · Île-de-France — un projet par et pour
       les soignants. 🎾🩺<br>📸 Instagram :
       <a href="https://instagram.com/padelmedleague">@padelmedleague</a>
-      {('· 💬 <a href="' + e(WHATSAPP_URL) + '">Communauté WhatsApp</a>') if WHATSAPP_URL else ''}</div>
+      {('· 💬 <a href="' + e(WHATSAPP_URL) + '">Communauté WhatsApp</a>') if WHATSAPP_URL else ''}
+      · <a href="/confidentialite">Confidentialité</a></div>
     </div>
     </div>"""
     return page("Accueil", corps)
+
+
+def page_confidentialite():
+    corps = """<div class="card legal">
+    <h2 style="font-size:28px">Politique de confidentialité</h2>
+    <p class="muted">Dernière mise à jour : juin 2026</p>
+    <p>La Ligue Padel Santé Île-de-France attache de l'importance à la protection de tes
+    données. Cette page explique, en clair, quelles informations nous recueillons via la
+    liste d'attente, pourquoi, et quels sont tes droits.</p>
+
+    <h3>Qui est responsable ?</h3>
+    <p>La Ligue Padel Santé, projet à but non lucratif porté par des professionnels de
+    santé. Pour toute question ou demande relative à tes données :
+    <a href="mailto:contact@padel-med-league.fr">contact@padel-med-league.fr</a>.</p>
+
+    <h3>Quelles données collectons-nous ?</h3>
+    <ul>
+      <li><strong>Ton email</strong> (obligatoire) — pour te recontacter.</li>
+      <li><strong>Facultatif</strong> : prénom, profession, zone géographique et
+      préférence de jeu — pour préparer la ligue et son appariement.</li>
+      <li>Un <strong>code de parrainage</strong> et, le cas échéant, le code de la
+      personne qui t'a invité — pour le programme de parrainage.</li>
+    </ul>
+    <p>Nous ne collectons <strong>aucune donnée de santé</strong> te concernant.</p>
+
+    <h3>Pourquoi ? (finalités)</h3>
+    <ul>
+      <li>Te prévenir de l'ouverture de la ligue et t'informer du projet.</li>
+      <li>Organiser la ligue et l'appariement par niveau et par zone.</li>
+      <li>Gérer le programme de parrainage.</li>
+    </ul>
+    <p>La base légale de ce traitement est <strong>ton consentement</strong>, recueilli
+    via la case que tu coches au moment de l'inscription.</p>
+
+    <h3>Qui y a accès ?</h3>
+    <p>Uniquement l'équipe de la ligue. <strong>Nous ne vendons, ne louons et ne
+    partageons jamais ton email</strong> à des tiers à des fins commerciales. Tes données
+    sont stockées et traitées pour notre compte par nos prestataires techniques
+    (hébergement du site et de la base de données, et — à l'avenir — l'outil d'envoi des
+    emails), qui agissent comme sous-traitants et ne les utilisent pas pour leur compte.</p>
+
+    <h3>Combien de temps les conservons-nous ?</h3>
+    <p>Jusqu'au lancement de la ligue puis pendant la durée de ta participation, ou
+    jusqu'à ce que tu demandes ta désinscription / la suppression de tes données.</p>
+
+    <h3>Tes droits</h3>
+    <p>Tu disposes à tout moment d'un droit d'accès, de rectification, d'effacement,
+    d'opposition, de limitation, de portabilité, et du droit de <strong>retirer ton
+    consentement</strong>. Pour les exercer, écris-nous à
+    <a href="mailto:contact@padel-med-league.fr">contact@padel-med-league.fr</a> : il te
+    suffit d'un mot, la désinscription se fait en quelques secondes. Tu peux aussi
+    introduire une réclamation auprès de la CNIL (<a href="https://www.cnil.fr"
+    target="_blank">cnil.fr</a>).</p>
+
+    <h3>Cookies</h3>
+    <p>Ce site n'utilise <strong>ni cookie publicitaire, ni traceur, ni outil de mesure
+    d'audience tiers</strong>. Seuls d'éventuels cookies strictement nécessaires au
+    fonctionnement du site peuvent être déposés.</p>
+
+    <p style="margin-top:28px"><a class="btn sec" href="/">← Retour à l'accueil</a></p>
+    </div>"""
+    return page("Confidentialité", corps)
 
 
 def page_classement(flash=None):
@@ -2005,8 +2117,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if u.path == "/":
                 ok = q.get("ok", [None])[0]
                 ref = q.get("ref", [None])[0]
+                err = q.get("err", [None])[0]
                 self._send(page_landing(sent_code=ok,
-                                        ref_from=waitlist_par_code(ref)))
+                                        ref_from=waitlist_par_code(ref),
+                                        error=err))
+            elif u.path == "/confidentialite":
+                self._send(page_confidentialite())
             elif u.path == "/classement":
                 self._send(page_classement(flash))
             elif u.path == "/classements":
@@ -2142,14 +2258,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         elif u.path == "/rejoindre":
             email = g("email")
-            if "@" not in email:
-                self._send(page_landing())
+            consent = g("consent")  # case RGPD : doit être cochée
+            if "@" not in email or not consent:
+                # email invalide ou consentement manquant : on n'enregistre rien
+                self._redirect("/?err=consent#rejoindre")
             else:
                 _, code = add_waitlist(
                     email, prenom=g("prenom") or None,
                     profession=g("profession") or None, zone=g("zone") or None,
                     a_partenaire=g("a_partenaire") or None,
-                    referred_by=g("referred_by") or None)
+                    referred_by=g("referred_by") or None, consent=True)
                 self._redirect("/?ok=" + code + "#rejoindre")
 
         elif u.path == "/auth/google":
