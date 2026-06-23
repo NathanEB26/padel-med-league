@@ -1160,6 +1160,15 @@ font-size:14px;word-break:break-all;color:var(--txt)}
 .share-row a{text-decoration:none}
 .share-wa{background:#25D366;color:#06210f}
 .share-wa:hover{box-shadow:0 0 22px rgba(37,211,102,.45)}
+.countdown{position:relative;display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.cd-cell{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;
+padding:12px 16px;min-width:76px;text-align:center}
+.cd-cell b{display:block;font-size:34px;font-weight:900;font-style:italic;color:var(--lime);
+line-height:1;font-variant-numeric:tabular-nums}
+.cd-cell span{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.cd-label{position:relative;margin:12px 0 0;font-size:13px;color:var(--muted)}
+.cd-label strong{color:var(--lime)}
+
 .consent{display:flex;gap:10px;align-items:flex-start;margin-top:18px;text-transform:none;
 letter-spacing:0;font-weight:500;font-size:12.5px;color:var(--muted);line-height:1.45}
 .consent input{width:auto;flex:0 0 auto;margin-top:2px}
@@ -1182,6 +1191,7 @@ nav a{padding:7px 10px;font-size:11px}
 table{font-size:13px}th,td{padding:9px 7px}
 .hero .stats{gap:18px}.hero .stats b{font-size:23px}
 .btn-xl{font-size:15px;padding:14px 22px}
+.cd-cell{min-width:62px;padding:10px 12px}.cd-cell b{font-size:26px}
 }
 """
 
@@ -1228,6 +1238,33 @@ def nom_equipe(conn, eid):
 
 
 # ---- Pages -----------------------------------------------------------------
+
+# Compte à rebours jusqu'au coup d'envoi de la Saison 1 (1er sept 2026, heure de Paris).
+# Hors f-string pour éviter le conflit des accolades JS avec le formatage Python.
+_COUNTDOWN_JS = '''
+<script>
+(function(){
+  var target = new Date("2026-09-01T00:00:00+02:00").getTime();
+  function pad(n){ return (n<10?"0":"")+n; }
+  function set(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; }
+  var timer = setInterval(tick, 1000);
+  function tick(){
+    var diff = target - Date.now();
+    if(diff <= 0){
+      clearInterval(timer);
+      var cd = document.getElementById("cd");
+      if(cd) cd.innerHTML = "<div class='cd-cell' style='min-width:auto;padding:14px 24px'><b>C'est parti !</b></div>";
+      return;
+    }
+    set("cd-d", Math.floor(diff/86400000));
+    set("cd-h", pad(Math.floor(diff/3600000)%24));
+    set("cd-m", pad(Math.floor(diff/60000)%60));
+    set("cd-s", pad(Math.floor(diff/1000)%60));
+  }
+  tick();
+})();
+</script>'''
+
 
 def page_landing(sent_code=None, ref_from=None, error=None):
     n = count_waitlist()
@@ -1393,6 +1430,14 @@ def page_landing(sent_code=None, ref_from=None, error=None):
         <span>✅ Tous les <b>professionnels de santé</b></span>
         <span>✅ <b>9 zones</b> en IDF</span>
       </div>
+      <div class="countdown" id="cd" role="timer" aria-label="Compte à rebours avant le lancement">
+        <div class="cd-cell"><b id="cd-d">--</b><span>Jours</span></div>
+        <div class="cd-cell"><b id="cd-h">--</b><span>Heures</span></div>
+        <div class="cd-cell"><b id="cd-m">--</b><span>Min</span></div>
+        <div class="cd-cell"><b id="cd-s">--</b><span>Sec</span></div>
+      </div>
+      <p class="cd-label">Coup d'envoi de la <strong>Saison 1</strong> — 1ᵉʳ septembre 2026.
+      Prends ta place avant.</p>
       {compteur}
     </div>
 
@@ -1512,7 +1557,7 @@ def page_landing(sent_code=None, ref_from=None, error=None):
       {('· 💬 <a href="' + e(WHATSAPP_URL) + '">Communauté WhatsApp</a>') if WHATSAPP_URL else ''}
       · <a href="/confidentialite">Confidentialité</a></div>
     </div>
-    </div>"""
+    </div>""" + _COUNTDOWN_JS
     return page("Accueil", corps)
 
 
