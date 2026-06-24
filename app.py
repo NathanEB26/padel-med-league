@@ -33,8 +33,10 @@ DB_PATH = os.environ.get(
 BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.fr")
 # « Inscription avec Google » : actif seulement si un Client ID Google est fourni
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-# Lien d'invitation de la communauté WhatsApp (affiché si défini)
-WHATSAPP_URL = os.environ.get("WHATSAPP_URL", "")
+# Lien d'invitation de la communauté WhatsApp (affiché si défini). Lien d'invitation
+# public ; surchargeable par variable d'environnement.
+WHATSAPP_URL = os.environ.get(
+    "WHATSAPP_URL", "https://chat.whatsapp.com/GZwLxA7S5PLFjegpI5gXdg?mode=gi_t")
 # Mode pré-lancement : seule la landing (pré-inscription) est publique. La démo et
 # l'admin ne sont accessibles qu'après déverrouillage via /apercu?cle=<APERCU_CODE>.
 # Si APERCU_CODE n'est pas défini, démo + admin restent fermées à tout le monde.
