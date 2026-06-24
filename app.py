@@ -35,6 +35,10 @@ BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.fr")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 # Lien d'invitation de la communauté WhatsApp (affiché si défini)
 WHATSAPP_URL = os.environ.get("WHATSAPP_URL", "")
+# Mode pré-lancement : seule la landing (pré-inscription) est publique. La démo et
+# l'admin ne sont accessibles qu'après déverrouillage via /apercu?cle=<APERCU_CODE>.
+# Si APERCU_CODE n'est pas défini, démo + admin restent fermées à tout le monde.
+APERCU_CODE = os.environ.get("APERCU_CODE")
 # Persistance : liste d'attente + parrainages stockés dans Neon (PostgreSQL) si
 # DATABASE_URL est défini — sinon repli SQLite local.
 
@@ -94,15 +98,16 @@ OG_IMAGE = ("https://raw.githubusercontent.com/NathanEB26/padel-med-league/"
 # Sondage liste d'attente : préférence de mode de jeu (stocké dans waitlist.a_partenaire)
 PREF_OPTIONS = [
     "En équipe — j'ai déjà un binôme",
-    "En équipe — j'en cherche un",
     "En solo (partenaires tournants)",
     "Peu importe / les deux",
 ]
-# Regroupement pour l'affichage des résultats (3 buckets)
+# Regroupement pour l'affichage des résultats (3 buckets). On garde l'ancien libellé
+# « j'en cherche un » dans le bucket Équipe pour rester compatible avec d'éventuelles
+# réponses déjà enregistrées.
 PREF_BUCKETS = [
-    ("Équipe", (PREF_OPTIONS[0], PREF_OPTIONS[1])),
-    ("Solo", (PREF_OPTIONS[2],)),
-    ("Peu importe", (PREF_OPTIONS[3],)),
+    ("Équipe", (PREF_OPTIONS[0], "En équipe — j'en cherche un")),
+    ("Solo", (PREF_OPTIONS[1],)),
+    ("Peu importe", (PREF_OPTIONS[2],)),
 ]
 
 # Quadrillage fin : 8 directions + Centre, placées sur une boussole.
@@ -1196,7 +1201,9 @@ table{font-size:13px}th,td{padding:9px 7px}
 """
 
 
-def page(titre, corps, flash=None):
+def page(titre, corps, flash=None, nav=True):
+    # nav=False sur les pages publiques (landing, confidentialité) : on ne montre pas
+    # les liens vers la démo tant qu'on est en pré-lancement.
     nav = """
     <a href="/">Accueil</a>
     <a href="/classements">Classements</a>
@@ -1204,7 +1211,7 @@ def page(titre, corps, flash=None):
     <a href="/tournant">Tournant</a>
     <a href="/joueurs">Joueurs</a>
     <a href="/inscription">S'inscrire</a>
-    <a href="/admin">Admin</a>"""
+    <a href="/admin">Admin</a>""" if nav else ""
     fl = f'<div class="flash">{e(flash)}</div>' if flash else ""
     return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1268,16 +1275,22 @@ _COUNTDOWN_JS = '''
 
 def page_landing(sent_code=None, ref_from=None, error=None):
     n = count_waitlist()
+    # Tant qu'on a peu d'inscrits, on n'affiche PAS le nombre (un compteur bas est
+    # contre-productif). Au-delà du seuil, on montrera le compteur — et plus tard le
+    # détail par corps de métier (voir S9 dans STRATEGIE.md).
+    SEUIL_COMPTEUR = 50
     err_banner = ""
     if error:
         err_banner = ('<div class="ref-banner" style="background:rgba(255,47,122,.12);'
                       'border-color:var(--mag);color:var(--mag)">⚠️ Pour t\'inscrire, '
                       'merci de cocher la case d\'accord sur l\'utilisation de ton '
                       'email (et de renseigner un email valide).</div>')
-    compteur = (f'<span class="lp-counter"><span class="dot"></span>'
-                f'{n} soignant·e·s déjà sur la liste</span>' if n >= 1
-                else '<span class="lp-counter"><span class="dot"></span>'
-                     'Sois parmi les tout premiers inscrits</span>')
+    if n >= SEUIL_COMPTEUR:
+        compteur = (f'<span class="lp-counter"><span class="dot"></span>'
+                    f'{n} soignant·e·s déjà sur la liste</span>')
+    else:
+        compteur = ('<span class="lp-counter"><span class="dot"></span>'
+                    'Inscription ouverte — sois parmi les premiers</span>')
 
     # Bandeau d'invitation si on arrive via un lien de parrainage
     ref_banner = ""
@@ -1422,7 +1435,6 @@ def page_landing(sent_code=None, ref_from=None, error=None):
       on s'occupe de tout le reste.</p>
       <div class="lp-cta-row">
         <a class="btn btn-xl" href="#rejoindre">Rejoindre la liste d'attente →</a>
-        <a class="btn sec btn-xl" href="/classement">Voir la démo</a>
       </div>
       <div class="lp-trust">
         <span>✅ <b>100% gratuit</b></span>
@@ -1558,7 +1570,7 @@ def page_landing(sent_code=None, ref_from=None, error=None):
       · <a href="/confidentialite">Confidentialité</a></div>
     </div>
     </div>""" + _COUNTDOWN_JS
-    return page("Accueil", corps)
+    return page("Accueil", corps, nav=False)
 
 
 def page_confidentialite():
@@ -1620,7 +1632,7 @@ def page_confidentialite():
 
     <p style="margin-top:28px"><a class="btn sec" href="/">← Retour à l'accueil</a></p>
     </div>"""
-    return page("Confidentialité", corps)
+    return page("Confidentialité", corps, nav=False)
 
 
 def page_classement(flash=None):
@@ -2151,13 +2163,25 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return v
         return None
 
+    def _apercu_ok(self):
+        """Vrai si le visiteur a déverrouillé la démo/admin (cookie d'aperçu valide)."""
+        return bool(APERCU_CODE) and self._cookie("apercu") == APERCU_CODE
+
     def log_message(self, *args):
         pass  # silence
+
+    # Pages accessibles sans déverrouillage (pré-lancement : seule la préinscription).
+    PUBLIC_GET = {"/", "/confidentialite", "/apercu"}
+    PUBLIC_POST = {"/rejoindre", "/auth/google", "/apercu"}
 
     def do_GET(self):
         u = urllib.parse.urlparse(self.path)
         q = urllib.parse.parse_qs(u.query)
         flash = q.get("flash", [None])[0]
+        # Verrou pré-lancement : tout ce qui n'est pas public exige le déverrouillage.
+        if u.path not in self.PUBLIC_GET and not self._apercu_ok():
+            self._redirect("/")
+            return
         try:
             if u.path == "/":
                 ok = q.get("ok", [None])[0]
@@ -2166,6 +2190,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send(page_landing(sent_code=ok,
                                         ref_from=waitlist_par_code(ref),
                                         error=err))
+            elif u.path == "/apercu":
+                # Déverrouillage de la démo/admin via ?cle=<APERCU_CODE>
+                cle = q.get("cle", [""])[0]
+                if APERCU_CODE and cle == APERCU_CODE:
+                    self.send_response(303)
+                    self.send_header("Location", "/classement")
+                    self.send_header(
+                        "Set-Cookie",
+                        f"apercu={APERCU_CODE}; Path=/; HttpOnly; "
+                        "Max-Age=2592000; SameSite=Lax")
+                    self.end_headers()
+                else:
+                    self._redirect("/")
             elif u.path == "/confidentialite":
                 self._send(page_confidentialite())
             elif u.path == "/classement":
@@ -2203,6 +2240,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         def g(k, d=""):
             return f.get(k, [d])[0].strip()
+
+        # Verrou pré-lancement : seules les actions publiques sont permises.
+        if u.path not in self.PUBLIC_POST and not self._apercu_ok():
+            self._redirect("/")
+            return
 
         if u.path == "/inscription":
             zone = g("zone")
