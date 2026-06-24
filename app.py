@@ -248,15 +248,18 @@ def init_db(reset=False):
             prenom TEXT, profession TEXT, zone TEXT, niveau INTEGER,
             a_partenaire TEXT,
             consent INTEGER DEFAULT 0,  -- consentement RGPD recueilli (1) ou non (0)
+            source TEXT,                -- canal d'acquisition (?from=…, ex. "sihp")
             ref_code TEXT UNIQUE,       -- code de parrainage personnel
             referred_by TEXT,           -- code du parrain (si invité)
             created TEXT DEFAULT (datetime('now'))
         );
     """)
-    # Migration : ajoute la colonne de consentement aux bases déjà créées
+    # Migration : ajoute les colonnes manquantes aux bases déjà créées
     cols = [r[1] for r in conn.execute("PRAGMA table_info(waitlist)").fetchall()]
     if "consent" not in cols:
         conn.execute("ALTER TABLE waitlist ADD COLUMN consent INTEGER DEFAULT 0")
+    if "source" not in cols:
+        conn.execute("ALTER TABLE waitlist ADD COLUMN source TEXT")
     conn.commit()
     conn.close()
 
@@ -288,9 +291,10 @@ def _pg_ensure():
             profession TEXT, zone TEXT, niveau INTEGER, a_partenaire TEXT,
             ref_code TEXT UNIQUE, referred_by TEXT,
             created TIMESTAMP DEFAULT now())""")
-        # Migration : consentement RGPD sur les tables déjà déployées
+        # Migration : colonnes ajoutées sur les tables déjà déployées
         c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS "
                   "consent BOOLEAN DEFAULT FALSE")
+        c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS source TEXT")
     _pg_ready = True
 
 
@@ -317,13 +321,15 @@ def count_waitlist():
 
 
 def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
-                 a_partenaire=None, referred_by=None, consent=False):
+                 a_partenaire=None, referred_by=None, consent=False, source=None):
     """Ajoute un email à la liste d'attente. Renvoie (nouveau, ref_code).
 
     `consent` : True si l'utilisateur a explicitement coché la case RGPD.
+    `source`  : canal d'acquisition (paramètre ?from=…, ex. "sihp").
     """
     email = email.strip().lower()
     referred_by = referred_by or None
+    source = (source or None)
     if PG_URL:
         _pg_ensure()
         with _pg() as c:
@@ -335,10 +341,10 @@ def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
                 "SELECT 1 FROM waitlist WHERE ref_code=%s", (x,)).fetchone())
             c.execute(
                 "INSERT INTO waitlist(email,prenom,profession,zone,niveau,"
-                "a_partenaire,consent,ref_code,referred_by) "
-                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                "a_partenaire,consent,source,ref_code,referred_by) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                 (email, prenom, profession, zone, niveau, a_partenaire,
-                 bool(consent), code, referred_by))
+                 bool(consent), source, code, referred_by))
             return True, code
     conn = db()
     existant = conn.execute("SELECT ref_code FROM waitlist WHERE email=?",
@@ -350,9 +356,9 @@ def add_waitlist(email, prenom=None, profession=None, zone=None, niveau=None,
         "SELECT 1 FROM waitlist WHERE ref_code=?", (x,)).fetchone())
     conn.execute(
         "INSERT INTO waitlist(email, prenom, profession, zone, niveau, a_partenaire, "
-        "consent, ref_code, referred_by) VALUES (?,?,?,?,?,?,?,?,?)",
+        "consent, source, ref_code, referred_by) VALUES (?,?,?,?,?,?,?,?,?,?)",
         (email, prenom, profession, zone, niveau, a_partenaire,
-         1 if consent else 0, code, referred_by))
+         1 if consent else 0, source, code, referred_by))
     conn.commit()
     conn.close()
     return True, code
@@ -393,18 +399,18 @@ def compte_filleuls(code):
 
 def waitlist_all():
     """Toute la liste d'attente (pour l'admin), liste de dicts."""
-    cols = ("email", "prenom", "profession", "zone", "a_partenaire",
+    cols = ("email", "prenom", "profession", "zone", "a_partenaire", "source",
             "ref_code", "referred_by", "created")
     if PG_URL:
         _pg_ensure()
         with _pg() as c:
             return c.execute(
-                "SELECT email,prenom,profession,zone,a_partenaire,ref_code,"
+                "SELECT email,prenom,profession,zone,a_partenaire,source,ref_code,"
                 "referred_by,created FROM waitlist ORDER BY created DESC").fetchall()
     conn = db()
     init_db()
     rows = conn.execute(
-        "SELECT email,prenom,profession,zone,a_partenaire,ref_code,referred_by,"
+        "SELECT email,prenom,profession,zone,a_partenaire,source,ref_code,referred_by,"
         "created FROM waitlist ORDER BY created DESC").fetchall()
     conn.close()
     return [{k: r[k] for k in cols} for r in rows]
@@ -1275,8 +1281,11 @@ _COUNTDOWN_JS = '''
 </script>'''
 
 
-def page_landing(sent_code=None, ref_from=None, error=None):
+def page_landing(sent_code=None, ref_from=None, error=None, source=None):
     n = count_waitlist()
+    # Suivi d'acquisition : ?from=<source> (ex. "sihp") transmis au formulaire
+    source_field = (f'<input type="hidden" name="source" value="{e(source)}">'
+                    if source else "")
     # Tant qu'on a peu d'inscrits, on n'affiche PAS le nombre (un compteur bas est
     # contre-productif). Au-delà du seuil, on montrera le compteur — et plus tard le
     # détail par corps de métier (voir S9 dans STRATEGIE.md).
@@ -1402,7 +1411,7 @@ def page_landing(sent_code=None, ref_from=None, error=None):
         Gratuit · 30 secondes · zéro engagement. On te prévient au lancement.</p>
         {err_banner}
         {google_block}
-        <form method="post" action="/rejoindre">{referred_field}
+        <form method="post" action="/rejoindre">{referred_field}{source_field}
           <label>Email *</label>
           <input name="email" type="email" required placeholder="toi@exemple.fr">
           <div class="grid2">
@@ -2099,10 +2108,11 @@ def page_admin(flash=None):
         f"<tr><td>{e(w['email'])}</td><td>{e(w['prenom'] or '')}</td>"
         f"<td>{e(w['profession'] or '')}</td><td>{e(w['zone'] or '')}</td>"
         f"<td>{e(w['a_partenaire'] or '')}</td>"
+        f"<td>{e(w.get('source') or '—')}</td>"
         f"<td><span class='tag'>{e(w['ref_code'] or '')}</span></td>"
         f"<td>{e(w['referred_by'] or '—')}</td>"
         f"<td class='tag'>{e(w['created'] or '')}</td></tr>"
-        for w in wl) or '<tr><td colspan="8" class="muted">Aucune inscription pour l\'instant.</td></tr>'
+        for w in wl) or '<tr><td colspan="9" class="muted">Aucune inscription pour l\'instant.</td></tr>'
     corps = f"""<div class="card"><h2>Administration</h2>
     <p class="muted">{nb_eq} équipes · {nb_j} journées générées · {nb_att} matchs
     en attente de score.</p>
@@ -2111,7 +2121,7 @@ def page_admin(flash=None):
     relances de lancement. « Code » = lien de parrainage personnel ; « Parrain » =
     code de celui qui l'a invité.</p>
     <table><tr><th>Email</th><th>Prénom</th><th>Profession</th><th>Zone</th>
-    <th>Préférence</th><th>Code</th><th>Parrain</th><th>Date</th></tr>{wl_rows}</table>
+    <th>Préférence</th><th>Source</th><th>Code</th><th>Parrain</th><th>Date</th></tr>{wl_rows}</table>
     <form method="post" action="/admin/wl-delete" class="row" style="align-items:flex-end;margin-top:14px"
       onsubmit="return confirm('Supprimer cette entrée de la liste d\\'attente ?')">
       <div><label>Supprimer une entrée (email)</label>
@@ -2189,9 +2199,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 ok = q.get("ok", [None])[0]
                 ref = q.get("ref", [None])[0]
                 err = q.get("err", [None])[0]
+                src = q.get("from", [None])[0]
                 self._send(page_landing(sent_code=ok,
                                         ref_from=waitlist_par_code(ref),
-                                        error=err))
+                                        error=err, source=src))
             elif u.path == "/apercu":
                 # Déverrouillage de la démo/admin via ?cle=<APERCU_CODE>
                 cle = q.get("cle", [""])[0]
@@ -2356,7 +2367,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     email, prenom=g("prenom") or None,
                     profession=g("profession") or None, zone=g("zone") or None,
                     a_partenaire=g("a_partenaire") or None,
-                    referred_by=g("referred_by") or None, consent=True)
+                    referred_by=g("referred_by") or None, consent=True,
+                    source=(g("source") or None))
                 self._redirect("/?ok=" + code + "#rejoindre")
 
         elif u.path == "/auth/google":

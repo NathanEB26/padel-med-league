@@ -85,6 +85,33 @@ l'officiel (qui fait vivre la ligue). Gate basé sur « avoir **honoré** son of
 **Dépendance** : s'appuie sur le **modèle open match (S2)** → à implémenter après lui.
 **Statut** : backlog produit, **non prioritaire** (mode de travail asynchrone).
 
+### S10 — Stratégie d'événements physiques (IRL) — *24/06/2026* 🟡 brainstorm validé, en backlog
+**Décision** : programmer des temps forts « en vrai » tout au long de l'année — ils
+convertissent la liste d'attente, nourrissent l'Instagram et fidélisent. Programme :
+- **Soirée de lancement** (sept) dans un club partenaire : initiation + 1ers matchs + verre.
+- **After-works padel mensuels** par zone (récurrent, convivial, réseau + jeu).
+- **Tournois « open » trimestriels** (Americano géant, tous niveaux).
+- **Battles inter-groupes** (Cardio vs Anesthésie, inter-hôpitaux, inter-facs) → lien S9.
+- **Journée des Fondateurs** (50 premières équipes), **initiations débutants**,
+  **Masters de fin de saison** (« Kings League »), **tournoi caritatif** (cause santé).
+**Angles** : convivialité, réseau, découverte, esprit de corps. **Statut** : backlog
+non prioritaire ; seule la **soirée de lancement** se rapproche de l'échéance sept 2026.
+
+### S11 — Stratégie de communication & viralité — *24/06/2026* 🟡 brainstorm validé
+**3 moteurs de croissance** : (1) **relais institutionnels** (levier n°1 au démarrage),
+(2) **viralité par les inscrits** (boule de neige), (3) **contenu Instagram** (preuve
+sociale). 
+**Relais** : liste complète des syndicats/ordres/URPS/fédés étudiantes/assos d'IDF par
+profession → `CONTACTS-RELAIS.md`. **SIHP = accord obtenu** (mailing list) → mail clé en
+main dans `KIT-AMBASSADEUR.md` §2bis. Priorité : (a) ceux qui ont dit oui, (b) cibles
+jeunes/virales (corpos, internes, FNEK/FNESI), (c) CGOS & assos sportives.
+**Viralité (optimiser le coefficient K)** : le **binôme est l'unité virale** (inviter
+son partenaire est intrinsèque au padel) ; partage juste après l'inscription ; rareté du
+Club des Fondateurs ; à ajouter → étape « invite ton binôme », classement des
+ambassadeurs, carte perso partageable, boucle événementielle (S10).
+**Mesure** : ✅ **suivi de source** implémenté (`?from=<source>`, ex. `?from=sihp`) —
+stocké en base et visible dans l'admin → on saura quel relais convertit.
+
 ### S7 — Emails : provider transactionnel + authentification DNS — *23/06/2026* ✅ validé (à mettre en place après le domaine)
 **Décision** : envoi de mails automatiques via un **provider transactionnel** (reco
 **Brevo** — français, RGPD-friendly, gratuit 300 mails/j ; alternatives Resend/Mailgun),
@@ -191,13 +218,17 @@ remplir des appariements crédibles au lancement.
       confirmation d'inscription d'abord, puis paliers parrainage, notifications open
       match, rappels. → *Claude.*
 
-### 🟡 À suivre (com' & contenu)
+### 🟡 À suivre (com' & contenu) — *cf. S11*
+- [ ] **Envoyer le mail au SIHP** (accord obtenu) : `KIT-AMBASSADEUR.md` §2bis, lien
+      `padel-med-league.fr/?from=sihp`. → *Nathan — priorité haute (relais acquis).*
+- [ ] **Démarcher les relais** par profession → `CONTACTS-RELAIS.md` (vérifier coord.,
+      envoyer, relancer, suivre le tableau). → *Nathan.*
 - [ ] Dérouler le **calendrier Instagram** (01 épinglé → 03 à J+2-3 → 02 pour l'urgence).
-- [ ] **Démarchage institutionnel** (route à fort levier ET conforme) : URPS IdF,
-      Ordres, internat/SIHP, **associations sportives AP-HP**, BDE des facs de santé.
-- [x] Préparer un **kit ambassadeur** (textes WhatsApp/LinkedIn/SMS prêts à transférer +
-      one-pager institutionnel + liste de cibles + réponses aux objections) → voir
-      `KIT-AMBASSADEUR.md`. ✅ *fait — prêt à diffuser (swap lien `.fr` après branchement).*
+- [x] **Kit ambassadeur** (textes + one-pager + mail SIHP + cibles + objections) →
+      `KIT-AMBASSADEUR.md`. ✅ *fait.*
+- [x] **Suivi de source** `?from=` (mesure des relais) visible dans l'admin. ✅ *fait.*
+- [ ] **Viralité** *(S11, backlog)* : étape « invite ton binôme », classement
+      ambassadeurs, carte perso partageable.
 
 ### 🟢 Backlog produit (Saison 1+)
 - [ ] **Modèle « open match »** *(S2)* : ouverture de match par un joueur + sollicitation

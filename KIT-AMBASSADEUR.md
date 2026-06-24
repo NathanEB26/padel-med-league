@@ -71,6 +71,36 @@
 
 ---
 
+## 2 bis. Email clé en main pour une mailing list partenaire (ex. SIHP)
+> *Le SIHP a donné son accord pour diffuser à sa mailing list. Voici un email
+> qu'ils n'ont qu'à copier-coller (lien traçable `?from=sihp` pour mesurer l'impact).*
+
+**Objet : 🎾 La Ligue Padel Santé arrive — inscriptions ouvertes (gratuit)**
+
+> Bonjour à toutes et à tous,
+>
+> Bonne nouvelle pour les amateurs de padel : la **Ligue Padel Santé Île-de-France**
+> ouvre ses inscriptions. C'est un **championnat amical, 100 % gratuit et sans but
+> lucratif**, monté par des soignants, ouvert à **tous les professionnels de santé**
+> (internes compris !).
+>
+> Le principe : tu t'inscris, on t'apparie par **niveau** et par **zone géographique**,
+> tu joues un match toutes les deux semaines au créneau qui t'arrange, et le classement
+> se met à jour tout seul. Débutant ? Tu joues face à des gens de ton niveau. Confirmé ?
+> Tu trouves enfin des partenaires à ta hauteur. Idéal pour décompresser et rencontrer
+> du monde, même avec des gardes.
+>
+> 👉 **Inscription (liste d'attente) : https://padel-med-league.fr/?from=sihp**
+> Les **50 premières équipes** rejoignent le Club des Fondateurs.
+>
+> Sportivement,
+> L'équipe de la Ligue Padel Santé · @padelmedleague
+
+*(Le SIHP est remercié comme l'un des premiers relais partenaires — réciprocité = mise
+en avant sur notre Instagram.)*
+
+---
+
 ## 3. Cibles institutionnelles à démarcher (route conforme & à fort levier)
 
 > Principe : on ne contacte **pas** des individus à froid. On contacte des **structures**
