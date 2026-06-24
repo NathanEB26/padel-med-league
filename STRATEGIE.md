@@ -219,14 +219,19 @@ remplir des appariements crédibles au lancement.
 - [ ] **Publier le post Instagram 01** (annonce) ; photo de profil = `logo-icon.jpg` ;
       mettre l'URL **onrender** en bio tant que le `.fr` n'est pas branché. → *Nathan.*
 
-### 🟢 Après le domaine — Emails *(S7)*
-- [ ] **Alias OVH** `contact@padel-med-league.fr` → redirigé vers Gmail (gratuit). → *Nathan.*
-- [ ] **Compte Brevo** (gratuit, 300 mails/j). → *Nathan.*
-- [ ] **DNS SPF + DKIM + DMARC** sur le domaine (anti-spam / anti-usurpation). → *Nathan
-      colle les enregistrements fournis par Claude.*
-- [ ] **Câbler l'envoi** dans `app.py` (API Brevo via `urllib`, activé par `EMAIL_API_KEY`) :
-      confirmation d'inscription d'abord, puis paliers parrainage, notifications open
-      match, rappels. → *Claude.*
+### Emails *(S7)* — **code prêt**, reste l'activation
+- [x] **Câblé dans `app.py`** (API Brevo via `urllib`, no-op si non configuré) :
+      à chaque inscription → **email de confirmation** brandé (avec lien de parrainage)
+      + **synchro du contact dans Brevo** (campagnes d'annonces). ✅ *fait, déployé.*
+- [ ] **Compte Brevo** (gratuit, 300 mails/j), créé avec `padelmedleague@gmail.com`.
+      → *Nathan.*
+- [ ] **Alias OVH** `contact@padel-med-league.fr` → forward vers Gmail. → *Nathan.*
+- [ ] **Vérifier le domaine dans Brevo** : coller les **DKIM/DMARC** (+ ajuster SPF)
+      fournis par Brevo dans la zone DNS OVH (délivrabilité). → *Nathan (je guide).*
+- [ ] **Mettre les variables d'env sur Render** : `BREVO_API_KEY`, `BREVO_LIST_ID`
+      (liste de la waitlist), `EMAIL_FROM=contact@padel-med-league.fr`. → *Nathan.*
+- [ ] Ensuite : **annonces d'étapes** = campagnes Brevo vers la liste synchronisée.
+      Backlog : paliers parrainage, notifications open match, rappels.
 
 ### 🟡 À suivre (com' & contenu) — *cf. S11*
 - [ ] **Envoyer le mail au SIHP** (accord obtenu) : `KIT-AMBASSADEUR.md` §2bis, lien
