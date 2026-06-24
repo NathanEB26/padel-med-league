@@ -170,6 +170,16 @@ remplir des appariements crédibles au lancement.
 | **2 — Lancement Saison 1** | ⏳ À venir | Ouverture des inscriptions réelles, clubs partenaires, Club des Fondateurs, vraies journées |
 | **3 — Croissance** | ⏳ Plus tard | Affinité/ressenti, classements par groupe mis en avant, automatisations, hébergement payant |
 
+> ⚠️ **« Prêt » = uniquement la phase pré-inscription** (landing + liste d'attente, en
+> ligne). Le **VRAI lancement (Saison 1, sept 2026) n'est PAS prêt** — gros morceaux non
+> construits, à ne pas oublier :
+> - **Moteur de jeu réel** : comptes joueurs réels, **open match (S2)**, saisie de score
+>   validée, classements réels. *(Aujourd'hui c'est une **démo/simulation**, pas la prod.)*
+> - **Emails automatiques (S7)** : confirmation d'inscription + **annonces des étapes** +
+>   rappels. **Pas encore en place** (dépend de Brevo + auth domaine).
+> - **App iPhone** : **PWA (S6b)** puis natif (S6c). **Pas encore construite.**
+> - Restent aussi : côté G/D (S4), amicaux (S8), stats (S9), événements (S10).
+
 ---
 
 ## 3. Priorités du moment (top 3)
