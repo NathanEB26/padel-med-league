@@ -219,19 +219,17 @@ remplir des appariements crédibles au lancement.
 - [ ] **Publier le post Instagram 01** (annonce) ; photo de profil = `logo-icon.jpg` ;
       mettre l'URL **onrender** en bio tant que le `.fr` n'est pas branché. → *Nathan.*
 
-### Emails *(S7)* — **code prêt**, reste l'activation
-- [x] **Câblé dans `app.py`** (API Brevo via `urllib`, no-op si non configuré) :
-      à chaque inscription → **email de confirmation** brandé (avec lien de parrainage)
-      + **synchro du contact dans Brevo** (campagnes d'annonces). ✅ *fait, déployé.*
-- [ ] **Compte Brevo** (gratuit, 300 mails/j), créé avec `padelmedleague@gmail.com`.
-      → *Nathan.*
-- [ ] **Alias OVH** `contact@padel-med-league.fr` → forward vers Gmail. → *Nathan.*
-- [ ] **Vérifier le domaine dans Brevo** : coller les **DKIM/DMARC** (+ ajuster SPF)
-      fournis par Brevo dans la zone DNS OVH (délivrabilité). → *Nathan (je guide).*
-- [ ] **Mettre les variables d'env sur Render** : `BREVO_API_KEY`, `BREVO_LIST_ID`
-      (liste de la waitlist), `EMAIL_FROM=contact@padel-med-league.fr`. → *Nathan.*
-- [ ] Ensuite : **annonces d'étapes** = campagnes Brevo vers la liste synchronisée.
-      Backlog : paliers parrainage, notifications open match, rappels.
+### Emails *(S7)* — ✅ **ACTIFS** (testé le 24/06/2026)
+- [x] Câblé dans `app.py` : confirmation d'inscription brandée (avec lien de parrainage)
+      + synchro du contact dans Brevo (liste #3). ✅
+- [x] **Compte Brevo** créé (`padelmedleague@gmail.com`). ✅
+- [x] **Domaine authentifié** dans Brevo (DKIM brevo1/brevo2 + DMARC + code, via OVH). ✅
+- [x] **Alias OVH** `contact@padel-med-league.fr` → forward vers Gmail (sans copie). ✅
+- [x] **Variables Render** : `BREVO_API_KEY`, `BREVO_LIST_ID=3`,
+      `EMAIL_FROM=contact@padel-med-league.fr`. ✅
+- [x] **Test grandeur nature OK** : email de confirmation reçu + contact ajouté. ✅
+- [ ] **Annonces d'étapes** = campagnes Brevo vers la liste #3 (quand tu veux). → *Nathan.*
+- [ ] Backlog : paliers parrainage, notifications open match, rappels.
 
 ### 🟡 À suivre (com' & contenu) — *cf. S11*
 - [ ] **Envoyer le mail au SIHP** (accord obtenu) : `KIT-AMBASSADEUR.md` §2bis, lien
@@ -289,8 +287,8 @@ remplir des appariements crédibles au lancement.
 |---|---|---|
 | 1 | ~~Acheter + brancher `padel-med-league.fr`~~ | ✅ acheté, branché, HTTPS actif, site en `.fr` |
 | 1b | Passer la **bio Instagram** sur `padel-med-league.fr` | ⏳ (le lien marche maintenant) |
-| 2 | Créer l'alias OVH `contact@padel-med-league.fr` → forward vers `padelmedleague@gmail.com` | ⏳ |
-| 3 | Créer un compte **Brevo** (avec `padelmedleague@gmail.com`) | ⏳ |
+| 2 | ~~Alias OVH `contact@` + compte Brevo + auth domaine + env Render~~ | ✅ **emails actifs (testé)** |
+| 3 | Définir **`APERCU_CODE`** dans Render (accès admin : voir la waitlist + supprimer) | ⏳ |
 | 4 | ~~Créer la communauté WhatsApp~~ | ✅ créée + lien activé sur le site |
 | 5 | Envoyer le **mail SIHP** (`/?from=sihp`) + publier **post 01** + photo de profil = nouveau `logo-icon` | ⏳ |
 
