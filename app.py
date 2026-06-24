@@ -1297,6 +1297,7 @@ letter-spacing:0;font-weight:500;font-size:12.5px;color:var(--muted);line-height
 .legal{max-width:760px;margin:0 auto;color:#c2ccd4;font-size:15px;line-height:1.65}
 .legal h3{color:var(--lime);margin-top:26px}
 .legal a{color:var(--lime)}
+.brand .mark{width:30px;height:auto;flex:0 0 auto}
 
 @media(max-width:600px){
 .lp-hero{padding:40px 22px}.lp-hero h1{font-size:36px}.lp-sub{font-size:16px}
@@ -1315,6 +1316,20 @@ table{font-size:13px}th,td{padding:9px 7px}
 .cd-cell{min-width:62px;padding:10px 12px}.cd-cell b{font-size:26px}
 }
 """
+
+
+# Marque compacte (caducée padel) pour le header + le favicon — cohérente avec le logo.
+MARK_SVG = (
+    '<svg class="mark" viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" '
+    'aria-hidden="true">'
+    '<circle cx="16" cy="15" r="14" fill="#c6ff00"/>'
+    '<ellipse cx="16" cy="12" rx="6.5" ry="8.5" fill="#070b10"/>'
+    '<rect x="14.4" y="19" width="3.2" height="16" rx="1.6" fill="#070b10"/>'
+    '<path d="M16 21 C13.4 22.5 13.4 25 16 26.5 C18.6 28 18.6 30.5 16 32 '
+    'C13.6 33.4 13.6 35 16 36" fill="none" stroke="#c6ff00" stroke-width="2.2" '
+    'stroke-linecap="round"/>'
+    '<circle cx="16" cy="20" r="2.1" fill="#c6ff00"/>'
+    '</svg>')
 
 
 def page(titre, corps, flash=None, nav=True):
@@ -1338,10 +1353,11 @@ def page(titre, corps, flash=None, nav=True):
 <meta property="og:url" content="{BASE_URL}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
 <style>{CSS}</style></head>
 <body><header>
-<div class="brand"><span class="ball">🎾</span>
+<div class="brand">{MARK_SVG}
 <span>Ligue Padel Santé<small>ÎLE-DE-FRANCE</small></span></div>
 <nav>{nav}</nav></header>
 <main>{fl}{corps}</main></body></html>"""
@@ -2296,7 +2312,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         pass  # silence
 
     # Pages accessibles sans déverrouillage (pré-lancement : seule la préinscription).
-    PUBLIC_GET = {"/", "/confidentialite", "/apercu"}
+    PUBLIC_GET = {"/", "/confidentialite", "/apercu", "/favicon.svg", "/favicon.ico"}
     PUBLIC_POST = {"/rejoindre", "/auth/google", "/apercu"}
 
     def do_GET(self):
@@ -2329,6 +2345,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     self.end_headers()
                 else:
                     self._redirect("/")
+            elif u.path in ("/favicon.svg", "/favicon.ico"):
+                data = MARK_SVG.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "image/svg+xml")
+                self.send_header("Cache-Control", "max-age=86400")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
             elif u.path == "/confidentialite":
                 self._send(page_confidentialite())
             elif u.path == "/classement":
