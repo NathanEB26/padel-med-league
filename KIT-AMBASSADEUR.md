@@ -4,9 +4,7 @@
 > grossir la liste d'attente **de façon conforme** (chacun diffuse dans **ses propres**
 > réseaux — jamais de scraping ni d'envoi de masse, cf. CLAUDE.md règle 2).
 >
-> 🔗 **Lien à mettre partout** (tant que le `.fr` n'est pas branché) :
-> `https://padel-med-league.onrender.com`
-> → à remplacer par `https://padel-med-league.fr` dès que le domaine est actif.
+> 🔗 **Lien à mettre partout** : `https://padel-med-league.fr` *(domaine actif, HTTPS ok)*.
 
 ---
 
@@ -16,14 +14,14 @@
 > 🎾 On lance le **premier championnat de padel des soignants d'Île-de-France** !
 > Un adversaire à ton niveau, près de chez toi, toutes les 2 semaines. Tu joues quand
 > tu veux, le classement fait le reste. Débutant ou confirmé, tout le monde a sa place.
-> Inscription gratuite (liste d'attente) 👉 https://padel-med-league.onrender.com
+> Inscription gratuite (liste d'attente) 👉 https://padel-med-league.fr
 > Les **50 premières équipes** = Club des Fondateurs. Tag/transfère à ton binôme 🎾
 
 ### 💬 WhatsApp — version perso (à UN collègue)
 > Hey ! Je file un coup de main au lancement d'une **ligue de padel pour soignants** en
 > IDF — appariement par niveau et par zone, un match toutes les 2 semaines, classement
 > auto. C'est gratuit et plutôt bien foutu. Ça te dit qu'on s'inscrive ensemble ?
-> 👉 https://padel-med-league.onrender.com
+> 👉 https://padel-med-league.fr
 
 ### 💼 LinkedIn — post
 > 🎾🩺 **Soignants d'Île-de-France qui jouent au padel : ça vous parle ?**
@@ -35,12 +33,12 @@
 > seul. Débutant ? Vous jouez face à des gens comme vous. Confirmé ? Vous trouvez enfin
 > des partenaires à votre hauteur.
 > Sans but lucratif, par et pour les soignants. Inscription (liste d'attente) 👇
-> 👉 https://padel-med-league.onrender.com
+> 👉 https://padel-med-league.fr
 > \#padel #santé #IledeFrance #sportsanté
 
 ### 📱 SMS / message direct (ultra court)
 > Championnat de padel des soignants IDF, gratuit, appariement par niveau/zone, 1 match/
-> 2 sem. Inscription : https://padel-med-league.onrender.com 🎾
+> 2 sem. Inscription : https://padel-med-league.fr 🎾
 
 ---
 
@@ -65,7 +63,7 @@
 > mettons à disposition un visuel et un court texte prêts à diffuser. Aucune donnée n'est
 > revendue, l'inscription est gratuite, et chacun se désinscrit en un clic.
 >
-> Lien d'inscription : https://padel-med-league.onrender.com
+> Lien d'inscription : https://padel-med-league.fr
 > Contact : contact@padel-med-league.fr · Instagram : @padelmedleague
 >
 > Avec nos remerciements,

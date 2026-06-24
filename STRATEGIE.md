@@ -151,8 +151,8 @@ remplir des appariements crédibles au lancement.
    emails). Mention de confidentialité + case de consentement.
 2. **🔴 Site responsive mobile** — le trafic vient d'Instagram = mobile. Landing
    parfaite sur smartphone avant de pousser la com'. *(S6)*
-3. **🟠 Domaine `padel-med-league.fr`** — acheter (en cours) + brancher, puis basculer
-   `BASE_URL`/OG/bio sur le `.fr`. Débloque aussi l'authentification email (S7).
+3. **✅ Domaine `padel-med-league.fr`** — acheté, branché sur Render, HTTPS actif,
+   `BASE_URL`/OG sur le `.fr`. Reste la bio Instagram (Nathan). Débloque l'email (S7).
 
 ---
 
@@ -172,9 +172,9 @@ remplir des appariements crédibles au lancement.
 ### 🟠 Important (cette semaine / semaine prochaine)
 - [ ] **Acheter `padel-med-league.fr`** chez OVH (~7-9 €/an, domaine seul). → *Nathan
       (en cours).*
-- [ ] **Brancher le domaine** sur Render (Custom Domain + 2 enregistrements DNS),
-      puis basculer `BASE_URL` / Open Graph / bio Instagram sur le `.fr`. → *Nathan
-      fait le DNS ; Claude bascule la config.*
+- [x] **Brancher le domaine** sur Render : DNS OVH (A racine + www → `216.24.57.1`),
+      HTTPS émis, `BASE_URL` + Open Graph basculés sur `https://padel-med-league.fr`,
+      déployé & vérifié. ✅ *fait.* → reste : **bio Instagram** à passer en `.fr` (Nathan).
 - [x] **Compte à rebours 1er sept 2026** sur la landing *(S3)* — countdown live dans le
       hero, responsive, « C'est parti ! » à l'échéance. ✅ *fait & déployé.*
 - [ ] **Communauté WhatsApp** : la créer → fournir le lien → définir `WHATSAPP_URL`.
@@ -241,7 +241,8 @@ remplir des appariements crédibles au lancement.
 
 | # | Action | Statut |
 |---|---|---|
-| 1 | ~~Acheter `padel-med-league.fr` chez OVH~~ | ✅ livré & actif — reste à brancher sur Render (DNS) |
+| 1 | ~~Acheter + brancher `padel-med-league.fr`~~ | ✅ acheté, branché, HTTPS actif, site en `.fr` |
+| 1b | Passer la **bio Instagram** sur `padel-med-league.fr` | ⏳ (le lien marche maintenant) |
 | 2 | Créer l'alias mail `contact@…` (redirection Gmail) | ⏳ après domaine |
 | 3 | Créer un compte **Brevo** (envoi d'emails) | ⏳ après domaine |
 | 4 | Créer la communauté WhatsApp → lien | ⏳ |
