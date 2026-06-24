@@ -324,3 +324,31 @@ outils com' type Canva (~12 €/mo, optionnel).
 Le « coût » dominant n'est pas les serveurs mais **le temps** (Nathan + ambassadeurs).
 Coûts évités en restant malin : **PWA** (pas de natif), **terrains payés par les joueurs**,
 **tiers gratuits** tant qu'ils suffisent.
+
+---
+
+## 8. Readiness PRÉ-INSCRIPTION — vérifié le 24/06/2026
+
+> Audit complet passé au vert (tests automatisés de bout en bout). La **phase
+> pré-inscription** est prête à être promue. *(Rappel : le VRAI lancement Saison 1 reste
+> à construire — cf. encart §2.)*
+
+**✅ Vérifié & en ligne sur `padel-med-league.fr`**
+- Identité : **logo caducée** dans le header + **favicon** ; ancien emoji retiré.
+- Landing : hero « débutant **ou** confirmé, à ton niveau » ; section niveau remontée ;
+  « Comment ça marche » à jour (solo/équipe au choix + amicaux) ; aucune réf. obsolète.
+- RGPD : consentement obligatoire (vérifié serveur) + page `/confidentialite`.
+- Sécurité : `/admin` et la démo **protégés** (verrou aperçu) → plus de fuite d'emails.
+- Compteur masqué <50 · compte à rebours 1ᵉʳ sept · WhatsApp · suivi de source `?from=`.
+- Mobile responsive · HTTPS · domaine `.fr`.
+- Emails : **code prêt** (confirmation + contact Brevo), activation = clé Brevo (Nathan).
+
+**⏳ Avant de lancer la promo — actions Nathan**
+1. Activer **Brevo** (clé + DNS DKIM/DMARC + env Render) → emails de confirmation actifs.
+2. **Bio Instagram** → `padel-med-league.fr/?from=ig` + **photo de profil = `logo-icon`**.
+3. Programmer la **com'** en une session → voir `CALENDRIER-COMM.md` (calendrier 10 sem.
+   pré-écrit + scheduler gratuit). Envoyer le **mail SIHP** (`/?from=sihp`).
+
+> Tant que les emails de confirmation ne sont pas activés (Brevo), on **peut** déjà
+> promouvoir (l'inscription marche), mais l'inscrit ne reçoit pas d'accusé de réception.
+> **Reco : activer Brevo AVANT la promo** (c'était la demande).
