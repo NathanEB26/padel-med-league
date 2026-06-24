@@ -21,8 +21,7 @@
   <!-- Serpent (monochrome lime) enroulé autour du manche -->
   <path d="M540 690 C514 706 514 730 540 746 C566 762 566 786 540 802 C514 818 514 842 540 858 C566 874 566 896 540 906"
         fill="none" stroke="#c6ff00" stroke-width="27" stroke-linecap="round"/>
-  <!-- Tête + langue + œil -->
+  <!-- Tête + œil -->
   <ellipse cx="540" cy="672" rx="22" ry="18" fill="#c6ff00"/>
-  <path d="M540 656 L532 640 M540 656 L548 640" stroke="#c6ff00" stroke-width="7" stroke-linecap="round" fill="none"/>
   <circle cx="548" cy="668" r="4.5" fill="#070b10"/>
 </svg>

@@ -22,7 +22,6 @@
   <path d="M540 516 C522 528 522 547 540 559 C558 571 558 590 540 602 C522 614 522 633 540 645 C558 657 558 672 540 680"
         fill="none" stroke="#c6ff00" stroke-width="18" stroke-linecap="round"/>
   <ellipse cx="540" cy="504" rx="15" ry="12" fill="#c6ff00"/>
-  <path d="M540 492 L534 480 M540 492 L546 480" stroke="#c6ff00" stroke-width="5" stroke-linecap="round" fill="none"/>
   <circle cx="546" cy="501" r="3" fill="#070b10"/>
 
   <!-- Wordmark -->
