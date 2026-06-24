@@ -41,6 +41,14 @@ WHATSAPP_URL = os.environ.get(
 # l'admin ne sont accessibles qu'après déverrouillage via /apercu?cle=<APERCU_CODE>.
 # Si APERCU_CODE n'est pas défini, démo + admin restent fermées à tout le monde.
 APERCU_CODE = os.environ.get("APERCU_CODE")
+
+# Emails (transactionnels + contacts) via Brevo. Tout est désactivé tant que
+# BREVO_API_KEY n'est pas défini (repli gracieux : l'inscription marche sans email).
+# L'expéditeur DOIT être un domaine/sender vérifié dans Brevo (ex. contact@…fr).
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
+BREVO_LIST_ID = os.environ.get("BREVO_LIST_ID")  # liste de contacts (campagnes)
+EMAIL_FROM = os.environ.get("EMAIL_FROM", "contact@padel-med-league.fr")
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Ligue Padel Santé")
 # Persistance : liste d'attente + parrainages stockés dans Neon (PostgreSQL) si
 # DATABASE_URL est défini — sinon repli SQLite local.
 
@@ -461,6 +469,106 @@ def waitlist_pref_counts():
                         "WHERE a_partenaire IS NOT NULL GROUP BY a_partenaire").fetchall()
     conn.close()
     return {r["v"]: r["n"] for r in rows}
+
+
+# ---------------------------------------------------------------------------
+# EMAILS (Brevo) — transactionnel + synchro des contacts
+# Tout est no-op si BREVO_API_KEY n'est pas défini (l'inscription marche sans).
+# Aucune dépendance : appels HTTP via urllib (stdlib).
+# ---------------------------------------------------------------------------
+
+def _brevo_post(path, payload):
+    import json
+    import urllib.request
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3" + path,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"api-key": BREVO_API_KEY, "content-type": "application/json",
+                 "accept": "application/json"},
+        method="POST")
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return r.status
+
+
+def envoyer_email(to, sujet, html, nom=None):
+    """Envoie un email transactionnel via Brevo. Silencieux si non configuré."""
+    if not (BREVO_API_KEY and to):
+        return
+    dest = {"email": to}
+    if nom:
+        dest["name"] = nom
+    payload = {"sender": {"email": EMAIL_FROM, "name": EMAIL_FROM_NAME},
+               "to": [dest], "subject": sujet, "htmlContent": html}
+    try:
+        _brevo_post("/smtp/email", payload)
+    except Exception:
+        pass  # ne jamais casser le flux d'inscription si l'email échoue
+
+
+def brevo_ajouter_contact(email, prenom=None):
+    """Crée/maj le contact dans Brevo (pour les campagnes). Silencieux si non configuré."""
+    if not (BREVO_API_KEY and email):
+        return
+    payload = {"email": email, "updateEnabled": True}
+    if prenom:
+        payload["attributes"] = {"PRENOM": prenom}
+    if BREVO_LIST_ID:
+        try:
+            payload["listIds"] = [int(BREVO_LIST_ID)]
+        except (TypeError, ValueError):
+            pass
+    try:
+        _brevo_post("/contacts", payload)
+    except Exception:
+        pass
+
+
+def email_confirmation_html(prenom, ref_code):
+    """HTML de l'email de confirmation d'inscription (clair, délivrable)."""
+    bonjour = f"Bonjour {e(prenom)}," if prenom else "Bonjour,"
+    lien = f"{BASE_URL}/?ref={e(ref_code)}" if ref_code else BASE_URL
+    return f"""\
+<div style="background:#f4f6f8;padding:24px 0;font-family:Helvetica,Arial,sans-serif">
+  <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:14px;
+       overflow:hidden;border:1px solid #e3e8ee">
+    <div style="background:#070b10;padding:22px 28px">
+      <span style="color:#ffffff;font-weight:900;font-style:italic;font-size:18px">
+      LIGUE PADEL SANTÉ</span>
+      <span style="color:#c6ff00;font-weight:800;font-size:11px;letter-spacing:3px;
+       display:block;margin-top:4px">ÎLE-DE-FRANCE</span>
+    </div>
+    <div style="padding:28px">
+      <p style="font-size:16px;color:#0b1118;margin:0 0 14px">{bonjour}</p>
+      <h1 style="font-size:22px;color:#0b1118;margin:0 0 12px">
+      Tu es bien sur la liste d'attente 🎾</h1>
+      <p style="font-size:15px;color:#3a4654;line-height:1.6;margin:0 0 16px">
+      Merci de rejoindre la première ligue de padel des soignants d'Île-de-France !
+      On te préviendra <strong>dès l'ouverture</strong> (coup d'envoi de la Saison 1 le
+      <strong>1ᵉʳ septembre 2026</strong>), et tu seras <strong>prioritaire pour le Club
+      des Fondateurs</strong> (50 premières équipes).</p>
+      <p style="font-size:15px;color:#3a4654;line-height:1.6;margin:0 0 8px">
+      <strong>Fais grimper la ligue :</strong> invite un·e collègue ou ton binôme avec
+      ton lien perso 👇</p>
+      <p style="margin:0 0 22px">
+        <a href="{lien}" style="display:inline-block;background:#c6ff00;color:#06120a;
+        font-weight:800;text-decoration:none;padding:12px 20px;border-radius:8px;
+        font-size:14px">Partager mon lien d'invitation →</a></p>
+      <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0">
+      Tu reçois cet email car tu t'es inscrit·e sur padel-med-league.fr. Pour te
+      désinscrire ou toute question : <a href="mailto:{EMAIL_FROM}"
+      style="color:#6b7a8c">{EMAIL_FROM}</a>.</p>
+    </div>
+  </div>
+</div>"""
+
+
+def post_inscription_emails(email, prenom, ref_code):
+    """Effets de bord post-inscription : email de confirmation + contact Brevo.
+    Conçu pour tourner dans un thread (fire-and-forget) afin de ne pas ralentir
+    la redirection de l'utilisateur."""
+    envoyer_email(email, "Bienvenue dans la Ligue Padel Santé 🎾",
+                  email_confirmation_html(prenom, ref_code), nom=prenom)
+    brevo_ajouter_contact(email, prenom)
 
 
 # ---------------------------------------------------------------------------
@@ -2368,12 +2476,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 # email invalide ou consentement manquant : on n'enregistre rien
                 self._redirect("/?err=consent#rejoindre")
             else:
-                _, code = add_waitlist(
+                nouveau, code = add_waitlist(
                     email, prenom=g("prenom") or None,
                     profession=g("profession") or None, zone=g("zone") or None,
                     a_partenaire=g("a_partenaire") or None,
                     referred_by=g("referred_by") or None, consent=True,
                     source=(g("source") or None))
+                if nouveau:
+                    # Email de confirmation + synchro contact Brevo (fire-and-forget)
+                    import threading
+                    threading.Thread(
+                        target=post_inscription_emails,
+                        args=(email.strip().lower(), g("prenom") or None, code),
+                        daemon=True).start()
                 self._redirect("/?ok=" + code + "#rejoindre")
 
         elif u.path == "/auth/google":
