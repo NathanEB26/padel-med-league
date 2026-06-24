@@ -30,7 +30,7 @@ HOST = os.environ.get("HOST", "127.0.0.1")
 DB_PATH = os.environ.get(
     "DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ligue.db"))
 # URL publique de base (pour fabriquer les liens de parrainage partageables)
-BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.onrender.com")
+BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.fr")
 # « Inscription avec Google » : actif seulement si un Client ID Google est fourni
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 # Lien d'invitation de la communauté WhatsApp (affiché si défini)
