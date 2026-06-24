@@ -274,10 +274,15 @@ remplir des appariements crédibles au lancement.
 |---|---|---|
 | 1 | ~~Acheter + brancher `padel-med-league.fr`~~ | ✅ acheté, branché, HTTPS actif, site en `.fr` |
 | 1b | Passer la **bio Instagram** sur `padel-med-league.fr` | ⏳ (le lien marche maintenant) |
-| 2 | Créer l'alias mail `contact@…` (redirection Gmail) | ⏳ après domaine |
-| 3 | Créer un compte **Brevo** (envoi d'emails) | ⏳ après domaine |
-| 4 | Créer la communauté WhatsApp → lien | ⏳ |
-| 5 | Publier Instagram post 01 + photo de profil | ⏳ |
+| 2 | Créer l'alias OVH `contact@padel-med-league.fr` → forward vers `padelmedleague@gmail.com` | ⏳ |
+| 3 | Créer un compte **Brevo** (avec `padelmedleague@gmail.com`) | ⏳ |
+| 4 | ~~Créer la communauté WhatsApp~~ | ✅ créée + lien activé sur le site |
+| 5 | Envoyer le **mail SIHP** (`/?from=sihp`) + publier **post 01** + photo de profil = nouveau `logo-icon` | ⏳ |
+
+> 📧 **Email** : `padelmedleague@gmail.com` créé = bon **inbox/ops**. Public/envoi : utiliser
+> `contact@padel-med-league.fr` (alias OVH → ce Gmail) pour rester pro et **authentifiable**
+> (SPF/DKIM/DMARC). Voir S7.
+> 🐍 **Logo** : refait en serpent monochrome (caducée) — fichiers SVG/PNG/JPG à jour.
 
 ---
 
