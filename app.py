@@ -1387,8 +1387,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
             onclick="navigator.clipboard.writeText('{lien}');this.textContent='✓ Copié !'">📋 Copier le lien</button>
         </div>
         <p class="muted" style="margin-top:10px;font-size:13px">📸 <strong>Instagram :</strong>
-        copie ton lien et partage-le en story — tu peux y poster un de nos visuels prêts à l'emploi.</p>
-        <p style="margin-top:16px"><a class="btn sec" href="/classement">Voir la démo de la ligue →</a></p></div>"""
+        copie ton lien et partage-le en story — tu peux y poster un de nos visuels prêts à l'emploi.</p></div>"""
     else:
         # Bouton « S'inscrire avec Google » (si configuré)
         google_block = ""
@@ -1441,16 +1440,17 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
     <div class="lp-hero">
       <span class="lp-eyebrow">Pré-lancement · Saison 1</span>
       <h1>Le championnat de padel des <em>soignants</em> d'Île-de-France</h1>
-      <p class="lp-sub">Un adversaire <strong>à ton niveau</strong>, <strong>près de
-      chez toi</strong>, toutes les 2 semaines. Tu trouves le créneau, tu joues —
-      on s'occupe de tout le reste.</p>
+      <p class="lp-sub"><strong>Débutant qui se lance</strong> ou <strong>joueur
+      confirmé</strong> : on t'apparie avec des partenaires et adversaires
+      <strong>exactement à ton niveau</strong>, près de chez toi, toutes les 2 semaines.
+      Tu trouves le créneau, tu joues — on gère tout le reste.</p>
       <div class="lp-cta-row">
         <a class="btn btn-xl" href="#rejoindre">Rejoindre la liste d'attente →</a>
       </div>
       <div class="lp-trust">
+        <span>✅ <b>À ton niveau</b>, garanti</span>
         <span>✅ <b>100% gratuit</b></span>
-        <span>✅ <b>Sans but lucratif</b></span>
-        <span>✅ Tous les <b>professionnels de santé</b></span>
+        <span>✅ Tous les <b>soignants</b></span>
         <span>✅ <b>9 zones</b> en IDF</span>
       </div>
       <div class="countdown" id="cd" role="timer" aria-label="Compte à rebours avant le lancement">
@@ -1462,6 +1462,27 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
       <p class="cd-label">Coup d'envoi de la <strong>Saison 1</strong> — 1ᵉʳ septembre 2026.
       Prends ta place avant.</p>
       {compteur}
+    </div>
+
+    <div class="lp-section">
+      <h2>Débutant ou confirmé : toujours à <em>ton</em> niveau</h2>
+      <p class="lead">La hantise au padel, c'est de tomber sur des joueurs trop forts —
+      ou trop faibles. Ici, l'appariement par niveau (et une cote qui s'affine à chaque
+      match) te garantit des parties <strong>serrées et plaisantes</strong>, quel que
+      soit ton point de départ.</p>
+      <div class="lp-grid">
+        <div class="benefit" style="border-color:rgba(198,255,0,.35)">
+          <div class="ic">🌱</div><h3>Tu débutes ?</h3>
+          <p>C'est <strong>le moment de t'y mettre</strong>. Tu joues face à des gens
+          comme toi, dans une ambiance bienveillante — <strong>zéro match humiliant</strong>.
+          Pas de partenaire ? On t'en trouve un à ton niveau.</p></div>
+        <div class="benefit" style="border-color:rgba(255,47,122,.35)">
+          <div class="ic">🔥</div><h3>Tu joues déjà bien ?</h3>
+          <p><strong>Fini les matchs déséquilibrés et ennuyeux.</strong> Tu trouves
+          enfin des partenaires et adversaires <strong>à ta hauteur</strong> — et des
+          soignants avec qui tu as de vraies <strong>affinités</strong>, sur le terrain
+          comme en dehors.</p></div>
+      </div>
     </div>
 
     <div class="lp-section">
@@ -1497,36 +1518,20 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
     </div>
 
     <div class="lp-section">
-      <h2>Quel que soit ton niveau</h2>
-      <p class="lead">Tout le monde joue contre des gens de son niveau. Une seule
-      ligue, en équipe ou en solo — tu choisis, et tu peux changer.</p>
-      <div class="lp-grid">
-        <div class="benefit" style="border-color:rgba(198,255,0,.35)">
-          <div class="ic">🌱</div><h3>Débutant ?</h3>
-          <p>C'est <strong>l'occasion de t'y mettre</strong>. Tu joues face à des
-          gens comme toi, dans une ambiance bienveillante — <strong>zéro match
-          humiliant</strong>. Pas de partenaire ? On t'en attribue un.</p></div>
-        <div class="benefit" style="border-color:rgba(255,47,122,.35)">
-          <div class="ic">🔥</div><h3>Joueur confirmé ?</h3>
-          <p><strong>Fini les matchs déséquilibrés et ennuyeux.</strong> Tu trouves
-          des partenaires et adversaires <strong>à ta hauteur</strong> — et des
-          soignants avec qui tu as de vraies <strong>affinités</strong>, sur le
-          terrain comme en dehors.</p></div>
-      </div>
-    </div>
-
-    <div class="lp-section">
       <h2>Comment ça marche</h2>
-      <p class="lead">Quatre étapes, et tu joues.</p>
+      <p class="lead">Quatre étapes, et tu joues. Aucun binôme fixe imposé.</p>
       <div class="steps">
         <div class="step"><h3>Inscris-toi</h3><p>Rejoins la liste d'attente
           maintenant. On t'écrit dès l'ouverture.</p></div>
-        <div class="step"><h3>Trouve ton binôme</h3><p>Tu as déjà un partenaire ?
-          Parfait. Sinon, trouve-en un dans l'annuaire des joueurs.</p></div>
-        <div class="step"><h3>Reçois ton match</h3><p>Toutes les 2 semaines, un
-          adversaire à ton niveau, dans ta zone.</p></div>
-        <div class="step"><h3>Joue & grimpe</h3><p>Vous jouez, tu entres le score,
-          le classement se met à jour tout seul.</p></div>
+        <div class="step"><h3>Choisis ton mode</h3><p>En <strong>solo</strong>
+          (partenaires tournants) ou en <strong>équipe</strong> avec ton binôme. Tu
+          peux changer <strong>à chaque journée</strong>.</p></div>
+        <div class="step"><h3>Reçois ton match</h3><p>Toutes les 2 semaines, des
+          partenaires et adversaires à ton niveau, dans ta zone. Tu cales le créneau
+          dans le club de ton choix.</p></div>
+        <div class="step"><h3>Joue, score &amp; grimpe</h3><p>Tu entres le score, le
+          classement et ta cote s'actualisent seuls. Officiel joué ? Tu peux
+          enchaîner des <strong>matchs amicaux</strong> quand tu veux.</p></div>
       </div>
     </div>
 
