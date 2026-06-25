@@ -30,6 +30,58 @@
 
 ---
 
+## 1 bis. 💬 Communications directes (à envoyer TOI-MÊME — contacts chauds)
+> Réseau perso + service actuel + future structure = **les meilleurs taux de conversion**
+> et 100 % conformes (relation existante). À faire **cette semaine**, en plus des relais.
+> Liens : `?from=perso` · `?from=bichat` · `?from=icpc`.
+
+### A. WhatsApp perso (réseau médical que tu connais)
+> Salut 👋 Petit message perso : je me lance dans un projet qui me tient à cœur — la
+> **Ligue Padel Santé Île-de-France**, un championnat de padel **100 % gratuit et
+> bénévole** pour les soignants (médicaux & paramédicaux). L'idée : se bouger un peu plus,
+> se rencontrer entre soignants, et jouer contre des gens de son niveau près de chez soi.
+> On t'apparie par niveau et par zone, tu joues quand tu veux (toutes les 2 semaines), et
+> le classement se fait tout seul. Ça démarre le 1ᵉʳ septembre.
+> La liste d'attente est ouverte 👉 https://padel-med-league.fr/?from=perso
+> Si tu joues (ou veux t'y mettre), inscris-toi — et transfère à tes collègues que ça
+> pourrait brancher 🎾🩺 Merci !
+
+### B. Email au service — Cardiologie Bichat (collègues actuels)
+**Objet : On monte une équipe Bichat ? Championnat de padel entre soignants 🎾**
+> Salut à toutes et à tous,
+> Vous me connaissez — je me lance un projet à côté du boulot : la **Ligue Padel Santé
+> Île-de-France**, un championnat de padel **amical, 100 % gratuit et bénévole**, ouvert à
+> tous les soignants. Le constat : entre les gardes et les horaires, on bouge trop peu.
+> L'idée, c'est de se remettre au sport et de créer du lien, sans prise de tête : on vous
+> apparie par niveau et par zone, vous jouez un match toutes les 2 semaines au créneau qui
+> vous arrange, et le classement se met à jour tout seul.
+> J'adorerais qu'on soit plusieurs de Bichat — on pourrait monter une ou deux équipes et
+> se tirer la bourre avec d'autres services 😏
+> Ça démarre le 1ᵉʳ septembre. Inscription (gratuit, 30 s) 👉 https://padel-med-league.fr/?from=bichat
+> Faites tourner autour de vous. À très vite sur le terrain !
+> Nathan
+
+### C. Email au service com — ICPC (Institut Cœur Paris Centre, future structure)
+**Objet : Initiative sport-santé pour les équipes — proposition de relais (bénévole)**
+> Bonjour,
+> Je me permets de vous contacter : je suis le Dr Nathan El Bèze, cardiologue, et je
+> rejoins prochainement les équipes de l'Institut Cœur Paris Centre.
+> En parallèle, j'ai monté la **Ligue Padel Santé Île-de-France** : un championnat de padel
+> **amical, 100 % gratuit et à but non lucratif**, ouvert à tous les professionnels de
+> santé. L'objectif est double : **encourager l'activité physique** chez les soignants (un
+> vrai enjeu vu nos rythmes) et **créer du lien** entre nous, toutes professions confondues.
+> Le fonctionnement est simple et sans contrainte : appariement par niveau et par zone,
+> chacun joue au créneau qui lui convient, classement automatique.
+> Je serais ravi d'en faire profiter les équipes de l'ICPC : seriez-vous ouverts à
+> **relayer l'information en interne** (intranet, newsletter, affichage) ? Démarche
+> entièrement bénévole de ma part, sans aucune contrepartie recherchée — juste embarquer un
+> maximum de collègues. Je joins un visuel prêt à l'emploi et reste à disposition.
+> Inscription (gratuit) : https://padel-med-league.fr/?from=icpc
+> Bien cordialement,
+> Dr Nathan El Bèze
+
+---
+
 ## 2. 🗓️ Calendrier social (Instagram + LinkedIn + Chaîne WhatsApp)
 
 > Cadence : **2 posts Insta/sem** (dont 1 story) · **1 LinkedIn/sem** · **1 message
