@@ -232,8 +232,10 @@ remplir des appariements crédibles au lancement.
 - [ ] Backlog : paliers parrainage, notifications open match, rappels.
 
 ### 🟡 À suivre (com' & contenu) — *cf. S11*
-- [ ] **Envoyer le mail au SIHP** (accord obtenu) : `KIT-AMBASSADEUR.md` §2bis, lien
-      `padel-med-league.fr/?from=sihp`. → *Nathan — priorité haute (relais acquis).*
+- [ ] **Envoyer le mail au SIHP** (accord confirmé 25/06 par Aude de Loynes) : mail +
+      texte à relayer **rédigés** (`KIT-AMBASSADEUR.md` §2bis, angle bénévole/lien/sport)
+      + **visuel newsletter prêt** (`01-annonce-newsletter`), lien `?from=sihp`.
+      → *Nathan : il ne reste qu'à l'envoyer (priorité haute, relais acquis).*
 - [ ] **Démarcher les relais** par profession → `CONTACTS-RELAIS.md` (vérifier coord.,
       envoyer, relancer, suivre le tableau). → *Nathan.*
 - [ ] Dérouler le **calendrier Instagram** (01 épinglé → 03 à J+2-3 → 02 pour l'urgence).

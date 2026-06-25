@@ -72,32 +72,63 @@
 ---
 
 ## 2 bis. Email clé en main pour une mailing list partenaire (ex. SIHP)
-> *Le SIHP a donné son accord pour diffuser à sa mailing list. Voici un email
-> qu'ils n'ont qu'à copier-coller (lien traçable `?from=sihp` pour mesurer l'impact).*
+> *Le SIHP (Aude de Loynes) a confirmé le 25/06/2026 qu'il relaiera : newsletter
+> mensuelle aux internes + réseaux (Insta/Facebook), **une seule communication**.
+> Angle validé par Nathan : insister sur le **100 % bénévole / à but non lucratif**,
+> le **lien entre soignants** et la **promotion du sport** (vrai enjeu chez les
+> internes). Lien traçable `?from=sihp` pour mesurer l'impact.*
 
-**Objet : 🎾 La Ligue Padel Santé arrive — inscriptions ouvertes (gratuit)**
+### a) Le mail à envoyer au contact partenaire (de la part de Nathan)
 
-> Bonjour à toutes et à tous,
+**Objet : Ligue Padel Santé — c'est prêt pour votre relais 🎾**
+
+> Bonjour [Prénom],
 >
-> Bonne nouvelle pour les amateurs de padel : la **Ligue Padel Santé Île-de-France**
-> ouvre ses inscriptions. C'est un **championnat amical, 100 % gratuit et sans but
-> lucratif**, monté par des soignants, ouvert à **tous les professionnels de santé**
-> (internes compris !).
+> Merci beaucoup pour votre retour et votre accord, ça compte beaucoup pour nous.
+>
+> Avant tout, je tiens à être transparent sur l'esprit du projet : c'est **100 %
+> bénévole et à but non lucratif — je n'y gagne strictement rien**. L'idée est née
+> d'un constat simple : entre les gardes et les horaires, **on bouge trop peu**, et
+> l'activité physique est un vrai sujet de santé, **en particulier chez les internes**.
+> Mon objectif est double — **remettre les soignants au sport** et **créer du lien**
+> entre nous, toutes professions confondues, dans un cadre convivial.
+>
+> Bonne nouvelle : le site est en ligne et les **pré-inscriptions sont ouvertes**.
+> C'est le bon moment pour la communication dont nous avions parlé : en relayant dès
+> maintenant, vos membres peuvent rejoindre avant le coup d'envoi de la première saison
+> (1ᵉʳ septembre 2026).
+>
+> Pour vous rassurer : il s'agit bien d'**une seule communication** de votre côté
+> (newsletter et/ou un post). Aucun risque de « polluer » vos autres messages — tout le
+> reste (inscriptions, relances, suivi) est géré chez nous.
+>
+> Voici un texte prêt à copier-coller (b), avec un lien traçable. Je joins aussi un
+> visuel prêt à l'emploi (format newsletter, lien intégré).
+>
+> Encore merci — n'hésitez pas si vous avez la moindre question.
+> Bien à vous, Nathan El Bèze — CCA en cardiologie, Bichat
+
+### b) Le texte clé en main qu'ils n'ont qu'à publier
+
+> **🎾 La Ligue Padel Santé Île-de-France ouvre ses inscriptions !**
+>
+> Un championnat de padel **amical, 100 % gratuit et à but non lucratif**, monté
+> bénévolement par des soignants, pour **bouger un peu plus** et **créer du lien**
+> entre professionnels de santé — internes compris.
 >
 > Le principe : tu t'inscris, on t'apparie par **niveau** et par **zone géographique**,
 > tu joues un match toutes les deux semaines au créneau qui t'arrange, et le classement
-> se met à jour tout seul. Débutant ? Tu joues face à des gens de ton niveau. Confirmé ?
-> Tu trouves enfin des partenaires à ta hauteur. Idéal pour décompresser et rencontrer
-> du monde, même avec des gardes.
+> se met à jour tout seul. Débutant comme confirmé, tu trouves enfin des partenaires à
+> ta hauteur — parfait pour décompresser et faire des rencontres, même avec des gardes.
 >
 > 👉 **Inscription (liste d'attente) : https://padel-med-league.fr/?from=sihp**
-> Les **50 premières équipes** rejoignent le Club des Fondateurs.
->
-> Sportivement,
-> L'équipe de la Ligue Padel Santé · @padelmedleague
 
-*(Le SIHP est remercié comme l'un des premiers relais partenaires — réciprocité = mise
-en avant sur notre Instagram.)*
+**Visuel à joindre** : `visuels-instagram/01-annonce-newsletter.{png,jpg}` (CTA = URL
+réelle, pas « lien en bio » ; mention « à but non lucratif »). Ne PAS envoyer la version
+Instagram `01-annonce` en newsletter (son CTA « lien en bio » n'a pas de sens hors Insta).
+
+*(Le partenaire est remercié comme l'un des premiers relais — réciprocité = mise en
+avant sur notre Instagram.)*
 
 ---
 
