@@ -240,8 +240,14 @@ remplir des appariements crédibles au lancement.
 - [x] **Kit ambassadeur** (textes + one-pager + mail SIHP + cibles + objections) →
       `KIT-AMBASSADEUR.md`. ✅ *fait.*
 - [x] **Suivi de source** `?from=` (mesure des relais) visible dans l'admin. ✅ *fait.*
-- [ ] **Viralité** *(S11, backlog)* : étape « invite ton binôme », classement
-      ambassadeurs, carte perso partageable.
+- [x] **Viralité** *(S11)* : ✅ **fait** sur la page de succès — (a) CTA dédié
+      **« invite ton binôme »** (message WhatsApp taillé pour le 2v2), (b) **rang de
+      parrain + podium anonymisé** (gamification RGPD-safe : on n'expose aucun nom
+      tiers, seulement ton rang + les compteurs du top 3), (c) **carte perso
+      partageable** (`/carte?ref=` → carte SVG « Membre fondateur » à screenshoter en
+      story + `/carte.svg`) et (d) **OG personnalisé** sur les liens partagés
+      (« Prénom t'invite… »). Reste en backlog : classement ambassadeurs *public*
+      (volontairement écarté tant qu'on n'a pas d'opt-in nominatif — cf. RGPD).
 
 ### 🟢 Backlog produit (Saison 1+)
 - [ ] **Modèle « open match »** *(S2)* : ouverture de match par un joueur + sollicitation
@@ -286,10 +292,10 @@ remplir des appariements crédibles au lancement.
 | # | Action | Statut |
 |---|---|---|
 | 1 | ~~Acheter + brancher `padel-med-league.fr`~~ | ✅ acheté, branché, HTTPS actif, site en `.fr` |
-| 1b | Passer la **bio Instagram** sur `padel-med-league.fr` | ⏳ (le lien marche maintenant) |
+| 1b | ~~Passer la **bio Instagram** sur `padel-med-league.fr`~~ | ✅ en ligne (`/?from=ig`, vérifiée 25/06) |
 | 2 | ~~Alias OVH `contact@` + compte Brevo + auth domaine + env Render~~ | ✅ **emails actifs (testé)** |
-| 3 | Définir **`APERCU_CODE`** dans Render (accès admin : voir la waitlist + supprimer) | ⏳ |
-| 4 | ~~Créer la communauté WhatsApp~~ | ✅ créée + lien activé sur le site |
+| 3 | ~~Définir **`APERCU_CODE`** dans Render~~ | ✅ fait |
+| 4 | **Créer la CHAÎNE WhatsApp** (anti-spam, numéros privés) → coller le lien `whatsapp.com/channel/…` dans `WHATSAPP_URL` (Render). Mode d'emploi : [COMMUNAUTE-WHATSAPP.md](COMMUNAUTE-WHATSAPP.md) §2 | ⏳ (remplace l'ancien groupe) |
 | 5 | Envoyer le **mail SIHP** (`/?from=sihp`) + publier **post 01** + photo de profil = nouveau `logo-icon` | ⏳ |
 
 > 📧 **Email** : `padelmedleague@gmail.com` créé = bon **inbox/ops**. Public/envoi : utiliser

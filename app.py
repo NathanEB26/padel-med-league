@@ -33,8 +33,10 @@ DB_PATH = os.environ.get(
 BASE_URL = os.environ.get("BASE_URL", "https://padel-med-league.fr")
 # « Inscription avec Google » : actif seulement si un Client ID Google est fourni
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-# Lien d'invitation de la communauté WhatsApp (affiché si défini). Lien d'invitation
-# public ; surchargeable par variable d'environnement.
+# Lien du canal WhatsApp (diffusion anti-spam, abonnés anonymes). Affiché si défini ;
+# surchargeable par variable d'environnement.
+# ⚠️ Mettre le lien de la CHAÎNE (whatsapp.com/channel/…), pas d'un groupe : la copie
+# du site/email parle de « canal » et le numéro des abonnés reste privé.
 WHATSAPP_URL = os.environ.get(
     "WHATSAPP_URL", "https://chat.whatsapp.com/GZwLxA7S5PLFjegpI5gXdg?mode=gi_t")
 # Mode pré-lancement : seule la landing (pré-inscription) est publique. La démo et
@@ -405,6 +407,40 @@ def compte_filleuls(code):
     return n
 
 
+def classement_parrains():
+    """Parrains classés par nombre de filleuls (décroissant).
+    Renvoie une liste de tuples (ref_code, prenom, nb_filleuls). Sert au rang
+    personnel et au podium anonymisé (S11 viralité). N'expose PAS d'email."""
+    sql = (
+        "SELECT p.ref_code AS ref_code, p.prenom AS prenom, COUNT(f.email) AS n "
+        "FROM waitlist f JOIN waitlist p ON p.ref_code = f.referred_by "
+        "GROUP BY p.ref_code, p.prenom ORDER BY n DESC")
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            rows = c.execute(sql).fetchall()
+            return [(r["ref_code"], r["prenom"], r["n"]) for r in rows]
+    conn = db()
+    init_db()
+    rows = conn.execute(sql).fetchall()
+    conn.close()
+    return [(r["ref_code"], r["prenom"], r["n"]) for r in rows]
+
+
+def rang_parrain(code):
+    """Rang du parrain `code` parmi les parrains actifs (1 = meilleur).
+    Renvoie (rang, total_parrains). (0, n) si le code n'a aucun filleul."""
+    if not code:
+        return (0, 0)
+    code = code.strip().upper()
+    classt = classement_parrains()
+    total = len(classt)
+    for i, (rc, _prenom, _n) in enumerate(classt, start=1):
+        if rc == code:
+            return (i, total)
+    return (0, total)
+
+
 def waitlist_all():
     """Toute la liste d'attente (pour l'admin), liste de dicts."""
     cols = ("email", "prenom", "profession", "zone", "a_partenaire", "source",
@@ -527,6 +563,14 @@ def email_confirmation_html(prenom, ref_code):
     """HTML de l'email de confirmation d'inscription (clair, délivrable)."""
     bonjour = f"Bonjour {e(prenom)}," if prenom else "Bonjour,"
     lien = f"{BASE_URL}/?ref={e(ref_code)}" if ref_code else BASE_URL
+    # Canal WhatsApp = moyen le plus fiable d'être prévenu (anti-spam). Affiché si défini.
+    whatsapp_phrase = (" — ou mieux, suis notre canal WhatsApp 👇" if WHATSAPP_URL
+                       else "")
+    whatsapp_btn = (
+        f'<a href="{e(WHATSAPP_URL)}" style="display:inline-block;background:#25D366;'
+        f'color:#06210f;font-weight:800;text-decoration:none;padding:11px 18px;'
+        f'border-radius:8px;font-size:14px">💬 Suivre le canal WhatsApp</a>'
+    ) if WHATSAPP_URL else ""
     return f"""\
 <div style="background:#f4f6f8;padding:24px 0;font-family:Helvetica,Arial,sans-serif">
   <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:14px;
@@ -553,6 +597,14 @@ def email_confirmation_html(prenom, ref_code):
         <a href="{lien}" style="display:inline-block;background:#c6ff00;color:#06120a;
         font-weight:800;text-decoration:none;padding:12px 20px;border-radius:8px;
         font-size:14px">Partager mon lien d'invitation →</a></p>
+      <div style="background:#eafaf0;border:1px solid #bfe9cf;border-radius:10px;
+           padding:16px 18px;margin:0 0 20px">
+        <p style="font-size:14px;color:#0b1118;line-height:1.6;margin:0 0 4px">
+        <strong>📌 Pour être sûr·e de ne rien rater :</strong></p>
+        <p style="font-size:14px;color:#3a4654;line-height:1.6;margin:0 0 12px">
+        ajoute <strong>{EMAIL_FROM}</strong> à tes contacts (sinon nos prochains emails
+        risquent les spams ou l'onglet Promotions){whatsapp_phrase}.</p>
+        {whatsapp_btn}</div>
       <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0">
       Tu reçois cet email car tu t'es inscrit·e sur padel-med-league.fr. Pour te
       désinscrire ou toute question : <a href="mailto:{EMAIL_FROM}"
@@ -1332,9 +1384,89 @@ MARK_SVG = (
     '</svg>')
 
 
-def page(titre, corps, flash=None, nav=True):
+def carte_svg(prenom, profession=None, zone=None):
+    """Carte perso partageable (1080×1080, format story/post Instagram).
+    « Membre fondateur » brandé, à screenshoter pour partager. Pas d'emoji
+    (risque de rendu). Couleurs du thème LIV/Kings. (S11 viralité)."""
+    nom = e((prenom or "").strip()) or "Membre fondateur"
+    sous = " · ".join(x for x in (e(profession or ""), e(zone or "")) if x)
+    sous_txt = (f'<text x="540" y="700" text-anchor="middle" fill="#9fb0c0" '
+                f'font-size="34" font-weight="600" '
+                f'font-family="Helvetica,Arial,sans-serif">{sous}</text>') if sous else ""
+    # Caducée agrandi, centré, repris de MARK_SVG (échelle ×6 ≈ 192px).
+    mark = (
+        '<g transform="translate(444,150) scale(6)">'
+        '<circle cx="16" cy="15" r="14" fill="#c6ff00"/>'
+        '<ellipse cx="16" cy="12" rx="6.5" ry="8.5" fill="#070b10"/>'
+        '<rect x="14.4" y="19" width="3.2" height="16" rx="1.6" fill="#070b10"/>'
+        '<path d="M16 21 C13.4 22.5 13.4 25 16 26.5 C18.6 28 18.6 30.5 16 32 '
+        'C13.6 33.4 13.6 35 16 36" fill="none" stroke="#c6ff00" stroke-width="2.2" '
+        'stroke-linecap="round"/>'
+        '<circle cx="16" cy="20" r="2.1" fill="#c6ff00"/></g>')
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" '
+        'width="1080" height="1080" font-family="Helvetica,Arial,sans-serif">'
+        '<rect width="1080" height="1080" fill="#070b10"/>'
+        '<rect x="24" y="24" width="1032" height="1032" rx="40" fill="none" '
+        'stroke="#1b2733" stroke-width="2"/>'
+        + mark +
+        # Bandeau « MEMBRE FONDATEUR »
+        '<rect x="360" y="470" width="360" height="58" rx="29" fill="#c6ff00"/>'
+        '<text x="540" y="509" text-anchor="middle" fill="#070b10" font-size="28" '
+        'font-weight="900" letter-spacing="3" '
+        'font-style="italic">MEMBRE FONDATEUR</text>'
+        # Prénom (gros)
+        f'<text x="540" y="630" text-anchor="middle" fill="#ffffff" font-size="92" '
+        f'font-weight="900" font-style="italic">{nom}</text>'
+        + sous_txt +
+        # Pied de carte
+        '<text x="540" y="900" text-anchor="middle" fill="#c6ff00" font-size="40" '
+        'font-weight="900" font-style="italic">LIGUE PADEL SANTÉ</text>'
+        '<text x="540" y="948" text-anchor="middle" fill="#5d6b78" font-size="28" '
+        'letter-spacing="4">ÎLE-DE-FRANCE · SAISON 1 · SEPT. 2026</text>'
+        '<text x="540" y="1010" text-anchor="middle" fill="#ff2f7a" font-size="30" '
+        'font-weight="700">padel-med-league.fr</text>'
+        '</svg>')
+
+
+def page_carte(ref_from):
+    """Page de la carte perso à partager (S11). Affiche la carte SVG + lien de
+    partage + instructions story. Repli gracieux si le code est inconnu."""
+    prenom = ref_from["prenom"] if ref_from else None
+    profession = ref_from["profession"] if ref_from else None
+    zone = ref_from["zone"] if ref_from else None
+    code = ref_from["ref_code"] if ref_from else None
+    svg = carte_svg(prenom, profession, zone)
+    lien = f"{BASE_URL}/?ref={e(code)}" if code else BASE_URL
+    corps = f"""
+    <div class="card" style="max-width:560px;margin:0 auto;text-align:center">
+      <h1 style="margin:.2em 0">Ta carte de fondateur·rice</h1>
+      <p class="muted">Fais une capture d'écran et partage-la en story Instagram ou
+      sur WhatsApp pour inviter tes collègues. Ton lien de parrainage est dessous.</p>
+      <div style="max-width:340px;margin:18px auto;border-radius:18px;overflow:hidden;
+           border:1px solid var(--line)">{svg}</div>
+      <div class="reflink"><span>{e(lien)}</span></div>
+      <div class="share-row" style="margin-top:14px">
+        <a class="btn share-wa" href="https://wa.me/?text={urllib.parse.quote(
+            'Je rejoins la Ligue Padel Santé — rejoins-moi : ' + lien)}">📲 WhatsApp</a>
+        <button type="button" class="btn sec"
+          onclick="navigator.clipboard.writeText('{lien}');this.textContent='✓ Copié !'">📋 Copier le lien</button>
+        <a class="btn sec" href="/?ref={e(code)}">← Retour</a>
+      </div>
+      <p class="muted" style="margin-top:14px;font-size:13px">Astuce : ouvre cette page
+      sur ton téléphone, capture la carte, puis poste-la en story.</p>
+    </div>"""
+    return page("Ma carte", corps, nav=False)
+
+
+def page(titre, corps, flash=None, nav=True, og_title=None, og_desc=None):
     # nav=False sur les pages publiques (landing, confidentialité) : on ne montre pas
     # les liens vers la démo tant qu'on est en pré-lancement.
+    # og_title/og_desc : aperçu de lien personnalisé (ex. parrainage). L'image OG
+    # reste l'image statique (les crawlers ne lisent pas le SVG dynamique).
+    og_t = og_title or "Ligue Padel Santé — Île-de-France"
+    og_d = og_desc or ("Le championnat de padel des soignants d'Île-de-France. "
+                       "Un adversaire à ton niveau, près de chez toi. Inscription gratuite.")
     nav = """
     <a href="/">Accueil</a>
     <a href="/classements">Classements</a>
@@ -1347,8 +1479,8 @@ def page(titre, corps, flash=None, nav=True):
     return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(titre)} — Ligue Padel Santé</title>
-<meta property="og:title" content="Ligue Padel Santé — Île-de-France">
-<meta property="og:description" content="Le championnat de padel des soignants d'Île-de-France. Un adversaire à ton niveau, près de chez toi. Inscription gratuite.">
+<meta property="og:title" content="{e(og_t)}">
+<meta property="og:description" content="{e(og_d)}">
 <meta property="og:image" content="{OG_IMAGE}">
 <meta property="og:url" content="{BASE_URL}">
 <meta property="og:type" content="website">
@@ -1448,6 +1580,41 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
         mail = (f"mailto:?subject={urllib.parse.quote('Rejoins-moi sur la Ligue Padel Santé')}"
                 f"&body={msg}")
         linkedin = f"https://www.linkedin.com/sharing/share-offsite/?url={urllib.parse.quote(lien)}"
+        # « Invite ton binôme » : le padel est un 2v2, c'est le partage n°1 (S11).
+        msg_binome = urllib.parse.quote(
+            "Sois mon binôme dans la Ligue Padel Santé 🎾🩺 — le championnat de "
+            "padel des soignants d'Île-de-France. On s'inscrit ensemble : " + lien)
+        wa_binome = f"https://wa.me/?text={msg_binome}"
+        binome_cta = (
+            '<div style="background:linear-gradient(135deg,rgba(198,255,0,.10),'
+            'rgba(255,47,122,.08));border:1px solid var(--lime);border-radius:14px;'
+            'padding:18px;margin:18px 0;text-align:center">'
+            '<p style="margin:0 0 4px;font-size:18px"><strong>🤝 Invite ton binôme</strong></p>'
+            '<p class="muted" style="margin:0 0 12px;font-size:14px">Le padel se joue à '
+            'deux. Embarque ton/ta partenaire de jeu maintenant — vous serez appariés '
+            'ensemble dès l\'ouverture.</p>'
+            f'<a class="btn share-wa btn-xl" href="{wa_binome}">📲 Inviter mon binôme</a></div>')
+        # Rang de parrain + podium anonymisé (gamification RGPD-safe : aucun nom tiers).
+        rang, total_p = rang_parrain(sent_code)
+        podium = ""
+        if total_p >= 3:
+            tops = [n for (_rc, _pr, n) in classement_parrains()[:3]]
+            medals = ["🥇", "🥈", "🥉"]
+            cells = "".join(
+                f'<div style="flex:1"><div style="font-size:24px">{medals[i]}</div>'
+                f'<div style="font-weight:900;color:var(--lime);font-size:20px">{tops[i]}</div>'
+                f'<div class="muted" style="font-size:12px">invitations</div></div>'
+                for i in range(len(tops)))
+            moi = (f'<p style="margin:10px 0 0;font-size:14px">Tu es <strong>'
+                   f'{rang}<sup>e</sup></strong> sur <strong>{total_p}</strong> '
+                   f'parrains actifs 🔥</p>') if rang else (
+                   '<p style="margin:10px 0 0;font-size:14px" class="muted">Lance-toi : '
+                   'une seule invitation et tu entres au classement des parrains.</p>')
+            podium = (
+                '<div style="text-align:center;background:var(--bg2);border:1px solid '
+                'var(--line);border-radius:12px;padding:16px 18px;margin:14px 0">'
+                '<strong>🏆 Le podium des parrains</strong>'
+                f'<div style="display:flex;gap:8px;margin-top:12px">{cells}</div>{moi}</div>')
         # Paliers de récompense du parrainage
         items, prochain = "", None
         for seuil, titre, detail in REF_MILESTONES:
@@ -1486,22 +1653,38 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
                    f'var(--line);border-radius:12px;padding:16px 18px;margin:18px 0">'
                    f'<strong>🗳️ Ce que préfèrent les {total_votes} inscrit·e·s :</strong>'
                    f'{bars}</div>') if total_votes else ""
-        whatsapp_cta = (f'<p style="margin:16px 0 6px"><strong>Rejoins la communauté '
-                        f'WhatsApp</strong> pour les annonces et trouver des joueurs '
-                        f'de ta zone 👇</p><a class="btn share-wa btn-xl" '
-                        f'href="{e(WHATSAPP_URL)}">💬 Rejoindre la communauté WhatsApp</a>'
-                        ) if WHATSAPP_URL else ""
+        # CTA n°1 : le canal WhatsApp est le moyen FIABLE d'être prévenu (les emails
+        # peuvent finir en spam/promotions). Abonnés anonymes = aucun numéro exposé.
+        whatsapp_cta = (
+            '<div style="background:rgba(37,211,102,.12);border:1px solid #25D366;'
+            'border-radius:14px;padding:18px;margin:4px 0 18px;text-align:center">'
+            '<p style="margin:0 0 4px;font-size:19px"><strong>💬 Suis le canal officiel '
+            'WhatsApp</strong></p>'
+            '<p class="muted" style="margin:0 0 12px;font-size:14px">'
+            '⚠️ <strong>Nos emails peuvent tomber dans tes spams ou l\'onglet '
+            'Promotions.</strong> Sur le canal WhatsApp, tu es sûr·e d\'être prévenu·e à '
+            'l\'ouverture (date, créneaux, clubs). Diffusion seulement — '
+            '<strong>ton numéro reste privé</strong>, personne ne le voit.</p>'
+            f'<a class="btn share-wa btn-xl" href="{e(WHATSAPP_URL)}">💬 Suivre le canal '
+            'WhatsApp</a></div>') if WHATSAPP_URL else (
+            '<div style="background:rgba(255,206,58,.10);border:1px solid var(--gold);'
+            'border-radius:12px;padding:14px 16px;margin:4px 0 16px;text-align:center">'
+            '<p class="muted" style="margin:0;font-size:14px">📌 <strong>Ajoute '
+            'contact@padel-med-league.fr à tes contacts</strong> pour ne pas rater nos '
+            'emails (ils peuvent tomber en spam/promotions).</p></div>')
         form_section = f"""<div class="success" id="rejoindre">
         <div class="big">🎾</div>
         <h2>Tu es sur la liste. Bienvenue !</h2>
-        <p class="muted">On te préviendra par email dès l'ouverture — tu seras
+        <p class="muted">On te préviendra dès l'ouverture — tu seras
         prioritaire pour le <strong>Club des Fondateurs</strong>.</p>
         {whatsapp_cta}
+        {binome_cta}
         {sondage}
         <p style="margin-top:6px"><strong>Fais grandir la ligue — et débloque des
         avantages 👇</strong><br><span class="muted">Plus tu invites de collègues,
         plus tu montes dans la file et plus tu débloques de paliers.</span></p>
         {incentive}
+        {podium}
         <div class="reflink"><span>{e(lien)}</span></div>
         <div class="share-row">
           <a class="btn share-wa" href="{wa}">📲 WhatsApp</a>
@@ -1510,8 +1693,10 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
           <button type="button" class="btn sec"
             onclick="navigator.clipboard.writeText('{lien}');this.textContent='✓ Copié !'">📋 Copier le lien</button>
         </div>
+        <p style="margin-top:12px"><a class="btn sec" href="/carte?ref={e(sent_code)}">🎴
+        Voir ma carte de fondateur·rice à partager</a></p>
         <p class="muted" style="margin-top:10px;font-size:13px">📸 <strong>Instagram :</strong>
-        copie ton lien et partage-le en story — tu peux y poster un de nos visuels prêts à l'emploi.</p></div>"""
+        ouvre ta carte, capture-la et partage-la en story avec ton lien.</p></div>"""
     else:
         # Bouton « S'inscrire avec Google » (si configuré)
         google_block = ""
@@ -1706,11 +1891,18 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
       <div class="lp-foot">Ligue Padel Santé · Île-de-France — un projet par et pour
       les soignants. 🎾🩺<br>📸 Instagram :
       <a href="https://instagram.com/padelmedleague">@padelmedleague</a>
-      {('· 💬 <a href="' + e(WHATSAPP_URL) + '">Communauté WhatsApp</a>') if WHATSAPP_URL else ''}
+      {('· 💬 <a href="' + e(WHATSAPP_URL) + '">Canal WhatsApp</a>') if WHATSAPP_URL else ''}
       · <a href="/confidentialite">Confidentialité</a></div>
     </div>
     </div>""" + _COUNTDOWN_JS
-    return page("Accueil", corps, nav=False)
+    # OG personnalisé quand on arrive via un lien de parrainage (aperçu partagé).
+    og_title = og_desc = None
+    if ref_from:
+        qui = (ref_from["prenom"] or "").strip() or "Un·e collègue"
+        og_title = f"{qui} t'invite dans la Ligue Padel Santé"
+        og_desc = ("Le championnat de padel des soignants d'Île-de-France. "
+                   "Inscris-toi gratuitement et jouez ensemble.")
+    return page("Accueil", corps, nav=False, og_title=og_title, og_desc=og_desc)
 
 
 def page_confidentialite():
@@ -2312,7 +2504,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         pass  # silence
 
     # Pages accessibles sans déverrouillage (pré-lancement : seule la préinscription).
-    PUBLIC_GET = {"/", "/confidentialite", "/apercu", "/favicon.svg", "/favicon.ico"}
+    PUBLIC_GET = {"/", "/confidentialite", "/apercu", "/favicon.svg",
+                  "/favicon.ico", "/carte", "/carte.svg"}
     PUBLIC_POST = {"/rejoindre", "/auth/google", "/apercu"}
 
     def do_GET(self):
@@ -2353,6 +2546,21 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
                 self.wfile.write(data)
+            elif u.path == "/carte":
+                ref = q.get("ref", [None])[0]
+                self._send(page_carte(waitlist_par_code(ref)))
+            elif u.path == "/carte.svg":
+                ref = waitlist_par_code(q.get("ref", [None])[0])
+                svg = carte_svg(
+                    ref["prenom"] if ref else None,
+                    ref["profession"] if ref else None,
+                    ref["zone"] if ref else None).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "image/svg+xml; charset=utf-8")
+                self.send_header("Cache-Control", "max-age=300")
+                self.send_header("Content-Length", str(len(svg)))
+                self.end_headers()
+                self.wfile.write(svg)
             elif u.path == "/confidentialite":
                 self._send(page_confidentialite())
             elif u.path == "/classement":

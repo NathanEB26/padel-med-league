@@ -31,19 +31,21 @@ sinon, publication manuelle depuis l'app Instagram — ça marche aussi très bi
 
 ---
 
-## 2. La bio (à copier-coller)
+## 2. La bio — ✅ EN LIGNE (vérifiée le 25/06/2026)
 
+Bio actuellement publiée sur le profil (bonne, lien `.fr` + suivi de source) :
 ```
-🎾 Le championnat de padel des soignants d'Île-de-France
-🩺 Médecins • kinés • infirmiers • dentistes • étudiants…
-📍 Un adversaire à ton niveau, près de chez toi, tous les 15 j
-👇 Inscris-toi (gratuit)
-https://padel-med-league.onrender.com
+🎾🩺 Le championnat de padel des soignants d'IDF
+100% gratuit · Liste d'attente 👇
+padel-med-league.fr/?from=ig
 ```
 
-- **Photo de profil** : la « balle » verte sur fond noir (même identité que le
-  site). Je peux vous générer ce logo en image.
-- **Lien** : l'URL du site (ou un Linktree si plusieurs liens plus tard).
+- **Lien** : `padel-med-league.fr/?from=ig` → le `?from=ig` fait remonter les inscrits
+  venus d'Instagram dans `/admin`. ✅
+- **Photo de profil** : icône caducée monochrome (`visuels-instagram/logo-icon.jpg`),
+  même identité que le site.
+- *Optionnel* : ajouter une ligne professions (« médecins · kinés · infirmiers… »)
+  pour expliciter l'inclusivité. Pas indispensable.
 
 ---
 
