@@ -232,10 +232,10 @@ remplir des appariements crédibles au lancement.
 - [ ] Backlog : paliers parrainage, notifications open match, rappels.
 
 ### 🟡 À suivre (com' & contenu) — *cf. S11*
-- [ ] **Envoyer le mail au SIHP** (accord confirmé 25/06 par Aude de Loynes) : mail +
-      texte à relayer **rédigés** (`KIT-AMBASSADEUR.md` §2bis, angle bénévole/lien/sport)
-      + **visuel newsletter prêt** (`01-annonce-newsletter`), lien `?from=sihp`.
-      → *Nathan : il ne reste qu'à l'envoyer (priorité haute, relais acquis).*
+- [x] **Mail au SIHP — ENVOYÉ le 25/06/2026.** Accord confirmé (Aude de Loynes, une
+      seule communication : newsletter internes + Insta/Facebook). Mail angle
+      bénévole/lien/sport + texte à relayer + visuel `01-annonce-newsletter`, lien
+      `?from=sihp`. → *Suivi : surveiller les inscrits `from=sihp` dans `/admin`.*
 - [ ] **Démarcher les relais** par profession → `CONTACTS-RELAIS.md` (vérifier coord.,
       envoyer, relancer, suivre le tableau). → *Nathan.*
 - [ ] Dérouler le **calendrier Instagram** (01 épinglé → 03 à J+2-3 → 02 pour l'urgence).
