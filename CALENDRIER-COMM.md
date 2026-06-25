@@ -61,24 +61,24 @@
 > Faites tourner autour de vous. À très vite sur le terrain !
 > Nathan
 
-### C. Email au service com — ICPC (Institut Cœur Paris Centre, future structure)
-**Objet : Initiative sport-santé pour les équipes — proposition de relais (bénévole)**
-> Bonjour,
-> Je me permets de vous contacter : je suis le Dr Nathan El Bèze, cardiologue, et je
-> rejoins prochainement les équipes de l'Institut Cœur Paris Centre.
-> En parallèle, j'ai monté la **Ligue Padel Santé Île-de-France** : un championnat de padel
-> **amical, 100 % gratuit et à but non lucratif**, ouvert à tous les professionnels de
-> santé. L'objectif est double : **encourager l'activité physique** chez les soignants (un
-> vrai enjeu vu nos rythmes) et **créer du lien** entre nous, toutes professions confondues.
-> Le fonctionnement est simple et sans contrainte : appariement par niveau et par zone,
-> chacun joue au créneau qui lui convient, classement automatique.
-> Je serais ravi d'en faire profiter les équipes de l'ICPC : seriez-vous ouverts à
-> **relayer l'information en interne** (intranet, newsletter, affichage) ? Démarche
-> entièrement bénévole de ma part, sans aucune contrepartie recherchée — juste embarquer un
-> maximum de collègues. Je joins un visuel prêt à l'emploi et reste à disposition.
+### C. Email au service com — ICPC (Institut Cœur Paris Centre — il les connaît bien, arrivée certaine)
+**Objet : Mon projet sport-santé — on le relaie en interne à l'ICPC ? 🎾**
+> Bonjour [Prénom],
+> Comme vous le savez, j'arrive bientôt dans les équipes de l'ICPC — et j'ai un projet
+> que j'aimerais beaucoup faire vivre avec vous.
+> J'ai monté la **Ligue Padel Santé Île-de-France** : un championnat de padel **amical,
+> 100 % gratuit et bénévole**, ouvert à tous les soignants. L'idée : remettre les soignants
+> au sport (un vrai sujet vu nos rythmes) et créer du lien entre nous, toutes professions
+> confondues. On apparie les joueurs par niveau et par zone, chacun joue au créneau qui
+> l'arrange, et le classement se gère tout seul.
+> Est-ce qu'on pourrait le **relayer en interne** auprès des équipes (intranet, newsletter,
+> affichage) ? Ce serait top d'embarquer un max de monde de l'ICPC dès le départ — voire de
+> monter une équipe maison 😏. C'est 100 % bénévole de ma part, aucune contrepartie, juste
+> l'envie de faire bouger les collègues. Je joins un visuel prêt à l'emploi, et je suis
+> évidemment dispo pour en parler de vive voix.
 > Inscription (gratuit) : https://padel-med-league.fr/?from=icpc
-> Bien cordialement,
-> Dr Nathan El Bèze
+> Merci à vous, à très vite !
+> Nathan El Bèze
 
 ---
 
