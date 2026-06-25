@@ -38,7 +38,7 @@ GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 # ⚠️ Mettre le lien de la CHAÎNE (whatsapp.com/channel/…), pas d'un groupe : la copie
 # du site/email parle de « canal » et le numéro des abonnés reste privé.
 WHATSAPP_URL = os.environ.get(
-    "WHATSAPP_URL", "https://chat.whatsapp.com/GZwLxA7S5PLFjegpI5gXdg?mode=gi_t")
+    "WHATSAPP_URL", "https://whatsapp.com/channel/0029Vb8eeatEquiTLlgEGh2q")
 # Mode pré-lancement : seule la landing (pré-inscription) est publique. La démo et
 # l'admin ne sont accessibles qu'après déverrouillage via /apercu?cle=<APERCU_CODE>.
 # Si APERCU_CODE n'est pas défini, démo + admin restent fermées à tout le monde.

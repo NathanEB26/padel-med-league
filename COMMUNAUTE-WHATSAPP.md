@@ -44,6 +44,20 @@ ajoutera alors une **Communauté** avec un **sous-groupe par zone**.
 > ⚠️ Le lien actuel dans le code pointe vers un **groupe** (numéros exposés). À
 > remplacer par le lien de la **chaîne** avant de pousser la promo.
 
+### Anonymat de l'admin (confirmé par WhatsApp)
+
+Sur une Chaîne, **l'admin n'est jamais mis en avant**. WhatsApp ne montre aux abonnés
+**ni ton numéro, ni ta photo de profil, ni ton nom de profil WhatsApp** — ils ne voient
+que le **nom** et la **photo de la chaîne**. Donc :
+- Nommer la chaîne `Ligue Padel Santé · IDF` (pas un nom de personne) suffit à rester
+  en coulisse. Photo = le logo caducée.
+- **Si on ajoute des co-admins** (ambassadeurs) : eux verront le numéro de l'admin
+  (les admins se voient entre eux) ; les abonnés, non.
+- **Séparation totale (optionnel)** : créer la chaîne depuis un **numéro dédié**
+  (2ᵉ SIM/eSIM ou WhatsApp Business) si on ne veut aucun lien avec le compte perso.
+
+> Réf. : WhatsApp Help Center — « About safety and privacy on channels ».
+
 ---
 
 ## 3. Ligne éditoriale (quoi publier, à quel rythme)
