@@ -1816,7 +1816,10 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
             style="width:100%;margin-top:18px">Je réserve ma place →</button>
         </form>
         <p class="muted" style="text-align:center;margin:14px 0 0;font-size:12px">
-        On ne partage et ne revend jamais ton email. Désinscription en 1 clic.</p></div>"""
+        On ne partage et ne revend jamais ton email. Désinscription en 1 clic.</p>
+        <p class="muted" style="text-align:center;margin:8px 0 0;font-size:12px">
+        💡 Déjà inscrit·e et tu as perdu ton email ? Re-saisis la même adresse :
+        on te renvoie ton accès (espace, canal, carte).</p></div>"""
 
     corps = f"""<div class="lp">
     {ref_banner}
