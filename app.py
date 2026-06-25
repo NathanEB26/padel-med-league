@@ -1705,24 +1705,6 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
         incentive = (f'<div style="text-align:left;background:var(--bg2);border:1px solid '
                      f'var(--line);border-radius:12px;padding:16px 18px;margin:14px 0">'
                      f'<p style="margin:0 0 10px">{entete}</p>{items}</div>')
-        # Résultats du sondage (révélés après le vote)
-        counts = waitlist_pref_counts()
-        total_votes = sum(counts.values())
-        bars = ""
-        for label, vals in PREF_BUCKETS:
-            n = sum(counts.get(v, 0) for v in vals)
-            pct = round(100 * n / total_votes) if total_votes else 0
-            bars += (f'<div style="margin:9px 0"><div style="display:flex;'
-                     f'justify-content:space-between;font-size:13px;margin-bottom:4px">'
-                     f'<span>{label}</span><span class="muted">{pct}% · {n}</span></div>'
-                     f'<div style="background:var(--bg2);border:1px solid var(--line);'
-                     f'border-radius:6px;height:12px;overflow:hidden">'
-                     f'<div style="width:{pct}%;height:100%;background:var(--lime)"></div>'
-                     f'</div></div>')
-        sondage = (f'<div style="text-align:left;background:var(--bg2);border:1px solid '
-                   f'var(--line);border-radius:12px;padding:16px 18px;margin:18px 0">'
-                   f'<strong>🗳️ Ce que préfèrent les {total_votes} inscrit·e·s :</strong>'
-                   f'{bars}</div>') if total_votes else ""
         # CTA n°1 : le canal WhatsApp est le moyen FIABLE d'être prévenu (les emails
         # peuvent finir en spam/promotions). Abonnés anonymes = aucun numéro exposé.
         whatsapp_cta = (
@@ -1753,7 +1735,6 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
         via le lien dans ton email de confirmation.</p>
         {whatsapp_cta}
         {binome_cta}
-        {sondage}
         <p style="margin-top:6px"><strong>Fais grandir la ligue — et débloque des
         avantages 👇</strong><br><span class="muted">Plus tu invites de collègues,
         plus tu montes dans la file et plus tu débloques de paliers.</span></p>
