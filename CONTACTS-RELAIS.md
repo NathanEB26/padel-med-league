@@ -14,9 +14,13 @@
 ---
 
 ## ⭐ Déjà acquis
-- **SIHP** (Syndicat des Internes des Hôpitaux de Paris) — **accord obtenu** pour
-  diffusion à leur mailing list. → Leur envoyer le mail clé en main (voir KIT). Proposer
-  un statut « partenaire fondateur » en réciprocité.
+- **SIHP** (Syndicat des Internes des Hôpitaux de Paris) — accord obtenu + **mail relais
+  ENVOYÉ le 25/06/2026** (Aude de Loynes : newsletter internes + Insta/Facebook, une
+  seule communication). → Relancer ~6/07 s'ils n'ont pas publié. Lien `?from=sihp`.
+
+> 📅 **Séquencement & relances** : voir [CALENDRIER-COMM.md](CALENDRIER-COMM.md) §3
+> (Vague 1 jeunes/viral d'ici le 1ᵉʳ juillet · Vague 2 institutionnel début juillet ·
+> Vague 3 médias + relances mi/fin août). **Relancer 1 fois ~10 j après** chaque envoi.
 
 ---
 
@@ -99,13 +103,18 @@
 ---
 
 ## Tableau de suivi (à remplir au fil de l'eau)
-| Structure | Contact (canal) | Envoyé le | Relancé le | A relayé ? | Notes |
-|---|---|---|---|---|---|
-| SIHP | mail (accord obtenu) | | | ⏳ | envoyer le mail clé en main |
-| SRP-IMG | | | | | |
-| URPS Médecins IDF | | | | | |
-| CGOS | | | | | |
-| … | | | | | |
+| Structure | Vague | Lien `?from=` | Envoyé le | Relancé le | A relayé ? | Notes |
+|---|---|---|---|---|---|---|
+| SIHP | 1 | sihp | **25/06** | | ⏳ | accord acquis, attendre la pub |
+| SRP-IMG | 1 | srpimg | | | | internes MG IDF |
+| FNSIP-BM | 1 | fnsip | | | | internes pharma/bio |
+| FNEK | 1 | fnek | | | | étudiants kiné |
+| FNESI | 1 | fnesi | | | | étudiants IDE (gros volume) |
+| ANEMF / corpos | 1 | anemf | | | | via corpos médecine locales |
+| URPS IDF (6 pros) | 2 | urps | | | | début juillet |
+| CGOS | 2 | cgos | | | | relais sport hospitalier |
+| MNH | 2 | mnh | | | | partenaire potentiel |
+| Presse (WUD/Egora…) | 3 | presse | | | | mi/fin août |
 
 > Astuce priorisation : commencer par **(1) ceux qui ont déjà dit oui** (SIHP),
 > **(2) les cibles jeunes/virales** (corpos, internes, FNEK/FNESI), **(3) le CGOS &
