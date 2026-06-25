@@ -563,6 +563,9 @@ def email_confirmation_html(prenom, ref_code):
     """HTML de l'email de confirmation d'inscription (clair, délivrable)."""
     bonjour = f"Bonjour {e(prenom)}," if prenom else "Bonjour,"
     lien = f"{BASE_URL}/?ref={e(ref_code)}" if ref_code else BASE_URL
+    # Espace perso (pas de compte) : ce lien est le SEUL moyen de revenir sur sa page
+    # (lien de parrainage, carte, paliers). On le met en avant dans l'email.
+    espace = f"{BASE_URL}/?ok={e(ref_code)}#rejoindre" if ref_code else BASE_URL
     # Canal WhatsApp = moyen le plus fiable d'être prévenu (anti-spam). Affiché si défini.
     whatsapp_phrase = (" — ou mieux, suis notre canal WhatsApp 👇" if WHATSAPP_URL
                        else "")
@@ -591,12 +594,15 @@ def email_confirmation_html(prenom, ref_code):
       <strong>1ᵉʳ septembre 2026</strong>), et tu seras <strong>prioritaire pour le Club
       des Fondateurs</strong> (50 premières équipes).</p>
       <p style="font-size:15px;color:#3a4654;line-height:1.6;margin:0 0 8px">
-      <strong>Fais grimper la ligue :</strong> invite un·e collègue ou ton binôme avec
-      ton lien perso 👇</p>
-      <p style="margin:0 0 22px">
-        <a href="{lien}" style="display:inline-block;background:#c6ff00;color:#06120a;
+      <strong>Ton espace personnel</strong> (à garder précieusement — c'est ici que tu
+      retrouves ton lien de parrainage, ta carte de fondateur·rice et tes avantages) 👇</p>
+      <p style="margin:0 0 14px">
+        <a href="{espace}" style="display:inline-block;background:#c6ff00;color:#06120a;
         font-weight:800;text-decoration:none;padding:12px 20px;border-radius:8px;
-        font-size:14px">Partager mon lien d'invitation →</a></p>
+        font-size:14px">Accéder à mon espace ligue →</a></p>
+      <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0 0 22px">
+      Astuce : ajoute cet email à tes favoris pour y revenir quand tu veux. Ton lien à
+      partager : <a href="{lien}" style="color:#6b7a8c">{lien}</a></p>
       <div style="background:#eafaf0;border:1px solid #bfe9cf;border-radius:10px;
            padding:16px 18px;margin:0 0 20px">
         <p style="font-size:14px;color:#0b1118;line-height:1.6;margin:0 0 4px">
@@ -1405,7 +1411,9 @@ def carte_svg(prenom, profession=None, zone=None):
         '<circle cx="16" cy="20" r="2.1" fill="#c6ff00"/></g>')
     return (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" '
-        'width="1080" height="1080" font-family="Helvetica,Arial,sans-serif">'
+        'preserveAspectRatio="xMidYMid meet" '
+        'style="width:100%;height:auto;display:block;max-width:1080px" '
+        'font-family="Helvetica,Arial,sans-serif">'
         '<rect width="1080" height="1080" fill="#070b10"/>'
         '<rect x="24" y="24" width="1032" height="1032" rx="40" fill="none" '
         'stroke="#1b2733" stroke-width="2"/>'
@@ -1447,11 +1455,11 @@ def page_carte(ref_from):
            border:1px solid var(--line)">{svg}</div>
       <div class="reflink"><span>{e(lien)}</span></div>
       <div class="share-row" style="margin-top:14px">
-        <a class="btn share-wa" href="https://wa.me/?text={urllib.parse.quote(
+        <a class="btn share-wa" target="_blank" rel="noopener" href="https://wa.me/?text={urllib.parse.quote(
             'Je rejoins la Ligue Padel Santé — rejoins-moi : ' + lien)}">📲 WhatsApp</a>
         <button type="button" class="btn sec"
           onclick="navigator.clipboard.writeText('{lien}');this.textContent='✓ Copié !'">📋 Copier le lien</button>
-        <a class="btn sec" href="/?ref={e(code)}">← Retour</a>
+        <a class="btn sec" href="/?ok={e(code)}#rejoindre">← Mon espace</a>
       </div>
       <p class="muted" style="margin-top:14px;font-size:13px">Astuce : ouvre cette page
       sur ton téléphone, capture la carte, puis poste-la en story.</p>
@@ -1593,7 +1601,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
             '<p class="muted" style="margin:0 0 12px;font-size:14px">Le padel se joue à '
             'deux. Embarque ton/ta partenaire de jeu maintenant — vous serez appariés '
             'ensemble dès l\'ouverture.</p>'
-            f'<a class="btn share-wa btn-xl" href="{wa_binome}">📲 Inviter mon binôme</a></div>')
+            f'<a class="btn share-wa btn-xl" target="_blank" rel="noopener" href="{wa_binome}">📲 Inviter mon binôme</a></div>')
         # Rang de parrain + podium anonymisé (gamification RGPD-safe : aucun nom tiers).
         rang, total_p = rang_parrain(sent_code)
         podium = ""
@@ -1665,7 +1673,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
             'Promotions.</strong> Sur le canal WhatsApp, tu es sûr·e d\'être prévenu·e à '
             'l\'ouverture (date, créneaux, clubs). Diffusion seulement — '
             '<strong>ton numéro reste privé</strong>, personne ne le voit.</p>'
-            f'<a class="btn share-wa btn-xl" href="{e(WHATSAPP_URL)}">💬 Suivre le canal '
+            f'<a class="btn share-wa btn-xl" target="_blank" rel="noopener" href="{e(WHATSAPP_URL)}">💬 Suivre le canal '
             'WhatsApp</a></div>') if WHATSAPP_URL else (
             '<div style="background:rgba(255,206,58,.10);border:1px solid var(--gold);'
             'border-radius:12px;padding:14px 16px;margin:4px 0 16px;text-align:center">'
@@ -1677,6 +1685,10 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
         <h2>Tu es sur la liste. Bienvenue !</h2>
         <p class="muted">On te préviendra dès l'ouverture — tu seras
         prioritaire pour le <strong>Club des Fondateurs</strong>.</p>
+        <p class="muted" style="font-size:13px;background:var(--bg2);border:1px solid var(--line);
+        border-radius:10px;padding:10px 14px">📌 <strong>Garde cette page en favori</strong> :
+        c'est ton espace (lien de parrainage + carte). Tu peux aussi y revenir à tout moment
+        via le lien dans ton email de confirmation.</p>
         {whatsapp_cta}
         {binome_cta}
         {sondage}
@@ -1687,13 +1699,13 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
         {podium}
         <div class="reflink"><span>{e(lien)}</span></div>
         <div class="share-row">
-          <a class="btn share-wa" href="{wa}">📲 WhatsApp</a>
-          <a class="btn sec" href="{linkedin}">💼 LinkedIn</a>
-          <a class="btn sec" href="{mail}">✉️ Email</a>
+          <a class="btn share-wa" target="_blank" rel="noopener" href="{wa}">📲 WhatsApp</a>
+          <a class="btn sec" target="_blank" rel="noopener" href="{linkedin}">💼 LinkedIn</a>
+          <a class="btn sec" target="_blank" rel="noopener" href="{mail}">✉️ Email</a>
           <button type="button" class="btn sec"
             onclick="navigator.clipboard.writeText('{lien}');this.textContent='✓ Copié !'">📋 Copier le lien</button>
         </div>
-        <p style="margin-top:12px"><a class="btn sec" href="/carte?ref={e(sent_code)}">🎴
+        <p style="margin-top:12px"><a class="btn sec" target="_blank" rel="noopener" href="/carte?ref={e(sent_code)}">🎴
         Voir ma carte de fondateur·rice à partager</a></p>
         <p class="muted" style="margin-top:10px;font-size:13px">📸 <strong>Instagram :</strong>
         ouvre ta carte, capture-la et partage-la en story avec ton lien.</p></div>"""
