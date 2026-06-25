@@ -21,6 +21,7 @@ import os
 import random
 import re
 import sqlite3
+import time
 import urllib.parse
 
 # Port et hôte : configurables par variables d'environnement (pour l'hébergement
@@ -663,6 +664,31 @@ def post_inscription_emails(email, prenom, ref_code):
     envoyer_email(email, "Bienvenue dans la Ligue Padel Santé 🎾",
                   email_confirmation_html(prenom, ref_code), nom=prenom)
     brevo_ajouter_contact(email, prenom)
+
+
+# Anti-abus : on ne renvoie pas l'email (le « hub ») plus d'une fois par adresse et
+# par fenêtre, pour éviter de bombarder une boîte mail via le formulaire. État en
+# mémoire (réinitialisé au redémarrage) — suffisant en phase liste d'attente.
+RENVOI_FENETRE_S = 180  # 3 min
+_dernier_email = {}     # email normalisé -> timestamp du dernier envoi
+
+
+def peut_envoyer_email(email):
+    """Vrai si on peut (ré)envoyer l'email à cette adresse maintenant (throttle)."""
+    email = (email or "").strip().lower()
+    now = time.time()
+    if now - _dernier_email.get(email, 0) < RENVOI_FENETRE_S:
+        return False
+    _dernier_email[email] = now
+    return True
+
+
+def renvoyer_email_hub(email, prenom, ref_code):
+    """Ré-inscription détectée : on renvoie le « hub » (email de confirmation) sans
+    recréer le contact Brevo. Email transactionnel → délivré même si désinscrit du
+    marketing. Throttlé en amont par peut_envoyer_email()."""
+    envoyer_email(email, "Ton accès à la Ligue Padel Santé 🎾 (lien retrouvé)",
+                  email_confirmation_html(prenom, ref_code), nom=prenom)
 
 
 # ---------------------------------------------------------------------------
@@ -2762,13 +2788,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     a_partenaire=g("a_partenaire") or None,
                     referred_by=g("referred_by") or None, consent=True,
                     source=(g("source") or None))
-                if nouveau:
-                    # Email de confirmation + synchro contact Brevo (fire-and-forget)
+                em = email.strip().lower()
+                # Email = seul canal durable (pas de compte). On l'envoie à la 1re
+                # inscription ET on le RENVOIE si la personne re-saisit son email
+                # (récupération du hub), le tout throttlé pour éviter le bombing.
+                if peut_envoyer_email(em):
                     import threading
-                    threading.Thread(
-                        target=post_inscription_emails,
-                        args=(email.strip().lower(), g("prenom") or None, code),
-                        daemon=True).start()
+                    if nouveau:
+                        cible, args = post_inscription_emails, (em, g("prenom") or None, code)
+                    else:
+                        # ré-inscription : prénom faisant autorité = celui stocké
+                        info = waitlist_par_code(code)
+                        p = (info["prenom"] if info else None) or (g("prenom") or None)
+                        cible, args = renvoyer_email_hub, (em, p, code)
+                    threading.Thread(target=cible, args=args, daemon=True).start()
                 self._redirect("/?ok=" + code + "#rejoindre")
 
         elif u.path == "/auth/google":
