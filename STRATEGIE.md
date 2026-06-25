@@ -263,7 +263,11 @@ remplir des appariements crédibles au lancement.
 - [ ] Score d'**affinité / ressenti de match** + quota d'exploration anti-bulle.
 - [ ] Mise en avant des **classements par groupe** (profession, spécialité, structure,
       zone).
-- [ ] **Clubs partenaires** + avantages Club des Fondateurs (50 premières équipes).
+- [ ] **Clubs partenaires** → stratégie validée 25/06 dans [CLUBS-PARTENAIRES.md](CLUBS-PARTENAIRES.md) :
+      **100 % troc, zéro cash** (pas d'asso nécessaire pour l'instant) ; modèles prioritaires =
+      **tarif membres + co-marketing** et **événements (lancement + finales)** ; backlog =
+      club référent par zone, créneaux dédiés, initiation, dotations Fondateurs. Mail clé en
+      main + cibles + suivi `?from=<club>` dans le doc. → *Nathan : démarcher (1-2 chaînes d'abord).*
 - [ ] Passage **Render payant** ($7/mo, sans veille) au lancement réel.
 - [ ] **App native iOS** *(S6c)* — phase Croissance seulement.
 - [ ] **Google Sign-in** *(S5)* — déprioritisé ; réactivable via `GOOGLE_CLIENT_ID`.
