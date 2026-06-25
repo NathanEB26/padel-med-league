@@ -560,20 +560,38 @@ def brevo_ajouter_contact(email, prenom=None):
 
 
 def email_confirmation_html(prenom, ref_code):
-    """HTML de l'email de confirmation d'inscription (clair, délivrable)."""
+    """HTML de l'email de confirmation d'inscription = HUB COMPLET et auto-suffisant.
+    Sans compte, l'email est le seul canal/artefact durable : on y met TOUT (infos,
+    espace perso, canal WhatsApp, lien de parrainage + boutons de partage, carte)."""
     bonjour = f"Bonjour {e(prenom)}," if prenom else "Bonjour,"
     lien = f"{BASE_URL}/?ref={e(ref_code)}" if ref_code else BASE_URL
-    # Espace perso (pas de compte) : ce lien est le SEUL moyen de revenir sur sa page
-    # (lien de parrainage, carte, paliers). On le met en avant dans l'email.
+    # Espace perso (pas de compte) : ce lien est le SEUL moyen de revenir sur sa page.
     espace = f"{BASE_URL}/?ok={e(ref_code)}#rejoindre" if ref_code else BASE_URL
+    carte = f"{BASE_URL}/carte?ref={e(ref_code)}" if ref_code else f"{BASE_URL}/carte"
+    # Liens de partage prêts à cliquer (pas de JS possible en email → intents directs).
+    msg = urllib.parse.quote(
+        "Je rejoins la Ligue Padel Santé d'Île-de-France 🎾🩺 (le championnat de padel "
+        "des soignants). Rejoins-moi sur la liste d'attente : " + lien.replace("&amp;", "&"))
+    wa = f"https://wa.me/?text={msg}"
+    linkedin = ("https://www.linkedin.com/sharing/share-offsite/?url="
+                + urllib.parse.quote(lien.replace("&amp;", "&")))
+    mailshare = (f"mailto:?subject={urllib.parse.quote('Rejoins-moi sur la Ligue Padel Santé')}"
+                 f"&body={msg}")
+
+    def _btn(href, bg, color, label):
+        return (f'<a href="{href}" style="display:inline-block;background:{bg};'
+                f'color:{color};font-weight:700;text-decoration:none;padding:10px 16px;'
+                f'border-radius:8px;font-size:14px;margin:0 6px 8px 0">{label}</a>')
+
     # Canal WhatsApp = moyen le plus fiable d'être prévenu (anti-spam). Affiché si défini.
     whatsapp_phrase = (" — ou mieux, suis notre canal WhatsApp 👇" if WHATSAPP_URL
                        else "")
-    whatsapp_btn = (
-        f'<a href="{e(WHATSAPP_URL)}" style="display:inline-block;background:#25D366;'
-        f'color:#06210f;font-weight:800;text-decoration:none;padding:11px 18px;'
-        f'border-radius:8px;font-size:14px">💬 Suivre le canal WhatsApp</a>'
-    ) if WHATSAPP_URL else ""
+    whatsapp_btn = _btn(e(WHATSAPP_URL), "#25D366", "#06210f",
+                        "💬 Suivre le canal WhatsApp") if WHATSAPP_URL else ""
+    share_btns = (_btn(wa, "#25D366", "#06210f", "📲 WhatsApp")
+                  + _btn(linkedin, "#0a66c2", "#ffffff", "💼 LinkedIn")
+                  + _btn(mailshare, "#5d6b78", "#ffffff", "✉️ Email")
+                  + _btn(carte, "#070b10", "#c6ff00", "🎴 Ma carte"))
     return f"""\
 <div style="background:#f4f6f8;padding:24px 0;font-family:Helvetica,Arial,sans-serif">
   <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:14px;
@@ -588,30 +606,48 @@ def email_confirmation_html(prenom, ref_code):
       <p style="font-size:16px;color:#0b1118;margin:0 0 14px">{bonjour}</p>
       <h1 style="font-size:22px;color:#0b1118;margin:0 0 12px">
       Tu es bien sur la liste d'attente 🎾</h1>
-      <p style="font-size:15px;color:#3a4654;line-height:1.6;margin:0 0 16px">
+      <p style="font-size:15px;color:#3a4654;line-height:1.6;margin:0 0 18px">
       Merci de rejoindre la première ligue de padel des soignants d'Île-de-France !
       On te préviendra <strong>dès l'ouverture</strong> (coup d'envoi de la Saison 1 le
       <strong>1ᵉʳ septembre 2026</strong>), et tu seras <strong>prioritaire pour le Club
       des Fondateurs</strong> (50 premières équipes).</p>
+
+      <p style="font-size:13px;color:#8595a6;font-weight:700;letter-spacing:1px;
+      text-transform:uppercase;margin:0 0 8px">Comment ça marche</p>
+      <p style="font-size:14px;color:#3a4654;line-height:1.7;margin:0 0 22px">
+      1. Tu t'inscris (c'est fait ✅)<br>
+      2. On t'apparie par <strong>niveau</strong> et par <strong>zone</strong><br>
+      3. Tu joues un match toutes les 2 semaines, au créneau qui t'arrange<br>
+      4. Tu saisis le score, le classement se met à jour tout seul</p>
+
       <p style="font-size:15px;color:#3a4654;line-height:1.6;margin:0 0 8px">
-      <strong>Ton espace personnel</strong> (à garder précieusement — c'est ici que tu
-      retrouves ton lien de parrainage, ta carte de fondateur·rice et tes avantages) 👇</p>
-      <p style="margin:0 0 14px">
+      <strong>📍 Ton espace personnel</strong> — garde cet email : c'est ici que tu
+      retrouves ton lien de parrainage, ta carte et tes avantages 👇</p>
+      <p style="margin:0 0 24px">
         <a href="{espace}" style="display:inline-block;background:#c6ff00;color:#06120a;
         font-weight:800;text-decoration:none;padding:12px 20px;border-radius:8px;
         font-size:14px">Accéder à mon espace ligue →</a></p>
-      <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0 0 22px">
-      Astuce : ajoute cet email à tes favoris pour y revenir quand tu veux. Ton lien à
-      partager : <a href="{lien}" style="color:#6b7a8c">{lien}</a></p>
+
       <div style="background:#eafaf0;border:1px solid #bfe9cf;border-radius:10px;
-           padding:16px 18px;margin:0 0 20px">
+           padding:16px 18px;margin:0 0 24px">
         <p style="font-size:14px;color:#0b1118;line-height:1.6;margin:0 0 4px">
         <strong>📌 Pour être sûr·e de ne rien rater :</strong></p>
         <p style="font-size:14px;color:#3a4654;line-height:1.6;margin:0 0 12px">
         ajoute <strong>{EMAIL_FROM}</strong> à tes contacts (sinon nos prochains emails
         risquent les spams ou l'onglet Promotions){whatsapp_phrase}.</p>
         {whatsapp_btn}</div>
-      <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0">
+
+      <p style="font-size:15px;color:#3a4654;line-height:1.6;margin:0 0 4px">
+      <strong>🤝 Fais grandir la ligue — invite tes collègues et ton binôme.</strong></p>
+      <p style="font-size:14px;color:#3a4654;line-height:1.6;margin:0 0 12px">
+      Plus tu invites, plus tu montes dans la file et plus tu débloques de paliers.
+      Partage ton lien perso :</p>
+      <p style="margin:0 0 6px">{share_btns}</p>
+      <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0 0 22px;
+      word-break:break-all">Ton lien : <a href="{lien}" style="color:#6b7a8c">{lien}</a></p>
+
+      <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0;border-top:1px solid #eef2f6;
+      padding-top:16px">
       Tu reçois cet email car tu t'es inscrit·e sur padel-med-league.fr. Pour te
       désinscrire ou toute question : <a href="mailto:{EMAIL_FROM}"
       style="color:#6b7a8c">{EMAIL_FROM}</a>.</p>
