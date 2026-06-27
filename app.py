@@ -493,6 +493,7 @@ def rejoindre_match(match_id, email):
                   (match_id, email))
         if pris + 1 >= m["nb_slots"]:
             c.execute("UPDATE open_matches SET statut='complet' WHERE id=%s", (match_id,))
+            return "complet"  # signal pour déclencher l'email récap
     return None
 
 
@@ -921,6 +922,117 @@ def email_magic_link_html(prenom, magic_url):
     <p style="margin:8px 0 0;font-size:12px;color:#6b7a8c">Lien : {magic_url}</p>
   </div>
 </div>"""
+
+
+def email_notif_match_html(prenom, match, magic_url):
+    """Email de notification : un match compatible vient d'être ouvert."""
+    bonjour = f"Bonjour {e(prenom)} !" if prenom else "Bonjour !"
+    niv = (f"Niveau {match['niveau_min']}→{match['niveau_max']}"
+           if match['niveau_min'] != 3 or match['niveau_max'] != 7
+           else "Tous niveaux")
+    return f"""
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#070b10;color:#e2eaf0;border-radius:12px;overflow:hidden">
+  <div style="background:#0b141d;padding:28px 36px;border-bottom:1px solid #1e2f3d">
+    <p style="margin:0;font-size:20px;font-weight:900;font-style:italic;
+       text-transform:uppercase;color:#c6ff00">Ligue Padel Santé · IDF</p>
+  </div>
+  <div style="padding:36px">
+    <p style="margin:0 0 10px;font-size:17px;font-weight:700">{bonjour}</p>
+    <p style="margin:0 0 20px;color:#9baab5">Un match vient d'être ouvert et tu corresponds au profil recherché :</p>
+    <div style="background:#0b141d;border:1px solid #1e2f3d;border-radius:10px;padding:20px;margin-bottom:24px">
+      <p style="margin:0 0 6px;font-size:18px;font-weight:900">{e(match['date'])} à {e(match['heure'])}</p>
+      <p style="margin:0 0 12px;color:#9baab5">{e(match['club'])}</p>
+      <p style="margin:0;font-size:13px;color:#6b7a8c">Zone {e(match['zone'] or '—')} · {niv} · {e(match['format'].capitalize())}</p>
+    </div>
+    <a href="{magic_url}" style="display:inline-block;background:#c6ff00;color:#06120a;
+       font-weight:900;font-style:italic;text-transform:uppercase;font-size:15px;
+       padding:14px 28px;border-radius:10px;text-decoration:none">
+      Voir le match et rejoindre →
+    </a>
+    <p style="margin:24px 0 0;font-size:12px;color:#6b7a8c">Ce lien est personnel et valable 15 min. Si tu n'es pas disponible, ignore cet email.</p>
+  </div>
+</div>"""
+
+
+def email_match_complet_html(prenom, match, joueurs):
+    """Email envoyé à tous les joueurs quand le match est complet (4/4)."""
+    bonjour = f"Bonjour {e(prenom)} !" if prenom else "Bonjour !"
+    liste_joueurs = "".join(
+        f'<p style="margin:4px 0;color:#e2eaf0">· {e(j.get("prenom") or j["email"].split("@")[0])} '
+        f'({e(j.get("profession") or "—")})</p>'
+        for j in joueurs)
+    return f"""
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#070b10;color:#e2eaf0;border-radius:12px;overflow:hidden">
+  <div style="background:#0b141d;padding:28px 36px;border-bottom:1px solid #1e2f3d">
+    <p style="margin:0;font-size:20px;font-weight:900;font-style:italic;
+       text-transform:uppercase;color:#c6ff00">Ligue Padel Santé · IDF</p>
+  </div>
+  <div style="padding:36px">
+    <p style="margin:0 0 10px;font-size:17px;font-weight:700">{bonjour}</p>
+    <p style="margin:0 0 6px;color:#c6ff00;font-weight:800">Match complet !</p>
+    <p style="margin:0 0 20px;color:#9baab5">Votre créneau est complet. Voici les participants :</p>
+    <div style="background:#0b141d;border:1px solid #1e2f3d;border-radius:10px;padding:20px;margin-bottom:24px">
+      <p style="margin:0 0 6px;font-size:18px;font-weight:900">{e(match['date'])} à {e(match['heure'])}</p>
+      <p style="margin:0 0 16px;color:#9baab5">{e(match['club'])}</p>
+      {liste_joueurs}
+    </div>
+    <p style="margin:0 0 0;font-size:13px;color:#6b7a8c">Après le match, connecte-toi sur le site pour saisir le score.</p>
+  </div>
+</div>"""
+
+
+def notifier_joueurs_compatibles(match_id):
+    """Envoie un email (magic link) aux joueurs de la waitlist compatibles avec ce match."""
+    if not PG_URL:
+        return
+    m = get_open_match(match_id)
+    if not m:
+        return
+    _pg_ensure()
+    with _pg() as c:
+        rows = c.execute(
+            """SELECT email, prenom FROM waitlist
+               WHERE lower(email) != lower(%s)
+               AND (zone = %s OR zone IS NULL OR %s = 'Centre')
+               AND (niveau IS NULL OR niveau BETWEEN %s AND %s)
+               AND consent = TRUE""",
+            (m["creator_email"], m["zone"], m["zone"],
+             m["niveau_min"], m["niveau_max"])
+        ).fetchall()
+    for row in rows:
+        email = row["email"]
+        prenom = row.get("prenom")
+        if not peut_envoyer_email(email):
+            continue
+        token = creer_magic_token(email)
+        if not token:
+            continue
+        next_url = urllib.parse.quote(f"/match?id={match_id}")
+        magic_url = f"{BASE_URL}/connexion/lien?t={token}&next={next_url}"
+        try:
+            envoyer_email(email, f"Match ouvert le {m['date']} à {m['heure']} — {m['club']}",
+                          email_notif_match_html(prenom, m, magic_url), nom=prenom)
+        except Exception:
+            pass
+
+
+def notifier_match_complet(match_id):
+    """Envoie un email récap à tous les joueurs quand le match passe à 'complet'."""
+    if not PG_URL:
+        return
+    m = get_open_match(match_id)
+    if not m:
+        return
+    joueurs = get_joueurs_match(match_id)
+    html_recap = email_match_complet_html  # alias pour lisibilité
+    for j in joueurs:
+        email = j["email"]
+        prenom = j.get("prenom")
+        try:
+            envoyer_email(email, f"Match complet — {m['date']} à {m['club']}",
+                          html_recap(prenom, m, joueurs), nom=prenom)
+        except Exception:
+            pass
 
 
 def post_inscription_emails(email, prenom, ref_code):
@@ -1880,7 +1992,7 @@ _COUNTDOWN_JS = '''
 </script>'''
 
 
-def page_landing(sent_code=None, ref_from=None, error=None, source=None):
+def page_landing(sent_code=None, ref_from=None, error=None, source=None, top_banner=""):
     n = count_waitlist()
     # Suivi d'acquisition : ?from=<source> (ex. "sihp") transmis au formulaire
     source_field = (f'<input type="hidden" name="source" value="{e(source)}">'
@@ -2233,7 +2345,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
         og_title = f"{qui} t'invite dans la Ligue Padel Santé"
         og_desc = ("Le championnat de padel des soignants d'Île-de-France. "
                    "Inscris-toi gratuitement et jouez ensemble.")
-    return page("Accueil", corps, nav=False, og_title=og_title, og_desc=og_desc)
+    return page("Accueil", top_banner + corps, nav=False, og_title=og_title, og_desc=og_desc)
 
 
 def page_confidentialite():
@@ -3136,9 +3248,22 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 ref = q.get("ref", [None])[0]
                 err = q.get("err", [None])[0]
                 src = q.get("from", [None])[0]
+                joueur_co = self._joueur()
+                conn_banner = ""
+                if joueur_co:
+                    p = joueur_co.get("prenom") or joueur_co["email"]
+                    conn_banner = (
+                        f'<div style="position:fixed;top:0;left:0;right:0;z-index:999;'
+                        f'background:rgba(6,18,10,.95);border-bottom:1px solid var(--lime);'
+                        f'padding:10px 20px;text-align:center;font-size:13px;backdrop-filter:blur(6px)">'
+                        f'Connecté(e) : <strong style="color:var(--lime)">{e(p)}</strong> · '
+                        f'<a href="/matchs">Matchs</a> · '
+                        f'<a href="/profil">Profil</a> · '
+                        f'<a href="/deconnexion" style="color:var(--muted)">Déconnexion</a></div>')
                 self._send(page_landing(sent_code=ok,
                                         ref_from=waitlist_par_code(ref),
-                                        error=err, source=src))
+                                        error=err, source=src,
+                                        top_banner=conn_banner))
             elif u.path == "/apercu":
                 # Déverrouillage de la démo/admin via ?cle=<APERCU_CODE>
                 cle = q.get("cle", [""])[0]
@@ -3184,8 +3309,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     self._send(page_connexion("Lien invalide ou expiré. Recommence."))
                     return
                 session = creer_session(email)
+                next_path = q.get("next", ["/profil"])[0]
+                # Sécurité : autoriser seulement les chemins internes
+                if not next_path.startswith("/"):
+                    next_path = "/profil"
                 self.send_response(303)
-                self.send_header("Location", "/profil")
+                self.send_header("Location", next_path)
                 self._set_session(session)
                 self.end_headers()
             elif u.path == "/deconnexion":
@@ -3221,7 +3350,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 if not joueur:
                     self._redirect("/connexion")
                     return
-                mid = int(q.get("id", [0])[0])
+                try:
+                    mid = int(q.get("id", [0])[0])
+                except (ValueError, TypeError):
+                    mid = 0
                 self._send(page_match(mid, joueur, flash))
             elif u.path == "/confidentialite":
                 self._send(page_confidentialite())
@@ -3303,8 +3435,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
             zone = g("zone") or joueur.get("zone") or "Centre"
             mid = ouvrir_match(joueur["email"], date, heure, club,
                                format_, niveau_min, niveau_max, zone)
+            import threading
+            threading.Thread(target=notifier_joueurs_compatibles,
+                             args=(mid,), daemon=True).start()
             self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(
-                "Match ouvert ! Les joueurs compatibles peuvent maintenant te rejoindre."))
+                "Match ouvert ! Les joueurs compatibles vont recevoir une notification."))
 
         elif u.path == "/match/rejoindre":
             joueur = self._joueur()
@@ -3313,9 +3448,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             mid = int(g("match_id") or 0)
             err = rejoindre_match(mid, joueur["email"])
-            if err:
+            if err and err != "complet":
                 self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(err))
             else:
+                if err == "complet":
+                    import threading
+                    threading.Thread(target=notifier_match_complet,
+                                     args=(mid,), daemon=True).start()
                 self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(
                     "Inscrit(e) ! À très vite sur le terrain."))
 
