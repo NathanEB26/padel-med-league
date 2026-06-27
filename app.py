@@ -888,8 +888,12 @@ def email_confirmation_html(prenom, ref_code):
       <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0 0 22px;
       word-break:break-all">Ton lien : <a href="{lien}" style="color:#6b7a8c">{lien}</a></p>
 
-      <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0;border-top:1px solid #eef2f6;
-      padding-top:16px">
+      <p style="font-size:14px;color:#444;margin:0 0 12px;padding:16px 0 0;border-top:1px solid #eef2f6">
+      <strong>Espace bêta :</strong> avant le lancement officiel, tu peux accéder au
+      système de matchs en cliquant ici →
+      <a href="{BASE_URL}/connexion" style="color:#1a6b35;font-weight:700">
+      {BASE_URL}/connexion</a></p>
+      <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0">
       Tu reçois cet email car tu t'es inscrit(e) sur padel-med-league.fr. Pour te
       désinscrire ou toute question : <a href="mailto:{EMAIL_FROM}"
       style="color:#6b7a8c">{EMAIL_FROM}</a>.</p>
@@ -1033,6 +1037,95 @@ def notifier_match_complet(match_id):
                           html_recap(prenom, m, joueurs), nom=prenom)
         except Exception:
             pass
+
+
+def annuler_match(match_id, email):
+    """Annule un match (créateur uniquement). Retourne None si OK, message sinon."""
+    if not PG_URL:
+        return "Fonctionnalité non disponible hors ligne."
+    _pg_ensure_jeu()
+    with _pg() as c:
+        m = c.execute("SELECT * FROM open_matches WHERE id=%s", (match_id,)).fetchone()
+        if not m:
+            return "Match introuvable."
+        if m["creator_email"].lower() != email.lower():
+            return "Seul le créateur peut annuler ce match."
+        if m["statut"] == "annulé":
+            return "Déjà annulé."
+        c.execute("UPDATE open_matches SET statut='annulé' WHERE id=%s", (match_id,))
+    return None
+
+
+def matchs_joueur(email):
+    """Retourne tous les matchs auxquels ce joueur est inscrit."""
+    if not PG_URL:
+        return []
+    _pg_ensure_jeu()
+    with _pg() as c:
+        return c.execute(
+            """SELECT m.*,
+               (SELECT COUNT(*) FROM open_match_joueurs j WHERE j.match_id=m.id) AS nb_inscrits
+               FROM open_matches m
+               JOIN open_match_joueurs j ON j.match_id=m.id
+               WHERE lower(j.email)=lower(%s)
+               ORDER BY m.date DESC, m.heure DESC""",
+            (email,)).fetchall()
+
+
+def envoyer_invitations_beta(nb_max=None):
+    """Envoie un magic link à tous les membres de la waitlist (usage admin).
+    Retourne le nombre d'emails envoyés. Bypasse le throttle habituel."""
+    if not PG_URL:
+        return 0
+    _pg_ensure()
+    with _pg() as c:
+        rows = c.execute(
+            "SELECT email, prenom FROM waitlist WHERE consent=TRUE ORDER BY created"
+        ).fetchall()
+    if nb_max:
+        rows = rows[:nb_max]
+    sent = 0
+    for row in rows:
+        email = row["email"]
+        prenom = row.get("prenom")
+        token = creer_magic_token(email)
+        if not token:
+            continue
+        magic_url = f"{BASE_URL}/connexion/lien?t={token}&next=/matchs"
+        try:
+            envoyer_email(
+                email,
+                "Tu es invité(e) à tester la Ligue Padel Santé — Accès bêta",
+                email_invitation_beta_html(prenom, magic_url),
+                nom=prenom)
+            sent += 1
+        except Exception:
+            pass
+    return sent
+
+
+def email_invitation_beta_html(prenom, magic_url):
+    bonjour = f"Bonjour {e(prenom)} !" if prenom else "Bonjour !"
+    return f"""
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#070b10;color:#e2eaf0;border-radius:12px;overflow:hidden">
+  <div style="background:#0b141d;padding:28px 36px;border-bottom:1px solid #1e2f3d">
+    <p style="margin:0;font-size:20px;font-weight:900;font-style:italic;
+       text-transform:uppercase;color:#c6ff00">Ligue Padel Santé · IDF</p>
+  </div>
+  <div style="padding:36px">
+    <p style="margin:0 0 10px;font-size:17px;font-weight:700">{bonjour}</p>
+    <p style="margin:0 0 8px;color:#9baab5">Tu fais partie des premières personnes pré-inscrites à la Ligue Padel Santé.</p>
+    <p style="margin:0 0 20px;color:#9baab5">Avant le lancement officiel du <strong style="color:#e2eaf0">1er septembre</strong>, on ouvre un accès bêta pour tester le système de mise en relation : <strong style="color:#e2eaf0">les open matchs</strong>.</p>
+    <p style="margin:0 0 24px;color:#9baab5">Le principe : tu proposes un créneau (date, heure, club), et les joueurs compatibles de ta zone reçoivent une notification pour te rejoindre. Simple et direct.</p>
+    <a href="{magic_url}" style="display:inline-block;background:#c6ff00;color:#06120a;
+       font-weight:900;font-style:italic;text-transform:uppercase;font-size:16px;
+       padding:16px 32px;border-radius:10px;text-decoration:none">
+      Accéder à mon espace bêta →
+    </a>
+    <p style="margin:28px 0 0;font-size:13px;color:#9baab5">Ce lien est personnel et valable <strong style="color:#e2eaf0">15 minutes</strong>. Si le lien a expiré, va sur <a href="{BASE_URL}/connexion" style="color:#c6ff00">{BASE_URL}/connexion</a> pour en recevoir un nouveau.</p>
+    <p style="margin:12px 0 0;font-size:12px;color:#6b7a8c">Pour te désinscrire de ces emails : réponds à ce message.</p>
+  </div>
+</div>"""
 
 
 def post_inscription_emails(email, prenom, ref_code):
@@ -2891,7 +2984,16 @@ def page_admin(flash=None):
       <div><label>Supprimer une entrée (email)</label>
         <input name="email" type="email" placeholder="email à retirer"></div>
       <div style="flex:0 0 auto"><button class="btn danger" type="submit">Supprimer</button></div>
-    </form></div>
+    </form>
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line)">
+      <h3 style="margin-top:0">Invitations bêta (open match)</h3>
+      <p class="muted">Envoie un magic link à toute la waitlist pour accéder à l'espace bêta
+      (open match). Chaque lien est personnel et expire après 15 min. À n'envoyer qu'une fois.</p>
+      <form method="post" action="/admin/beta-invite"
+            onsubmit="return confirm('Envoyer les invitations bêta à tous les membres de la waitlist ?')">
+        <button class="btn" type="submit">Envoyer les invitations bêta</button>
+      </form>
+    </div></div>
     <div class="card">
     <h3 style="margin-top:0">Outils de simulation</h3>
     <h3>Générer la prochaine journée</h3>
@@ -2989,20 +3091,47 @@ def page_profil(joueur, flash=None):
         Voir les matchs ouverts</a>
       <a href="/match/ouvrir" class="btn sec" style="display:inline-block">
         Ouvrir un match</a>
-      <p style="margin-top:24px"><a href="/deconnexion" style="color:var(--muted);
-         font-size:13px">Se déconnecter</a></p>
     </div>"""
+    # Section "Mes matchs"
+    mes_matchs = matchs_joueur(email) if PG_URL else []
+    if mes_matchs:
+        def ligne_match(m):
+            statut_col = {"ouvert": "var(--lime)", "complet": "var(--mag)", "annulé": "var(--muted)"}
+            col = statut_col.get(m["statut"], "var(--muted)")
+            return (f'<tr><td><a href="/match?id={m["id"]}">{e(m["date"])} {e(m["heure"])}</a></td>'
+                    f'<td>{e(m["club"])}</td>'
+                    f'<td><span class="badge zone">{e(m["zone"] or "—")}</span></td>'
+                    f'<td style="color:{col}">{e(m["statut"])}</td></tr>')
+        rows_html = "".join(ligne_match(m) for m in mes_matchs)
+        corps += f"""<div class="card" style="max-width:620px;margin:16px auto 0">
+          <h3 style="margin-top:0">Mes matchs</h3>
+          <table><tr><th>Date</th><th>Club</th><th>Zone</th><th>Statut</th></tr>
+          {rows_html}</table></div>"""
+    corps += f"""<p style="max-width:620px;margin:16px auto 0;text-align:right">
+      <a href="/deconnexion" style="color:var(--muted);font-size:13px">Se déconnecter</a></p>"""
     return page("Mon profil", corps, flash)
 
 
 def page_matchs(joueur, flash=None):
     email = joueur["email"]
-    matchs = lister_open_matchs() if PG_URL else []
+    zone_joueur = joueur.get("zone") or ""
+    niv_joueur = joueur.get("niveau") or 0
+    matchs_bruts = lister_open_matchs() if PG_URL else []
+
+    # Tri : même zone d'abord, puis niveau compatible, puis le reste
+    def score_tri(m):
+        meme_zone = 0 if m["zone"] == zone_joueur else 1
+        niv_ok = 0 if (not niv_joueur or m["niveau_min"] <= niv_joueur <= m["niveau_max"]) else 1
+        return (meme_zone, niv_ok, m["date"], m["heure"])
+
+    matchs = sorted(matchs_bruts, key=score_tri)
+    mes_ids = {m["id"] for m in (matchs_joueur(email) if PG_URL else [])}
 
     def carte_match(m):
         inscrits = m["nb_inscrits"]
         slots = m["nb_slots"]
         complet = m["statut"] == "complet"
+        suis_inscrit = m["id"] in mes_ids
         statut_badge = ('<span class="badge" style="background:#1e3a1e;color:var(--lime)">'
                         f'{inscrits}/{slots} joueur(s)</span>'
                         if not complet else
@@ -3010,13 +3139,18 @@ def page_matchs(joueur, flash=None):
         niv_range = (f'Niveau {m["niveau_min"]}→{m["niveau_max"]}'
                      if m["niveau_min"] != 3 or m["niveau_max"] != 7
                      else "Tous niveaux")
-        return f"""<div class="card" style="margin-bottom:14px">
+        mon_badge = (' <span class="badge" style="background:#0d1f36;color:#7eb8f7">Inscrit(e)</span>'
+                     if suis_inscrit else "")
+        compat = (m["zone"] == zone_joueur and
+                  (not niv_joueur or m["niveau_min"] <= niv_joueur <= m["niveau_max"]))
+        border = "border-color:var(--lime)" if compat and not suis_inscrit else ""
+        return f"""<div class="card" style="margin-bottom:14px;{border}">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
             <div>
               <strong style="font-size:17px">{e(m['date'])} à {e(m['heure'])}</strong>
               <br><span class="muted">{e(m['club'])}</span>
             </div>
-            {statut_badge}
+            <div>{statut_badge}{mon_badge}</div>
           </div>
           <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
             <span class="badge zone">{e(m['zone'] or '—')}</span>
@@ -3153,6 +3287,19 @@ def page_match(match_id, joueur, flash=None):
     elif complet and not inscrit:
         action_html = '<p class="muted" style="margin-top:12px">Match complet.</p>'
 
+    # Bouton annuler (créateur seulement, si match pas encore annulé)
+    est_createur = (m["creator_email"].lower() == email.lower())
+    if est_createur and m["statut"] != "annulé":
+        action_html += f"""
+        <form method="post" action="/match/annuler" style="margin-top:14px"
+              onsubmit="return confirm('Annuler ce match ? Les joueurs inscrits ne seront pas notifiés automatiquement.')">
+          <input type="hidden" name="match_id" value="{match_id}">
+          <button class="btn danger" style="padding:8px 16px;font-size:13px">Annuler ce match</button>
+        </form>"""
+
+    if m["statut"] == "annulé":
+        action_html = '<p style="color:var(--muted);margin-top:12px;font-style:italic">Ce match a été annulé.</p>'
+
     niv_range = (f"Niveau {m['niveau_min']}→{m['niveau_max']}"
                  if m['niveau_min'] != 3 or m['niveau_max'] != 7 else "Tous niveaux")
 
@@ -3216,7 +3363,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                   "/connexion", "/connexion/lien", "/deconnexion",
                   "/profil", "/matchs", "/match/ouvrir", "/match"}
     PUBLIC_POST = {"/rejoindre", "/auth/google", "/apercu",
-                   "/connexion", "/match/ouvrir", "/match/rejoindre", "/match/score"}
+                   "/connexion", "/match/ouvrir", "/match/rejoindre", "/match/score",
+                   "/match/annuler"}
 
     def _joueur(self):
         """Retourne la ligne waitlist du joueur connecté, ou None."""
@@ -3637,6 +3785,28 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif u.path == "/admin/reset":
             seed()
             self._redirect("/classement?flash=" + urllib.parse.quote("Démo réinitialisée."))
+
+        elif u.path == "/admin/beta-invite":
+            import threading
+            def _send_invites():
+                nb = envoyer_invitations_beta()
+                pass  # résultat loggable mais pas renvoyable (fire-and-forget)
+            threading.Thread(target=_send_invites, daemon=True).start()
+            self._redirect("/admin?flash=" + urllib.parse.quote(
+                "Invitations bêta en cours d'envoi à toute la waitlist."))
+
+        elif u.path == "/match/annuler":
+            joueur = self._joueur()
+            if not joueur:
+                self._redirect("/connexion")
+                return
+            mid = int(g("match_id") or 0)
+            err = annuler_match(mid, joueur["email"])
+            if err:
+                self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(err))
+            else:
+                self._redirect(f"/matchs?flash=" + urllib.parse.quote("Match annulé."))
+
         else:
             self._send(page("404", "<div class='card'>Inconnu.</div>"), 404)
 
