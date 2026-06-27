@@ -32,7 +32,17 @@
    qu'aucune information importante ne reste uniquement « dans la tête » de la
    conversation.
 
-4. **Committer (et pousser si possible) les fichiers modifiés.** Les deux
+4. **Régénérer le dashboard Notion** (« Ligue Padel Santé IDF — Dashboard »,
+   créé le 27/06/2026) si STRATEGIE.md, CALENDRIER-COMM.md, CONTACTS-RELAIS.md
+   ou MEMOIRE.md ont changé pendant la session. Le dashboard est un **miroir en
+   lecture** régénéré en bloc depuis ces fichiers — jamais édité à la main côté
+   Notion, jamais mis à jour de façon incrémentale (pour ne pas recréer le
+   problème de double source de vérité qu'on a justement éliminé dans les .md).
+   Si Notion n'est pas connecté dans l'environnement courant (ex. certaines
+   sessions Claude Code), signaler que le dashboard est resté sur l'état de la
+   dernière régénération côté Cowork.
+
+5. **Committer (et pousser si possible) les fichiers modifiés.** Les deux
    environnements partagent le même dossier et le même `.git` local, donc un
    commit fait dans l'un est immédiatement visible dans l'autre. **Mais en
    Cowork, le réseau sandboxé bloque `git push` vers GitHub** (proxy 403) — le
