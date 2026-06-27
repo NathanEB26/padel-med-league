@@ -32,6 +32,16 @@
    qu'aucune information importante ne reste uniquement « dans la tête » de la
    conversation.
 
+4. **Committer (et pousser si possible) les fichiers modifiés.** Les deux
+   environnements partagent le même dossier et le même `.git` local, donc un
+   commit fait dans l'un est immédiatement visible dans l'autre. **Mais en
+   Cowork, le réseau sandboxé bloque `git push` vers GitHub** (proxy 403) — le
+   commit reste local jusqu'à ce qu'il soit poussé **depuis Claude Code**
+   (réseau normal). Donc : committer dans les deux environnements ; si on est
+   en Cowork et qu'un commit doit absolument partir vers GitHub/Render tout de
+   suite (ex. juste avant une promo), le signaler à Nathan pour qu'il pousse
+   depuis Code, plutôt que de supposer que le push a réussi.
+
 ---
 
 ## Pourquoi un fichier séparé (et plus la mémoire Cowork)
