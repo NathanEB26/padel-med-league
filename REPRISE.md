@@ -92,6 +92,12 @@ depuis son téléphone en dehors d'une session — c'est une vraie source d'entr
    (`DATABASE_URL`, `BREVO_API_KEY`…). Ne pas supposer qu'une case ✅ dans
    STRATEGIE.md est encore vraie si le code la contredit.
 
+2bis. **Pousser les commits en attente.** Faire `git status` / `git log
+   origin/main..HEAD` : si des commits faits depuis Cowork attendent (le
+   réseau sandboxé y bloque `git push`, voir AU-REVOIR.md point 5), les
+   pousser **dès le début de la session**, avant de continuer — ne pas attendre
+   la fin de session pour s'en apercevoir.
+
 3. **Point rapide en 3 temps** :
    - Où en est l'échéance S12 (open match + amicaux, début août).
    - Ce qui a été codé/déployé depuis la dernière session.
