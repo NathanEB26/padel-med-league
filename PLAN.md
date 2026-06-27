@@ -360,7 +360,7 @@ Pour renforcer le réseautage **sans enfermer** les gens dans un petit groupe.
 
 **On ne note jamais les collègues.** En fin de match, chaque joueur note
 seulement **son propre ressenti** (1 tap, optionnel, privé) :
-> « Tu t'es éclaté·e sur ce match ? » → 😄 Génial · 🙂 Sympa · 😐 Bof
+> « Tu t'es éclaté(e) sur ce match ? » → 😄 Génial · 🙂 Sympa · 😐 Bof
 
 **Usage par l'algo (jamais affiché, jamais nominatif) :**
 - Match « Génial » → légère **affinité privée** entre toi et les joueurs de ce

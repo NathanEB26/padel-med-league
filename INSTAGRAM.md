@@ -94,7 +94,7 @@ Créez ces 4 bulles permanentes :
 > Ça bouscule en haut du tableau ! Prochaine journée dans 15 j.
 
 ### e) Recherche de partenaire (conversion)
-> 👀 **Cherche binôme !** Plusieurs soignants cherchent un·e partenaire dans ta
+> 👀 **Cherche binôme !** Plusieurs soignants cherchent un(e) partenaire dans ta
 > zone (Sud, Ouest, Nord-Est…). Inscris-toi, trouve ton duo dans l'annuaire, et
 > c'est parti. Lien en bio.
 

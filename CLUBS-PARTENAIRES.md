@@ -57,7 +57,7 @@ relaient) + **lieux pour les événements**.
 > En retour, nous relayons votre club à notre communauté et vous envoyons des joueurs.
 > Démarche entièrement bénévole et non lucrative de ma part.
 >
-> Seriez-vous partant·e pour en discuter 15 min ? Je peux vous présenter le projet.
+> Seriez-vous partant(e) pour en discuter 15 min ? Je peux vous présenter le projet.
 > Bien à vous,
 > Dr Nathan El Bèze — Ligue Padel Santé Île-de-France · padel-med-league.fr
 

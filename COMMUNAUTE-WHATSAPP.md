@@ -66,7 +66,7 @@ que le **nom** et la **photo de la chaîne**. Donc :
 mieux qu'une chaîne qui spamme et fait désabonner). Toujours **utile ou exclusif**.
 
 - **Post de bienvenue** (épinglé) — voir §4.
-- **Jalons d'inscription** : « On est 50 / 100 / 200 inscrit·e·s 🎾 ».
+- **Jalons d'inscription** : « On est 50 / 100 / 200 inscrit(e)s 🎾 ».
 - **Coulisses** : un club partenaire qu'on contacte, le format expliqué, une zone qui
   se remplit.
 - **Compte à rebours** : J-60, J-30, J-7 avant le 1ᵉʳ septembre 2026.
@@ -87,11 +87,11 @@ médical/pro (rester sur le padel et la ligue).
 > Ici, et seulement ici, tu reçois les annonces qui comptent : date d'ouverture,
 > créneaux, clubs partenaires, Club des Fondateurs. Pas de spam, ton numéro reste
 > privé. Coup d'envoi de la Saison 1 : **1ᵉʳ septembre 2026**.
-> Pas encore inscrit·e ? → padel-med-league.fr
+> Pas encore inscrit(e) ? → padel-med-league.fr
 
 **Relance jalon (exemple) :**
-> 🔥 On vient de passer les **100 soignant·e·s** sur la liste ! Médecins, kinés,
-> infirmier·e·s, dentistes, sages-femmes, étudiant·e·s… la ligue prend forme.
+> 🔥 On vient de passer les **100 soignant(e)s** sur la liste ! Médecins, kinés,
+> infirmier(ère)s, dentistes, sages-femmes, étudiant(e)s… la ligue prend forme.
 > Invite ton binôme de padel, vous serez appariés ensemble : padel-med-league.fr
 
 **J-30 :**
@@ -112,7 +112,7 @@ partenaires** :
 3. **Sous-groupes par zone** (les 9 zones cardinales : Centre + N/NE/E/SE/S/SO/O/NO),
    **créés à la demande** quand une zone atteint ~15-20 inscrits (sinon groupes vides).
 4. **Charte épinglée** dans chaque groupe (voir §6).
-5. **Modérateurs** : Nathan + 1 ambassadeur·rice par zone active (cf. KIT-AMBASSADEUR).
+5. **Modérateurs** : Nathan + 1 ambassadeur(rice) par zone active (cf. KIT-AMBASSADEUR).
 
 > La chaîne reste en parallèle comme **vitrine publique anti-spam** ; la communauté
 > sert l'**organisation des matchs**.

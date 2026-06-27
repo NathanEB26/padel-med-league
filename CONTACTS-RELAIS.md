@@ -62,7 +62,7 @@
 | **FFMKR · SNMKR · Alizé** | Diffusion adhérents |
 | **FNEK** (étudiants kiné) | Cible jeune + sportive |
 
-## Infirmier·ère·s
+## Infirmier(ère)s
 | Structure | Angle |
 |---|---|
 | **URPS Infirmiers IDF** · **Ordre National Infirmier** | Bien-être soignant |
@@ -77,7 +77,7 @@
 
 ## Autres paramédicaux
 - **Orthophonistes** : URPS, FNO, **FNEO** (étudiants).
-- **Pédicures-podologues**, **ergothérapeutes**, **orthoptistes**, **diététicien·ne·s**,
+- **Pédicures-podologues**, **ergothérapeutes**, **orthoptistes**, **diététicien(ne)s**,
   **manipulateurs radio** : ordres/syndicats/assos étudiantes respectifs.
 
 ## Transversal (fort levier — à ne pas oublier)
@@ -106,6 +106,7 @@
 | Structure | Vague | Lien `?from=` | Envoyé le | Relancé le | A relayé ? | Notes |
 |---|---|---|---|---|---|---|
 | SIHP | 1 | sihp | **25/06** | | ⏳ | accord acquis, attendre la pub |
+| Internes cardio (Johann/Samuel/Gabriel) | 1 | cardio | **26/06** | | ⏳ | contacts chauds, WhatsApp + mail à transférer aux internes |
 | SRP-IMG | 1 | srpimg | | | | internes MG IDF |
 | FNSIP-BM | 1 | fnsip | | | | internes pharma/bio |
 | FNEK | 1 | fnek | | | | étudiants kiné |

@@ -80,6 +80,53 @@
 > Merci à vous, à très vite !
 > Nathan El Bèze
 
+### D. Internes référents de cardiologie (Johann, Samuel, Gabriel — il les connaît bien, mais ils ne sont pas au courant du projet)
+> Méthode : **WhatsApp direct** à chacun pour présenter le projet et leur demander
+> le coup de main, **+ mail clé en main** qu'ils n'ont qu'à transférer à leur liste
+> d'internes. Lien traçable `?from=cardio`.
+
+**D.1 — WhatsApp à envoyer en direct (Johann / Samuel / Gabriel)**
+> Salut [Prénom] 👋 J'espère que tu vas bien ! Je te dérange pour un truc qui me tient
+> à cœur : je viens de lancer la **Ligue Padel Santé Île-de-France**, un championnat de
+> padel **amical, 100 % gratuit et bénévole**, ouvert à tous les soignants (j'y gagne
+> rien, c'est juste l'envie de nous faire bouger et de créer du lien). Le principe : on
+> t'apparie par niveau et par zone, tu joues un match toutes les 2 semaines au créneau qui
+> t'arrange, et le classement se fait tout seul — débutant comme confirmé. Ça démarre le
+> 1ᵉʳ septembre.
+> Comme tu es référent des internes de cardio, est-ce que tu pourrais **transférer un petit
+> mail aux internes** ? Je t'ai préparé un texte tout prêt, t'as juste à le faire suivre 🙏
+> Et évidemment, inscris-toi aussi si ça te branche 😄
+> Inscription : https://padel-med-league.fr/?from=cardio
+> Merci beaucoup, ça compte vraiment 🎾🩺
+
+**D.2 — Mail clé en main à transférer aux internes** (objet + corps prêts)
+**Objet : Championnat de padel entre soignants — ça démarre en septembre 🎾**
+> Salut à toutes et à tous,
+>
+> On relaie avec plaisir un projet sympa, monté **bénévolement par un CCA de cardiologie** :
+> la **Ligue Padel Santé Île-de-France**, un championnat de padel **amical, 100 % gratuit et
+> à but non lucratif**, ouvert à tous les soignants — internes compris.
+>
+> Le constat : entre les gardes et les horaires, on bouge tous trop peu. L'idée, c'est de
+> se remettre au sport et de créer du lien, sans prise de tête.
+>
+> Comment ça marche :
+> • Tu te pré-inscris (gratuit, **10 secondes**) ;
+> • On t'apparie par **niveau** et par **zone géographique** (tu joues contre des gens à ta
+>   hauteur, près de chez toi) ;
+> • Tu joues **un match toutes les 2 semaines**, au créneau qui t'arrange ;
+> • Le classement se met à jour tout seul.
+>
+> Débutant comme confirmé, tu trouves enfin des partenaires à ton niveau — parfait pour
+> décompresser et faire des rencontres, même avec un planning de garde. On pourrait même
+> **monter une ou deux équipes d'internes de cardio** et se tirer la bourre avec d'autres
+> services 😏
+>
+> Ça démarre le **1ᵉʳ septembre 2026**. Les pré-inscriptions sont ouvertes :
+> 👉 **https://padel-med-league.fr/?from=cardio**
+>
+> Faites tourner autour de vous. À très vite sur le terrain !
+
 ---
 
 ## 2. 🗓️ Calendrier social (Instagram + LinkedIn + Chaîne WhatsApp)
@@ -91,7 +138,7 @@
 | Sem | Dates | Thème | Instagram | LinkedIn | Chaîne WhatsApp |
 |---|---|---|---|---|---|
 | S1 | 25/6–1/7 | **Annonce** | Post 01 (épinglé) + story | Post « lancement » | Bienvenue (fait) |
-| S2 | 2–8/7 | **Le binôme** | Post 03 (tag ton binôme) | — | « invite un·e collègue » |
+| S2 | 2–8/7 | **Le binôme** | Post 03 (tag ton binôme) | — | « invite un(e) collègue » |
 | S3 | 9–15/7 | **Peur du niveau** | Post A | Post « débutant ou confirmé » | Jalon inscrits |
 | S4 | 16–22/7 | **Fondateurs (urgence)** | Post 02 + story compteur | — | Rappel Club des Fondateurs |
 | S5 | 23–29/7 | **Manifeste (bénévole)** | Post B | Post « pourquoi on monte ça » | Update avancement |
@@ -175,7 +222,7 @@
 > Rejoins la liste d'attente, lien en bio. #padel #soignants #iledefrance #padelmedleague
 
 ### Carrousel « Par métier » (S6)
-> Médecins, kinés, infirmier·ère·s, dentistes, pharmacien·ne·s, sages-femmes, étudiant·e·s
+> Médecins, kinés, infirmier(ère)s, dentistes, pharmacien(ne)s, sages-femmes, étudiant(e)s
 > en santé… 🎾 La ligue est ouverte à **tous** les pros de santé d'Île-de-France.
 > Quelle équipe va dominer : Cardio ou Anesthésie ? 👀 Inscris-toi, lien en bio.
 
@@ -188,6 +235,6 @@
 > débutant/confirmé, pourquoi, FAQ, J-15, on y est).
 
 ### Chaîne WhatsApp — messages types
-- Jalon : « On vient de passer les **X soignant·e·s** sur la liste 🎾 Invite ton binôme : padel-med-league.fr/?from=wa »
+- Jalon : « On vient de passer les **X soignant(e)s** sur la liste 🎾 Invite ton binôme : padel-med-league.fr/?from=wa »
 - Rappel Fondateurs : « Les 50 premières équipes = Club des Fondateurs. Tag ton binôme ! »
 - J-15 : « Plus que 15 jours avant le coup d'envoi ⏳ Prépare ton binôme. »
