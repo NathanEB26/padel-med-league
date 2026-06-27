@@ -3,13 +3,12 @@
 Tout est prêt à publier. Modèle de fonctionnement retenu : **je produis, tu
 publies/programmes** (via Meta Business Suite, gratuit).
 
-## 📅 Calendrier de publication (3 premiers posts)
+## 📅 Calendrier de publication
 
-| Quand | Post | Action |
-|---|---|---|
-| **Jour J** | `01-annonce.png` | Publie-le et **épingle-le**. Mets le lien d'inscription **en bio**. |
-| **J + 2-3** | `03-binome.png` | « Tag ton binôme » — pousse au partage. |
-| **J + 5-6** | `02-fondateurs.png` | « Club des Fondateurs » — crée l'urgence quand la liste grossit. |
+> Le calendrier **daté** (quel post, quelle semaine, Instagram/LinkedIn/WhatsApp) vit
+> dans **[CALENDRIER-COMM.md](CALENDRIER-COMM.md) §2** — c'est la source à jour, ne
+> pas se fier à un calendrier relatif ici. Les légendes correspondantes sont dans
+> [visuels-instagram/LEGENDES.md](visuels-instagram/LEGENDES.md).
 
 **Meilleurs créneaux** (audience FR) : en semaine, **12 h-13 h** ou **18 h-21 h**.
 
@@ -68,14 +67,13 @@ Créez ces 4 bulles permanentes :
 
 ---
 
-## 5. Modèles de posts prêts à l'emploi
+## 5. Modèles de posts prêts à l'emploi (régime de croisière — une fois la ligue lancée)
 
-### a) Annonce de lancement (post épinglé)
-> 🚨 **Ça arrive.** La **Ligue Padel Santé Île-de-France** ouvre ses inscriptions.
-> Le premier championnat de padel **entre professionnels de santé** : un adversaire
-> à ton niveau, dans ta zone, toutes les 2 semaines. Tu trouves le terrain, tu
-> joues, le classement fait le reste. 🎾🩺
-> 👉 Inscription gratuite (lien en bio). Tag ton futur binôme ! 👇
+> Les posts **pré-lancement** (annonce, fondateurs, binôme, peur du niveau,
+> manifeste…) sont dans [visuels-instagram/LEGENDES.md](visuels-instagram/LEGENDES.md),
+> programmés via [CALENDRIER-COMM.md](CALENDRIER-COMM.md) §2. Les modèles ci-dessous
+> sont pour **après** le 1ᵉʳ septembre : ils servent à chaque journée jouée (affiches,
+> résultats), pas de date fixe.
 
 ### b) Affiche d'un match (pilier Événements)
 > 🗓️ **JOURNÉE 3 — L'AFFICHE**

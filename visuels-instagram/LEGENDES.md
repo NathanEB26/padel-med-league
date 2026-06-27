@@ -1,8 +1,16 @@
-# Visuels Instagram — liste d'attente
+# LEGENDES.md — Bibliothèque de légendes prêtes à l'emploi
 
-3 visuels carrés (1080×1080), prêts à poster, aux couleurs de la ligue.
-Chaque visuel existe en **`.png`** (à publier directement) et en **`.svg`**
-(modifiable). Compte : **@padelmedleague**.
+> **Source unique des légendes/hashtags** pour tous les posts pré-lancement
+> (Instagram + carrousel). Le calendrier daté (quel post, quelle semaine) vit
+> dans [CALENDRIER-COMM.md](../CALENDRIER-COMM.md) §2 — ne pas dupliquer les
+> dates ici, juste le texte.
+
+3 visuels carrés (1080×1080) existent déjà, prêts à poster, aux couleurs de la
+ligue : **01-annonce, 02-fondateurs, 03-binome**. Chacun en **`.png`** (à publier
+directement) et en **`.svg`** (modifiable). Compte : **@padelmedleague**.
+
+Les posts **A, B, Carrousel, C** (§ plus bas) n'ont **pas encore de visuel dédié**
+— texte seul, story, ou réutiliser un visuel existant en attendant.
 
 > Astuce ordre de publication : **01 (annonce)** en post épinglé → **03 (binôme)**
 > 2-3 jours après → **02 (fondateurs)** pour créer l'urgence quand la liste grossit.
@@ -48,6 +56,51 @@ Chaque visuel existe en **`.png`** (à publier directement) et en **`.svg`**
 
 **Hashtags :**
 `#padel #padelfrance #padelparis #iledefrance #santé #kiné #infirmier #dentiste #pharmacien #sagefemme #internat #sportsanté #padelmedleague`
+
+---
+
+## A — La peur du niveau (semaine S3, 9-15/7)
+**Légende :**
+> 🎾 « J'ai peur de ne pas être au niveau. » On l'entend tout le temps.
+> Bonne nouvelle : à la Ligue Padel Santé, tu joues **toujours** contre des gens de
+> **ton** niveau. Débutant qui se lance ? Zéro match humiliant. Joueur affûté ? Enfin des
+> adversaires à ta hauteur. Inscription gratuite, lien en bio.
+
+**Hashtags :** `#padel #padelparis #santé #sportsanté #padelmedleague`
+
+---
+
+## B — Le manifeste, 100 % bénévole (semaine S5, 23-29/7)
+**Légende :**
+> 100 % gratuit. 0 % business. 🩺
+> La Ligue Padel Santé, c'est une bande de soignants qui voulaient juste jouer plus
+> souvent, contre des gens sympas. Pas de pub, pas de revente de données, pas un centime
+> dans la poche. Juste le plaisir de jouer et de se rencontrer entre soignants d'IDF.
+> Rejoins la liste d'attente, lien en bio.
+
+**Hashtags :** `#padel #soignants #iledefrance #padelmedleague`
+
+---
+
+## Carrousel — Par métier (semaine S6, 30/7-5/8)
+**Légende :**
+> Médecins, kinés, infirmier(ère)s, dentistes, pharmacien(ne)s, sages-femmes, étudiant(e)s
+> en santé… 🎾 La ligue est ouverte à **tous** les pros de santé d'Île-de-France.
+> Quelle équipe va dominer : Cardio ou Anesthésie ? 👀 Inscris-toi, lien en bio.
+
+---
+
+## C — Dernier appel (semaine S10, 27/8-1/9)
+**Légende :**
+> ⏳ Ça démarre le 1ᵉʳ septembre. Dernière ligne droite pour rejoindre la liste d'attente
+> et sécuriser ta place au Club des Fondateurs (50 premières équipes). Lien en bio. 🎾
+
+---
+
+> **LinkedIn** : décliner l'angle de la semaine à partir du post du KIT-AMBASSADEUR §1
+> (lancement, débutant/confirmé, pourquoi, FAQ, J-15, on y est) — publié depuis la **Page**
+> dédiée, pas le compte perso (voir CALENDRIER-COMM.md §2 bis).
+> **Chaîne WhatsApp** : messages types dans [COMMUNAUTE-WHATSAPP.md](../COMMUNAUTE-WHATSAPP.md) §4.
 
 ---
 

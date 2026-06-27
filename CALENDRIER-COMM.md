@@ -210,36 +210,10 @@
 
 ---
 
-## 6. 📝 Légendes prêtes (les 01/02/03 → `visuels-instagram/LEGENDES.md`)
+## 6. 📝 Légendes prêtes
 
-### Post A — La peur du niveau (S3)
-> 🎾 « J'ai peur de ne pas être au niveau. » On l'entend tout le temps.
-> Bonne nouvelle : à la Ligue Padel Santé, tu joues **toujours** contre des gens de
-> **ton** niveau. Débutant qui se lance ? Zéro match humiliant. Joueur affûté ? Enfin des
-> adversaires à ta hauteur. Inscription gratuite, lien en bio.
-> #padel #padelparis #santé #sportsanté #padelmedleague
-
-### Post B — Le manifeste (S5)
-> 100 % gratuit. 0 % business. 🩺
-> La Ligue Padel Santé, c'est une bande de soignants qui voulaient juste jouer plus
-> souvent, contre des gens sympas. Pas de pub, pas de revente de données, pas un centime
-> dans la poche. Juste le plaisir de jouer et de se rencontrer entre soignants d'IDF.
-> Rejoins la liste d'attente, lien en bio. #padel #soignants #iledefrance #padelmedleague
-
-### Carrousel « Par métier » (S6)
-> Médecins, kinés, infirmier(ère)s, dentistes, pharmacien(ne)s, sages-femmes, étudiant(e)s
-> en santé… 🎾 La ligue est ouverte à **tous** les pros de santé d'Île-de-France.
-> Quelle équipe va dominer : Cardio ou Anesthésie ? 👀 Inscris-toi, lien en bio.
-
-### Post C — Dernier appel (S10)
-> ⏳ Ça démarre le 1ᵉʳ septembre. Dernière ligne droite pour rejoindre la liste d'attente
-> et sécuriser ta place au Club des Fondateurs (50 premières équipes). Lien en bio. 🎾
-
-### LinkedIn
-> Décliner le post LinkedIn du KIT §1 avec l'angle de la semaine (lancement,
-> débutant/confirmé, pourquoi, FAQ, J-15, on y est).
-
-### Chaîne WhatsApp — messages types
-- Jalon : « On vient de passer les **X soignant(e)s** sur la liste 🎾 Invite ton binôme : padel-med-league.fr/?from=wa »
-- Rappel Fondateurs : « Les 50 premières équipes = Club des Fondateurs. Tag ton binôme ! »
-- J-15 : « Plus que 15 jours avant le coup d'envoi ⏳ Prépare ton binôme. »
+Toutes les légendes (posts 01/02/03 + A/B/Carrousel/C) sont centralisées dans
+**[visuels-instagram/LEGENDES.md](visuels-instagram/LEGENDES.md)** — source unique,
+ne pas dupliquer le texte ici. Ce calendrier (§2 ci-dessus) dit **quand** poster
+quoi ; LEGENDES.md dit **quel texte** poster. Messages WhatsApp type → voir
+[COMMUNAUTE-WHATSAPP.md](COMMUNAUTE-WHATSAPP.md) §4.

@@ -94,7 +94,7 @@ Projet Site Padel/
     ├── 03-binome.{svg,png,jpg}      ← parrainage / tag ton binôme
     ├── logo.{svg,png,jpg}           ← logo complet
     ├── logo-icon.{svg,png,jpg}      ← icône (photo de profil)
-    └── LEGENDES.md                  ← légendes + hashtags des 3 visuels fondateurs
+    └── LEGENDES.md                  ← source unique des légendes/hashtags prêts à poster (tous posts pré-lancement)
 ```
 
 ⚠️ **Deux documents partiellement périmés** — gardés pour leur valeur historique/macro,
