@@ -23,6 +23,28 @@
 
 ---
 
+## 0bis. Vérifier la boîte à idées Notion (si connecté)
+
+Avant de dérouler §A ou §B : si l'outil Notion est disponible dans la session,
+consulter la page **« 📥 Idées & to-do — Ligue Padel (mobile) »**
+(https://app.notion.com/p/38c48ae1d1da818b8e00c84331552ba7). C'est l'inverse du
+Dashboard (qui est un miroir en lecture) : **Nathan l'édite lui-même**, souvent
+depuis son téléphone en dehors d'une session — c'est une vraie source d'entrée.
+
+- Lire la section « À trier ».
+- Intégrer ce qui a de la substance dans le bon fichier projet (`STRATEGIE.md`
+  pour stratégie/com', le code/`CLAUDE.md` pour le technique, etc.) et signaler
+  à Nathan où chaque item a été rangé.
+- Une fois intégré, **vider la section « À trier »** côté Notion — la page
+  reste une boîte de capture, pas un historique qui s'accumule.
+- Si un item ne semble pas encore mûr ou actionnable, le laisser tel quel
+  plutôt que de le supprimer ou de le ranger en force.
+- Si Notion n'est **pas connecté** dans la session (ex. certaines sessions
+  Claude Code sans le connecteur), le signaler à Nathan plutôt que de supposer
+  qu'il n'y a rien de nouveau.
+
+---
+
 ## §A — Cowork : stratégie & communication
 
 1. **Relire l'état du projet** :
