@@ -103,18 +103,39 @@
 ---
 
 ## Tableau de suivi (à remplir au fil de l'eau)
+
+> 🔄 **Resynchronisé le 27/06 (12h15) depuis la boîte Gmail réelle** — plusieurs envois
+> n'étaient pas reflétés ici (cf. mémoire « vérifier les canaux live, pas seulement les
+> docs »). Vague 1 et Vague 2 sont quasi bouclées.
+
 | Structure | Vague | Lien `?from=` | Envoyé le | Relancé le | A relayé ? | Notes |
 |---|---|---|---|---|---|---|
 | SIHP | 1 | sihp | **25/06** | | ⏳ | accord acquis, attendre la pub |
 | Internes cardio (Johann/Samuel/Gabriel) | 1 | cardio | **26/06** | | ⏳ | contacts chauds, WhatsApp + mail à transférer aux internes |
-| SRP-IMG | 1 | srpimg | | | | internes MG IDF |
-| FNSIP-BM | 1 | fnsip | | | | internes pharma/bio |
-| FNEK | 1 | fnek | | | | étudiants kiné |
-| FNESI | 1 | fnesi | | | | étudiants IDE (gros volume) |
-| ANEMF / corpos | 1 | anemf | | | | via corpos médecine locales |
-| URPS IDF (6 pros) | 2 | urps | | | | début juillet |
-| CGOS | 2 | cgos | | | | relais sport hospitalier |
-| MNH | 2 | mnh | | | | partenaire potentiel |
+| ICPC (Institut Cœur Paris Centre) | 1 | icpc | | | | à faire — contacter Séverine Sebagh (CTO) + chargée de com (à identifier) ; relais interne + post LinkedIn |
+| SRP-IMG | 1 | srpimg | **27/06** | | ⏳ | mail envoyé à secretaire@srp-img.com |
+| FNSIP-BM | 1 | fnsip | **27/06** | | ⏳ | mail envoyé à vpcommunication@fnsipbm.fr |
+| FNEK | 1 | fnek | **27/06** | | ⏳ | mail envoyé à contact@fnek.fr |
+| FNESI | 1 | fnesi | **27/06** | | ⏳ | formulaire site **soumis et confirmé** ("Envoyé !") |
+| ANEMF | 1 | anemf | **27/06** | | ⏳ | mail envoyé à contact@anemf.org (à décliner ensuite via les corpos locales) |
+| UNECD (étudiants dentaire) | 1 | unecd | **27/06** | | ⏳ | mail envoyé à contact@unecd.com |
+| ANESF (étudiantes sages-femmes) | 1 | anesf | **27/06** | | ⏳ | mail envoyé à bureau@anesf.com |
+| ANEPF (étudiants pharma) | 1 | anepf | **27/06** | | ⏳ | mail envoyé à contact@anepf.org |
+| FNEO (étudiants orthophonie) | 1 | fneo | **27/06** | | ⏳ | mail envoyé à presidence@fneo.fr |
+| URPS Médecins IDF | 2 | urps-med | **27/06** | | ⏳ | mail envoyé à secretariat@urps-med-idf.org |
+| URPS Pharmaciens IDF | 2 | urps-pharma | **27/06** | | ⏳ | mail envoyé à secretariat@urps-pharmaciens-idf.fr |
+| URPS Masseurs-Kinés IDF | 2 | urps-mk | **27/06** | | ⏳ | mail envoyé à contact@urps-mk-idf.org |
+| URPS Infirmiers IDF | 2 | urps-infi | **27/06** | | ⏳ | mail envoyé à contact@urps-infirmiers-idf.fr |
+| URPS Sages-Femmes IDF | 2 | urps-sf | **27/06** | | ⏳ | mail envoyé à urps.sagefemme.idf@gmail.com |
+| URPS Chirurgiens-Dentistes IDF | 2 | urps-cd | **27/06** | | ⏳ | mail envoyé à contact@urps-cd-idf.com |
+| CROSIF (Comité Régional Olympique et Sportif IDF) | 2 | crosif | **27/06** | | ⏳ | mail envoyé à crosif@crosif.fr — cible ajoutée (hors plan initial, pertinente sport) |
+| CDOS Paris (Comité Départemental Olympique et Sportif) | 2 | cdosparis | **27/06** | | ⏳ | mail envoyé à mathias.chatrefou@cdosparis.fr (cc ludovic.lesaffre@cdosparis.fr) |
+| CGOS | 2 | cgos | — | — | ❌ | **abandonné** (décision Nathan, 27/06) : pas de canal partenariat exploitable trouvé |
+| MNH | 2 | mnh | **27/06** | | ⏳ | mail envoyé à contact@mnh.fr (formulaire web écarté : orienté adhérent individuel, pas partenariat) |
+| INSEP | 2 | insep | **27/06** | | ⏳ | mail envoyé à communication@insep.fr |
+| SFMES (médecine du sport) | 2 | sfmes | **27/06** | | ⏳ | formulaire rempli par Claude, captcha + envoi validés par Nathan |
+| SFTS (traumato du sport) | 2 | sfts | **27/06** | | ⏳ | formulaire rempli par Claude, captcha + envoi validés par Nathan |
+| Assos sportives AP-HP / GHT | 2 | asso | | | | à faire — pas encore de contact identifié |
 | Presse (WUD/Egora…) | 3 | presse | | | | mi/fin août |
 
 > Astuce priorisation : commencer par **(1) ceux qui ont déjà dit oui** (SIHP),

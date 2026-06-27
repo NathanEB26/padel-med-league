@@ -36,49 +36,16 @@
 > Liens : `?from=perso` · `?from=bichat` · `?from=icpc`.
 
 ### A. WhatsApp perso (réseau médical que tu connais)
-> Salut 👋 Petit message perso : je me lance dans un projet qui me tient à cœur — la
-> **Ligue Padel Santé Île-de-France**, un championnat de padel **100 % gratuit et
-> bénévole** pour les soignants (médicaux & paramédicaux). L'idée : se bouger un peu plus,
-> se rencontrer entre soignants, et jouer contre des gens de son niveau près de chez soi.
-> On t'apparie par niveau et par zone, tu joues quand tu veux (toutes les 2 semaines), et
-> le classement se fait tout seul. Ça démarre le 1ᵉʳ septembre.
-> La liste d'attente est ouverte 👉 https://padel-med-league.fr/?from=perso
-> Si tu joues (ou veux t'y mettre), inscris-toi — et transfère à tes collègues que ça
-> pourrait brancher 🎾🩺 Merci !
+> ✅ **Envoyé** (27/06). Lien `?from=perso`.
 
-### B. Email au service — Cardiologie Bichat (collègues actuels)
-**Objet : On monte une équipe Bichat ? Championnat de padel entre soignants 🎾**
-> Salut à toutes et à tous,
-> Vous me connaissez — je me lance un projet à côté du boulot : la **Ligue Padel Santé
-> Île-de-France**, un championnat de padel **amical, 100 % gratuit et bénévole**, ouvert à
-> tous les soignants. Le constat : entre les gardes et les horaires, on bouge trop peu.
-> L'idée, c'est de se remettre au sport et de créer du lien, sans prise de tête : on vous
-> apparie par niveau et par zone, vous jouez un match toutes les 2 semaines au créneau qui
-> vous arrange, et le classement se met à jour tout seul.
-> J'adorerais qu'on soit plusieurs de Bichat — on pourrait monter une ou deux équipes et
-> se tirer la bourre avec d'autres services 😏
-> Ça démarre le 1ᵉʳ septembre. Inscription (gratuit, 30 s) 👉 https://padel-med-league.fr/?from=bichat
-> Faites tourner autour de vous. À très vite sur le terrain !
-> Nathan
+### B. Email au service — Cardiologie Bichat
+> ❌ **Abandonné** (décision Nathan, 27/06).
 
-### C. Email au service com — ICPC (Institut Cœur Paris Centre — il les connaît bien, arrivée certaine)
-**Objet : Mon projet sport-santé — on le relaie en interne à l'ICPC ? 🎾**
-> Bonjour [Prénom],
-> Comme vous le savez, j'arrive bientôt dans les équipes de l'ICPC — et j'ai un projet
-> que j'aimerais beaucoup faire vivre avec vous.
-> J'ai monté la **Ligue Padel Santé Île-de-France** : un championnat de padel **amical,
-> 100 % gratuit et bénévole**, ouvert à tous les soignants. L'idée : remettre les soignants
-> au sport (un vrai sujet vu nos rythmes) et créer du lien entre nous, toutes professions
-> confondues. On apparie les joueurs par niveau et par zone, chacun joue au créneau qui
-> l'arrange, et le classement se gère tout seul.
-> Est-ce qu'on pourrait le **relayer en interne** auprès des équipes (intranet, newsletter,
-> affichage) ? Ce serait top d'embarquer un max de monde de l'ICPC dès le départ — voire de
-> monter une équipe maison 😏. C'est 100 % bénévole de ma part, aucune contrepartie, juste
-> l'envie de faire bouger les collègues. Je joins un visuel prêt à l'emploi, et je suis
-> évidemment dispo pour en parler de vive voix.
-> Inscription (gratuit) : https://padel-med-league.fr/?from=icpc
-> Merci à vous, à très vite !
-> Nathan El Bèze
+### C. ICPC (Institut Cœur Paris Centre)
+> 🔄 **Plan mis à jour (27/06)** : contacter **Séverine Sebagh (CTO)** + la **chargée de
+> communication** de l'ICPC, pour (1) un relais en interne (intranet/newsletter/affichage)
+> et (2) un **post LinkedIn**. Lien traçable `?from=icpc`. Statut : à faire — coordonnées
+> de la chargée de com à identifier.
 
 ### D. Internes référents de cardiologie (Johann, Samuel, Gabriel — il les connaît bien, mais ils ne sont pas au courant du projet)
 > Méthode : **WhatsApp direct** à chacun pour présenter le projet et leur demander
@@ -134,6 +101,10 @@
 > Cadence : **2 posts Insta/sem** (dont 1 story) · **1 LinkedIn/sem** · **1 message
 > Chaîne/sem**. **Août = ralenti** (congés) : 1 post/sem + stories, on garde le lien chaud.
 > Liens traçables : `?from=ig` · `?from=li` · `?from=wa`.
+>
+> 🔄 **Décision 27/06** : LinkedIn passe par une **Page dédiée "Ligue Padel Santé
+> Île-de-France"** (à créer), pas par le compte perso de Nathan — pour préserver son
+> anonymat (cf. règle anonymat). Voir §2 bis pour la création + la stratégie de portée.
 
 | Sem | Dates | Thème | Instagram | LinkedIn | Chaîne WhatsApp |
 |---|---|---|---|---|---|
@@ -152,6 +123,40 @@
 > 💡 **Logique été** : on FRONT-LOAD (juin–juillet, avant les vacances), on maintient un
 > filet en août, puis on RAMPE fort à la rentrée (20 août → 1ᵉʳ sept), quand tout le
 > monde rentre + le compte à rebours crée l'urgence.
+
+---
+
+## 2 bis. 💼 LinkedIn — créer la Page dédiée (anonymat préservé)
+
+> But : publier sous l'identité du projet, pas sous celle de Nathan (son nom/photo ne
+> doivent pas être exposés publiquement). Une **Page LinkedIn** (pas le compte perso)
+> est la bonne brique : les posts publiés depuis une Page affichent le nom de la Page,
+> jamais celui de l'admin qui les a écrits.
+
+**Création (≈10 min, gratuit) :**
+1. Aller sur `linkedin.com/company/setup/new/` (connecté avec un compte perso — celui
+   de Nathan suffit, il ne sera jamais visible publiquement en tant qu'admin).
+2. Type de Page : **« Petite entreprise »** ou **« Association à but non lucratif »**
+   (le plus proche du statut réel — pas besoin de SIRET pour créer la Page).
+3. Nom : **Ligue Padel Santé Île-de-France** · URL personnalisée :
+   `linkedin.com/company/ligue-padel-sante-idf` (ou variante si déjà pris).
+4. Secteur : *Sports* (ou *Loisirs/Voyage*) · Taille : 1 employé (ou « auto-entrepreneur »).
+5. Logo + bannière : `visuels-instagram/logo-icon.png` (logo) + un visuel `01-annonce`
+   recadré en bannière (1128×191).
+6. Tagline + « À propos » : reprendre le texte du post LinkedIn du KIT-AMBASSADEUR §1
+   (sans nom propre — déjà conforme).
+7. Premier post : republier le post « lancement » (S1) directement comme post de la Page.
+
+**Faire grossir l'audience depuis zéro (le vrai défi d'une Page neuve) :**
+- En tant qu'admin, LinkedIn permet d'**inviter ses contacts 1ᵉʳ degré à suivre la Page**
+  (quota mensuel limité) → Nathan peut le faire sans que son nom apparaisse *sur* les
+  posts (seulement dans la liste d'invitations, vue par les invités eux-mêmes — acceptable,
+  ce n'est pas une exposition publique).
+- **Repartage** : les relais (SIHP, URPS, ICPC une fois d'accord…) peuvent repartager les
+  posts de la Page sur leur propre profil/page — c'est le vrai levier de portée.
+- Optionnel : Nathan peut **repartager occasionnellement** un post de la Page sur son
+  propre profil perso avec un commentaire neutre (« Je relaie ce projet sympa 👇 »), sans
+  se positionner comme fondateur — reste cohérent avec l'anonymat.
 
 ---
 

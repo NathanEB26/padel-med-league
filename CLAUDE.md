@@ -73,6 +73,8 @@ Projet Site Padel/
 │
 ├── PLAN.md                 ← cahier des charges produit détaillé (la « bible »)
 ├── CLAUDE.md               ← (ce fichier) architecture + règles
+├── REPRISE.md              ← rituel de reprise de session (« On reprend »)
+├── AU-REVOIR.md            ← rituel de fin de session (« Au revoir »)
 ├── MEMOIRE.md              ← décisions + raisons + problèmes résolus
 ├── STRATEGIE.md            ← objectif + roadmap + TODO priorisée
 ├── COMMUNICATION.md        ← stratégie de com' (canaux, phases, KPIs)
@@ -128,7 +130,7 @@ Projet Site Padel/
 | `BASE_URL` | `https://padel-med-league.onrender.com` | base des liens de parrainage / OG |
 | `DATABASE_URL` | liste d'attente en **SQLite éphémère** | liste d'attente **persistante (Neon)** |
 | `GOOGLE_CLIENT_ID` | bouton Google masqué | « Inscription avec Google » actif |
-| `WHATSAPP_URL` | CTA WhatsApp masqué | lien communauté affiché |
+| `WHATSAPP_URL` | affiche le lien public par défaut (canal codé en dur dans `app.py`) | permet de changer de canal sans toucher au code |
 
 **Pattern à respecter** : toute nouvelle intégration externe = **activation
 conditionnelle par variable d'env**, avec repli gracieux si absente. On doit
@@ -186,3 +188,26 @@ toujours pouvoir déployer/lancer sans configurer quoi que ce soit.
 - **Domaine cible** : `padel-med-league.fr` (à acheter + brancher en Custom Domain).
 - **Neon** : `DATABASE_URL` configurée → liste d'attente persistante (vérifiée :
   survit aux redéploiements).
+
+---
+
+## 10. Rituels de session
+
+Nathan travaille **à la fois dans Cowork et dans Claude Code** — deux contextes
+qui ne partagent pas la même mémoire (Cowork a une mémoire auto-persistante,
+Code ne voit que les fichiers du repo). D'où deux rituels, à la portée différente :
+
+- **Fin de session — « Au revoir »** : signal que Nathan ferme et reprendra plus
+  tard. Déclenche le protocole décrit dans [AU-REVOIR.md](AU-REVOIR.md) : mise à
+  jour des fichiers + point rapide (où on en est / fait cette session / prochains
+  points) + nettoyage de contexte si besoin.
+- **Reprise de session — « On reprend »** : signal symétrique en début de
+  session. Déclenche le protocole décrit dans [REPRISE.md](REPRISE.md) — qui
+  **distingue maintenant le contexte** : Cowork porte la réflexion stratégie
+  globale + communication, Code porte la mise en place concrète du site.
+
+Les deux rituels vivent **dans le repo** (pas dans une mémoire propre à une
+plateforme) → **même fichier, même déclencheur partout**. Pour « Au revoir »,
+le contenu reste identique en Cowork et en Code. Pour « On reprend », le
+fichier est unique mais le protocole **se déroule différemment** selon
+l'environnement (voir §A/§B de REPRISE.md).
