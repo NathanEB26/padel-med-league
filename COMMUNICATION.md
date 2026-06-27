@@ -3,6 +3,14 @@
 > Objectif : faire connaître la ligue et recruter les premières équipes de
 > professionnels de santé en Île-de-France. Document opérationnel.
 
+> ⚠️ **Calendrier générique périmé.** Pour le plan de com' **daté et à jour**,
+> voir [CALENDRIER-COMM.md](CALENDRIER-COMM.md) (suivi des envois →
+> [CONTACTS-RELAIS.md](CONTACTS-RELAIS.md), messages prêts →
+> [KIT-AMBASSADEUR.md](KIT-AMBASSADEUR.md)). Ce document garde sa valeur pour
+> la **vision macro** (canaux par ordre de priorité §4, KPIs §1,
+> positionnement §3) — toujours valide — mais son calendrier en 3 phases / 8
+> semaines (§5) a été remplacé par le calendrier daté 10 semaines.
+
 ---
 
 ## 1. Objectif & indicateurs

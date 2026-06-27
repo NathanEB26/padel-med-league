@@ -4,6 +4,16 @@
 > Objectif : définir le produit, les écrans, la base de données et l'algorithme
 > d'appariement **avant** d'écrire le code.
 
+> ⚠️ **Document figé (cadrage initial), partiellement périmé.** La section §9
+> « pile technique envisagée » (Next.js/Postgres) ne correspond **pas** à la
+> stack réelle : voir [CLAUDE.md](CLAUDE.md) §3 (Python stdlib, zéro
+> dépendance obligatoire). Pour l'état d'implémentation à jour — notamment le
+> modèle « open match » livré le 27/06/2026 — se fier à [STRATEGIE.md](STRATEGIE.md)
+> (journal des décisions S1-S15+) et à `app.py`, pas à ce document. Ce qui reste
+> valide ici : la **logique produit** (niveaux §4.1, zones §4.2, cote Elo §4.5,
+> ligue unifiée §5 bis, validation des scores §6) — c'est la « bible » du
+> raisonnement métier, pas de l'implémentation technique.
+
 ---
 
 ## 1. Vision en une phrase

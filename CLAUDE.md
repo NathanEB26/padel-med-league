@@ -71,16 +71,22 @@ Projet Site Padel/
 ├── Procfile                ← démarrage (compat plateformes type Heroku/Render)
 ├── Lancer la ligue.command ← double-clic Mac pour lancer en local
 │
-├── PLAN.md                 ← cahier des charges produit détaillé (la « bible »)
 ├── CLAUDE.md               ← (ce fichier) architecture + règles
 ├── REPRISE.md              ← rituel de reprise de session (« On reprend »)
 ├── AU-REVOIR.md            ← rituel de fin de session (« Au revoir »)
 ├── MEMOIRE.md              ← décisions + raisons + problèmes résolus
-├── STRATEGIE.md            ← objectif + roadmap + TODO priorisée
-├── COMMUNICATION.md        ← stratégie de com' (canaux, phases, KPIs)
-├── INSTAGRAM.md            ← kit Instagram (@padelmedleague, bio, templates, calendrier)
-├── DEPLOIEMENT.md          ← notes d'hébergement
-├── MODE-EMPLOI.md          ← guide d'utilisation local pour Nathan
+├── STRATEGIE.md            ← objectif + roadmap + TODO priorisée (journal vivant, **source de vérité produit/planning**)
+├── PLAN.md                 ← cadrage produit **initial** (v1, 21/06/2026) — figé, voir ⚠️ ci-dessous
+├── MODE-EMPLOI.md          ← guide d'utilisation de la démo locale, pour Nathan
+├── DEPLOIEMENT.md          ← notes de mise en route Render (setup initial)
+│
+├── COMMUNICATION.md        ← vision macro com' (canaux, phases, KPIs) — voir ⚠️ ci-dessous
+├── CALENDRIER-COMM.md      ← plan de com' opérationnel **daté, à jour** (**source de vérité com'**)
+├── CONTACTS-RELAIS.md      ← cibles institutionnelles + tableau de suivi des envois
+├── KIT-AMBASSADEUR.md      ← messages/mails prêts à l'emploi (WhatsApp, LinkedIn, relais, objections)
+├── CLUBS-PARTENAIRES.md    ← stratégie de partenariat avec les clubs de padel
+├── COMMUNAUTE-WHATSAPP.md  ← organisation de la Chaîne puis Communauté WhatsApp
+├── INSTAGRAM.md            ← kit Instagram (@padelmedleague, bio, piliers de contenu, templates)
 │
 └── visuels-instagram/
     ├── 01-annonce.{svg,png,jpg}     ← post liste d'attente
@@ -88,8 +94,18 @@ Projet Site Padel/
     ├── 03-binome.{svg,png,jpg}      ← parrainage / tag ton binôme
     ├── logo.{svg,png,jpg}           ← logo complet
     ├── logo-icon.{svg,png,jpg}      ← icône (photo de profil)
-    └── LEGENDES.md                  ← légendes + hashtags + ordre de publication
+    └── LEGENDES.md                  ← légendes + hashtags des 3 visuels fondateurs
 ```
+
+⚠️ **Deux documents partiellement périmés** — gardés pour leur valeur historique/macro,
+**pas** comme source d'exécution :
+- **PLAN.md** : cadrage produit avant écriture du code. Sa section « pile technique »
+  (Next.js/Postgres) est **obsolète** — la stack réelle est celle de la §3 ci-dessous
+  (Python stdlib). Pour l'état d'implémentation à jour (ex. « open match », livré le
+  27/06/2026), se fier à **STRATEGIE.md** (journal S1-S15+) et à `app.py`, pas à PLAN.md.
+- **COMMUNICATION.md** : vision canaux/KPIs toujours valide en haut niveau, mais son
+  calendrier générique (3 phases / 8 semaines) est remplacé par le calendrier **daté**
+  de **CALENDRIER-COMM.md**.
 
 > Mémoire **inter-sessions** Claude : `/.claude/.../memory/` (MEMORY.md +
 > `etat-pre-lancement.md` + `deploiement-render.md`). Distincte des fichiers
