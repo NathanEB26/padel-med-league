@@ -1439,18 +1439,33 @@ table{font-size:13px}th,td{padding:9px 7px}
 """
 
 
-# Marque compacte (caducée padel) pour le header + le favicon — cohérente avec le logo.
+# Icône de marque (raquette de padel + serpent/caducée) — version Claude Design.
+# Badge rond lime-sur-nuit, œil magenta. ICON_INNER est réutilisée à l'identique
+# pour le header, le favicon et la carte de partage (une seule source de vérité).
+ICON_INNER = (
+    '<circle cx="100" cy="100" r="94" fill="#0c121a"/>'
+    '<circle cx="100" cy="100" r="94" fill="none" stroke="#c6ff00" stroke-width="2.5"/>'
+    '<path d="M 125.0,164.0 L 124.4,162.7 L 122.5,161.4 L 119.5,160.1 L 115.6,158.9 L 110.8,157.6 L 105.6,156.3 L 100.0,155.0 L 94.4,153.7 L 89.2,152.4 L 84.4,151.1 L 80.5,149.9 L 77.5,148.6 L 75.6,147.3 L 75.0,146.0" fill="none" stroke="#c6ff00" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<path d="M 125.0,128.0 L 124.4,126.7 L 122.5,125.4 L 119.5,124.1 L 115.6,122.9 L 110.8,121.6 L 105.6,120.3 L 100.0,119.0 L 94.4,117.7 L 89.2,116.4 L 84.4,115.1 L 80.5,113.9 L 77.5,112.6 L 75.6,111.3 L 75.0,110.0" fill="none" stroke="#c6ff00" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<rect x="90.5" y="84" width="19" height="93" rx="9.5" fill="#0c121a"/>'
+    '<rect x="92.5" y="85" width="15" height="91" rx="7.5" fill="#c6ff00"/>'
+    '<path d="M100,22 C130,22 146,44 146,66 C146,84 128,92 114,94 L86,94 C72,92 54,84 54,66 C54,44 70,22 100,22 Z" fill="#c6ff00"/>'
+    '<g fill="#0c121a">'
+    '<circle cx="85" cy="42" r="4.5"/><circle cx="100" cy="42" r="4.5"/><circle cx="115" cy="42" r="4.5"/>'
+    '<circle cx="70" cy="58" r="4.5"/><circle cx="85" cy="58" r="4.5"/><circle cx="100" cy="58" r="4.5"/><circle cx="115" cy="58" r="4.5"/><circle cx="130" cy="58" r="4.5"/>'
+    '<circle cx="85" cy="74" r="4.5"/><circle cx="100" cy="74" r="4.5"/><circle cx="115" cy="74" r="4.5"/>'
+    '</g>'
+    '<path d="M 75.0,146.0 L 75.6,144.7 L 77.5,143.4 L 80.5,142.1 L 84.4,140.9 L 89.2,139.6 L 94.4,138.3 L 100.0,137.0 L 105.6,135.7 L 110.8,134.4 L 115.6,133.1 L 119.5,131.9 L 122.5,130.6 L 124.4,129.3 L 125.0,128.0" fill="none" stroke="#0c121a" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<path d="M 75.0,146.0 L 75.6,144.7 L 77.5,143.4 L 80.5,142.1 L 84.4,140.9 L 89.2,139.6 L 94.4,138.3 L 100.0,137.0 L 105.6,135.7 L 110.8,134.4 L 115.6,133.1 L 119.5,131.9 L 122.5,130.6 L 124.4,129.3 L 125.0,128.0" fill="none" stroke="#c6ff00" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<path d="M 75.0,110.0 L 75.6,108.7 L 77.5,107.4 L 80.5,106.1 L 84.4,104.9 L 89.2,103.6 L 94.4,102.3 L 100.0,101.0 L 105.6,99.7 L 110.8,98.4 L 115.6,97.1 L 119.5,95.9 L 122.5,94.6 L 124.4,93.3 L 125.0,92.0" fill="none" stroke="#0c121a" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<path d="M 75.0,110.0 L 75.6,108.7 L 77.5,107.4 L 80.5,106.1 L 84.4,104.9 L 89.2,103.6 L 94.4,102.3 L 100.0,101.0 L 105.6,99.7 L 110.8,98.4 L 115.6,97.1 L 119.5,95.9 L 122.5,94.6 L 124.4,93.3 L 125.0,92.0" fill="none" stroke="#c6ff00" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<path d="M124,92 C115,88 114,78 121,74 C129,69 140,72 141,81 C142,89 135,94 128,94 C126,94 125,93 124,92 Z" fill="#0c121a"/>'
+    '<path d="M124,90 C117,86 117,78 122,75 C129,71 138,74 139,81 C140,88 134,92 128,92 C126,92 125,91 124,90 Z" fill="#c6ff00"/>'
+    '<circle cx="129" cy="81" r="2.6" fill="#ff2f7a"/>')
+
 MARK_SVG = (
-    '<svg class="mark" viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" '
-    'aria-hidden="true">'
-    '<circle cx="16" cy="15" r="14" fill="#c6ff00"/>'
-    '<ellipse cx="16" cy="12" rx="6.5" ry="8.5" fill="#070b10"/>'
-    '<rect x="14.4" y="19" width="3.2" height="16" rx="1.6" fill="#070b10"/>'
-    '<path d="M16 21 C13.4 22.5 13.4 25 16 26.5 C18.6 28 18.6 30.5 16 32 '
-    'C13.6 33.4 13.6 35 16 36" fill="none" stroke="#c6ff00" stroke-width="2.2" '
-    'stroke-linecap="round"/>'
-    '<circle cx="16" cy="20" r="2.1" fill="#c6ff00"/>'
-    '</svg>')
+    '<svg class="mark" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" '
+    'aria-hidden="true">' + ICON_INNER + '</svg>')
 
 
 def carte_svg(prenom, profession=None, zone=None):
@@ -1462,16 +1477,8 @@ def carte_svg(prenom, profession=None, zone=None):
     sous_txt = (f'<text x="540" y="700" text-anchor="middle" fill="#9fb0c0" '
                 f'font-size="34" font-weight="600" '
                 f'font-family="Helvetica,Arial,sans-serif">{sous}</text>') if sous else ""
-    # Caducée agrandi, centré, repris de MARK_SVG (échelle ×6 ≈ 192px).
-    mark = (
-        '<g transform="translate(444,150) scale(6)">'
-        '<circle cx="16" cy="15" r="14" fill="#c6ff00"/>'
-        '<ellipse cx="16" cy="12" rx="6.5" ry="8.5" fill="#070b10"/>'
-        '<rect x="14.4" y="19" width="3.2" height="16" rx="1.6" fill="#070b10"/>'
-        '<path d="M16 21 C13.4 22.5 13.4 25 16 26.5 C18.6 28 18.6 30.5 16 32 '
-        'C13.6 33.4 13.6 35 16 36" fill="none" stroke="#c6ff00" stroke-width="2.2" '
-        'stroke-linecap="round"/>'
-        '<circle cx="16" cy="20" r="2.1" fill="#c6ff00"/></g>')
+    # Icône agrandie (≈300px) centrée en haut de la carte — reprise de ICON_INNER.
+    mark = ('<g transform="translate(390,150) scale(1.5)">' + ICON_INNER + '</g>')
     return (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" '
         'preserveAspectRatio="xMidYMid meet" '
