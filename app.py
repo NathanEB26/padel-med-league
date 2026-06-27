@@ -357,6 +357,13 @@ def _pg_ensure_jeu():
             saisi_par TEXT NOT NULL,
             saisi_le TIMESTAMP DEFAULT now()
         )""")
+    # Nettoyage paresseux : purge les tokens/sessions expirés à chaque démarrage
+    try:
+        with _pg() as c:
+            c.execute("DELETE FROM magic_tokens WHERE expires < now()")
+            c.execute("DELETE FROM sessions WHERE expires < now()")
+    except Exception:
+        pass
     _jeu_ready = True
 
 
@@ -1890,6 +1897,27 @@ letter-spacing:0;font-weight:500;font-size:12.5px;color:var(--muted);line-height
 .legal a{color:var(--lime)}
 .brand .mark{width:30px;height:auto;flex:0 0 auto}
 
+/* ===== ESPACE JOUEUR ===== */
+.jeu-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.jeu-stat{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px}
+.jeu-stat .label{font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);margin:0 0 4px}
+.jeu-stat .val{margin:0;font-weight:700}
+.jeu-avatar{width:56px;height:56px;border-radius:50%;background:#1e2f3d;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  font-weight:900;color:var(--lime)}
+.jeu-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.match-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:20px;margin-bottom:14px}
+.match-card.compat{border-color:var(--lime)}
+.match-card.inscrit{border-color:#3a5a8c}
+.match-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.match-actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.joueur-ligne{display:flex;align-items:center;gap:10px;padding:10px 0;
+  border-bottom:1px solid var(--line)}
+.joueur-avatar{width:36px;height:36px;border-radius:50%;background:#1e2f3d;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-weight:900;
+  color:var(--lime);font-size:16px}
 @media(max-width:600px){
 .lp-hero{padding:40px 22px}.lp-hero h1{font-size:36px}.lp-sub{font-size:16px}
 .lp-section>h2{font-size:24px}.lp-final h2{font-size:26px}.lp-final{padding:38px 0}
@@ -1899,6 +1927,7 @@ main{padding:20px 14px 48px}
 .card{padding:18px}.card h2{font-size:20px}
 .lp-form-wrap{padding:22px 18px}
 .grid2{grid-template-columns:1fr}
+.jeu-stats{grid-template-columns:1fr}
 .lp-hero h1,.hero h1{letter-spacing:-.5px}
 nav a{padding:7px 10px;font-size:11px}
 table{font-size:13px}th,td{padding:9px 7px}
@@ -2995,6 +3024,30 @@ def page_admin(flash=None):
       </form>
     </div></div>
     <div class="card">
+    <h3 style="margin-top:0">Open matchs (bêta)</h3>"""
+    if PG_URL:
+        try:
+            open_matchs = lister_open_matchs()
+            if open_matchs:
+                om_rows = "".join(
+                    f"<tr><td><a href='/match?id={m['id']}'>{m['id']}</a></td>"
+                    f"<td>{e(m['date'])} {e(m['heure'])}</td>"
+                    f"<td>{e(m['club'])}</td>"
+                    f"<td>{e(m['zone'] or '—')}</td>"
+                    f"<td>{e(m['creator_email'])}</td>"
+                    f"<td>{m['nb_inscrits']}/{m['nb_slots']}</td>"
+                    f"<td>{e(m['statut'])}</td></tr>"
+                    for m in open_matchs)
+                corps += f"""<table><tr><th>#</th><th>Date</th><th>Club</th><th>Zone</th>
+                    <th>Créateur</th><th>Inscrits</th><th>Statut</th></tr>{om_rows}</table>"""
+            else:
+                corps += '<p class="muted">Aucun match ouvert pour l\'instant.</p>'
+        except Exception as ex:
+            corps += f'<p class="muted">Erreur lecture matchs : {e(str(ex))}</p>'
+    else:
+        corps += '<p class="muted">Non disponible hors Neon.</p>'
+    corps += """</div>
+    <div class="card">
     <h3 style="margin-top:0">Outils de simulation</h3>
     <h3>Générer la prochaine journée</h3>
     <p class="muted">Lance l'appariement suisse : chaque équipe reçoit un adversaire
@@ -3054,61 +3107,44 @@ def page_profil(joueur, flash=None):
     zone = joueur.get("zone") or "—"
     niv = joueur.get("niveau") or ""
     badge = badge_niveau(niv) if niv else '<span class="muted">—</span>'
+    init = e(prenom[:1].upper()) if prenom else "?"
     corps = f"""
     <div class="card" style="max-width:620px;margin:0 auto">
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
-        <div style="width:56px;height:56px;border-radius:50%;background:#1e2f3d;
-             display:flex;align-items:center;justify-content:center;font-size:26px;
-             font-weight:900;color:var(--lime)">{e(prenom[:1].upper()) if prenom else "?"}</div>
+      <div class="jeu-header">
+        <div class="jeu-avatar">{init}</div>
         <div>
           <h2 style="margin:0">{e(prenom or email)}</h2>
           <p class="muted" style="margin:4px 0 0">{e(email)}</p>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
-        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px">
-          <p class="muted" style="margin:0 0 4px;font-size:11px;text-transform:uppercase;
-             font-weight:800;letter-spacing:.6px">Profession</p>
-          <p style="margin:0;font-weight:700">{e(profession)}</p>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px">
-          <p class="muted" style="margin:0 0 4px;font-size:11px;text-transform:uppercase;
-             font-weight:800;letter-spacing:.6px">Zone</p>
-          <p style="margin:0;font-weight:700">{e(zone)}</p>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px">
-          <p class="muted" style="margin:0 0 4px;font-size:11px;text-transform:uppercase;
-             font-weight:800;letter-spacing:.6px">Niveau</p>
-          <p style="margin:0">{badge}</p>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px">
-          <p class="muted" style="margin:0 0 4px;font-size:11px;text-transform:uppercase;
-             font-weight:800;letter-spacing:.6px">Partenaire</p>
-          <p style="margin:0;font-weight:700">{e(joueur.get("a_partenaire") or "—")}</p>
-        </div>
+      <div class="jeu-stats">
+        <div class="jeu-stat"><p class="label">Profession</p><p class="val">{e(profession)}</p></div>
+        <div class="jeu-stat"><p class="label">Zone</p><p class="val">{e(zone)}</p></div>
+        <div class="jeu-stat"><p class="label">Niveau</p><p class="val">{badge}</p></div>
+        <div class="jeu-stat"><p class="label">Partenaire</p>
+          <p class="val">{e(joueur.get("a_partenaire") or "—")}</p></div>
       </div>
-      <a href="/matchs" class="btn" style="display:inline-block;margin-right:12px">
-        Voir les matchs ouverts</a>
-      <a href="/match/ouvrir" class="btn sec" style="display:inline-block">
-        Ouvrir un match</a>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="/matchs" class="btn">Matchs ouverts</a>
+        <a href="/match/ouvrir" class="btn sec">+ Ouvrir un match</a>
+      </div>
     </div>"""
-    # Section "Mes matchs"
     mes_matchs = matchs_joueur(email) if PG_URL else []
     if mes_matchs:
-        def ligne_match(m):
-            statut_col = {"ouvert": "var(--lime)", "complet": "var(--mag)", "annulé": "var(--muted)"}
-            col = statut_col.get(m["statut"], "var(--muted)")
-            return (f'<tr><td><a href="/match?id={m["id"]}">{e(m["date"])} {e(m["heure"])}</a></td>'
-                    f'<td>{e(m["club"])}</td>'
-                    f'<td><span class="badge zone">{e(m["zone"] or "—")}</span></td>'
-                    f'<td style="color:{col}">{e(m["statut"])}</td></tr>')
-        rows_html = "".join(ligne_match(m) for m in mes_matchs)
-        corps += f"""<div class="card" style="max-width:620px;margin:16px auto 0">
+        statut_col = {"ouvert": "var(--lime)", "complet": "var(--mag)", "annulé": "var(--muted)"}
+        rows_html = "".join(
+            f'<tr><td><a href="/match?id={m["id"]}">{e(m["date"])} {e(m["heure"])}</a></td>'
+            f'<td style="font-size:13px">{e(m["club"])}</td>'
+            f'<td><span class="badge zone">{e(m["zone"] or "—")}</span></td>'
+            f'<td style="color:{statut_col.get(m["statut"],"var(--muted)")}">{e(m["statut"])}</td></tr>'
+            for m in mes_matchs)
+        corps += f"""<div class="card" style="max-width:620px;margin:14px auto 0">
           <h3 style="margin-top:0">Mes matchs</h3>
           <table><tr><th>Date</th><th>Club</th><th>Zone</th><th>Statut</th></tr>
           {rows_html}</table></div>"""
-    corps += f"""<p style="max-width:620px;margin:16px auto 0;text-align:right">
-      <a href="/deconnexion" style="color:var(--muted);font-size:13px">Se déconnecter</a></p>"""
+    corps += ('<p style="max-width:620px;margin:14px auto 0;text-align:right">'
+              '<a href="/deconnexion" style="color:var(--muted);font-size:13px">'
+              'Se déconnecter</a></p>')
     return page("Mon profil", corps, flash)
 
 
@@ -3143,8 +3179,8 @@ def page_matchs(joueur, flash=None):
                      if suis_inscrit else "")
         compat = (m["zone"] == zone_joueur and
                   (not niv_joueur or m["niveau_min"] <= niv_joueur <= m["niveau_max"]))
-        border = "border-color:var(--lime)" if compat and not suis_inscrit else ""
-        return f"""<div class="card" style="margin-bottom:14px;{border}">
+        cls = "match-card" + (" compat" if compat and not suis_inscrit else "") + (" inscrit" if suis_inscrit else "")
+        return f"""<div class="{cls}">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
             <div>
               <strong style="font-size:17px">{e(m['date'])} à {e(m['heure'])}</strong>
@@ -3152,20 +3188,20 @@ def page_matchs(joueur, flash=None):
             </div>
             <div>{statut_badge}{mon_badge}</div>
           </div>
-          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <div class="match-meta">
             <span class="badge zone">{e(m['zone'] or '—')}</span>
             <span class="badge">{e(niv_range)}</span>
             <span class="badge">{e(m['format'].capitalize())}</span>
           </div>
-          <div style="margin-top:14px">
+          <div class="match-actions">
             <a href="/match?id={m['id']}" class="btn sec" style="padding:8px 16px;font-size:13px">
-              Voir le match →</a>
+              Voir →</a>
           </div>
         </div>"""
 
     liste = "".join(carte_match(m) for m in matchs) if matchs else (
-        '<p class="muted">Aucun match ouvert pour l\'instant. '
-        'Sois le premier à en créer un !</p>')
+        '<div class="card hint"><p style="margin:0">Aucun match ouvert pour l\'instant.<br>'
+        '<strong>Sois le(la) premier(ère) à proposer un créneau !</strong></p></div>')
 
     corps = f"""
     <div style="display:flex;justify-content:space-between;align-items:center;
@@ -3239,21 +3275,15 @@ def page_match(match_id, joueur, flash=None):
     joueurs = get_joueurs_match(match_id)
     score = get_score_open(match_id)
 
-    inscrits_html = ""
-    for j in joueurs:
+    def _joueur_ligne(j):
         p = j.get("prenom") or j["email"].split("@")[0]
         niv_b = badge_niveau(j["niveau"]) if j.get("niveau") else ""
-        inscrits_html += f"""<div style="display:flex;align-items:center;gap:10px;
-          padding:10px 0;border-bottom:1px solid var(--line)">
-          <div style="width:36px;height:36px;border-radius:50%;background:#1e2f3d;
-               display:flex;align-items:center;justify-content:center;font-weight:900;
-               color:var(--lime);font-size:16px">{e(p[:1].upper())}</div>
-          <div>
-            <strong>{e(p)}</strong>
-            <br><span class="muted">{e(j.get('profession') or '')}</span>
-          </div>
-          <div style="margin-left:auto">{niv_b}</div>
-        </div>"""
+        return (f'<div class="joueur-ligne">'
+                f'<div class="joueur-avatar">{e(p[:1].upper())}</div>'
+                f'<div><strong>{e(p)}</strong>'
+                f'<br><span class="muted">{e(j.get("profession") or "")}</span></div>'
+                f'<div style="margin-left:auto">{niv_b}</div></div>')
+    inscrits_html = "".join(_joueur_ligne(j) for j in joueurs)
 
     slots = m["nb_slots"]
     nb = len(joueurs)
