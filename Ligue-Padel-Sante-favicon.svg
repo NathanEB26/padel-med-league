@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Ligue Padel Sante">
+<rect x="0" y="0" width="200" height="200" fill="#0c121a"></rect>
+      <path d="M 125.0,164.0 L 124.4,162.7 L 122.5,161.4 L 119.5,160.1 L 115.6,158.9 L 110.8,157.6 L 105.6,156.3 L 100.0,155.0 L 94.4,153.7 L 89.2,152.4 L 84.4,151.1 L 80.5,149.9 L 77.5,148.6 L 75.6,147.3 L 75.0,146.0" fill="none" stroke="#c6ff00" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M 125.0,128.0 L 124.4,126.7 L 122.5,125.4 L 119.5,124.1 L 115.6,122.9 L 110.8,121.6 L 105.6,120.3 L 100.0,119.0 L 94.4,117.7 L 89.2,116.4 L 84.4,115.1 L 80.5,113.9 L 77.5,112.6 L 75.6,111.3 L 75.0,110.0" fill="none" stroke="#c6ff00" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"></path>
+      <rect x="88" y="82" width="24" height="96" rx="12" fill="#0c121a"></rect>
+      <rect x="90" y="83" width="20" height="94" rx="10" fill="#c6ff00"></rect>
+      <path d="M100,22 C130,22 146,44 146,66 C146,84 128,92 114,94 L86,94 C72,92 54,84 54,66 C54,44 70,22 100,22 Z" fill="#c6ff00"></path>
+      <g fill="#0c121a">
+        <circle cx="84" cy="50" r="6.5"></circle><circle cx="116" cy="50" r="6.5"></circle>
+        <circle cx="100" cy="62" r="6.5"></circle>
+        <circle cx="84" cy="74" r="6.5"></circle><circle cx="116" cy="74" r="6.5"></circle>
+      </g>
+      <path d="M 75.0,146.0 L 75.6,144.7 L 77.5,143.4 L 80.5,142.1 L 84.4,140.9 L 89.2,139.6 L 94.4,138.3 L 100.0,137.0 L 105.6,135.7 L 110.8,134.4 L 115.6,133.1 L 119.5,131.9 L 122.5,130.6 L 124.4,129.3 L 125.0,128.0" fill="none" stroke="#0c121a" stroke-width="23" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M 75.0,146.0 L 75.6,144.7 L 77.5,143.4 L 80.5,142.1 L 84.4,140.9 L 89.2,139.6 L 94.4,138.3 L 100.0,137.0 L 105.6,135.7 L 110.8,134.4 L 115.6,133.1 L 119.5,131.9 L 122.5,130.6 L 124.4,129.3 L 125.0,128.0" fill="none" stroke="#c6ff00" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M 75.0,110.0 L 75.6,108.7 L 77.5,107.4 L 80.5,106.1 L 84.4,104.9 L 89.2,103.6 L 94.4,102.3 L 100.0,101.0 L 105.6,99.7 L 110.8,98.4 L 115.6,97.1 L 119.5,95.9 L 122.5,94.6 L 124.4,93.3 L 125.0,92.0" fill="none" stroke="#0c121a" stroke-width="23" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M 75.0,110.0 L 75.6,108.7 L 77.5,107.4 L 80.5,106.1 L 84.4,104.9 L 89.2,103.6 L 94.4,102.3 L 100.0,101.0 L 105.6,99.7 L 110.8,98.4 L 115.6,97.1 L 119.5,95.9 L 122.5,94.6 L 124.4,93.3 L 125.0,92.0" fill="none" stroke="#c6ff00" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M124,93 C114,88 113,77 121,72 C130,67 142,71 143,81 C144,90 136,95 129,95 C127,95 125,94 124,93 Z" fill="#0c121a"></path>
+      <path d="M124,90 C116,86 116,77 122,74 C130,69 139,73 140,81 C141,88 134,92 128,92 C126,92 125,91 124,90 Z" fill="#c6ff00"></path>
+      <circle cx="129" cy="81" r="3.2" fill="#ff2f7a"></circle>
+</svg>
