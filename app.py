@@ -14,12 +14,14 @@ C'est une SIMULATION pour valider le fonctionnement (appariement suisse, cote
 Elo, scores, classement). Ce n'est pas la version finale de production.
 """
 
+import datetime
 import html
 import http.server
 import math
 import os
 import random
 import re
+import secrets
 import sqlite3
 import time
 import urllib.parse
@@ -285,6 +287,7 @@ def init_db(reset=False):
 
 PG_URL = os.environ.get("DATABASE_URL")
 _pg_ready = False
+_jeu_ready = False
 
 
 def _pg():
@@ -310,9 +313,245 @@ def _pg_ensure():
     _pg_ready = True
 
 
+def _pg_ensure_jeu():
+    """Crée (si besoin) les tables du moteur de jeu réel dans Neon."""
+    global _jeu_ready
+    if _jeu_ready or not PG_URL:
+        return
+    with _pg() as c:
+        c.execute("""CREATE TABLE IF NOT EXISTS magic_tokens (
+            token TEXT PRIMARY KEY,
+            email TEXT NOT NULL,
+            expires TIMESTAMP NOT NULL,
+            used BOOLEAN DEFAULT FALSE
+        )""")
+        c.execute("""CREATE TABLE IF NOT EXISTS sessions (
+            token TEXT PRIMARY KEY,
+            email TEXT NOT NULL,
+            created TIMESTAMP DEFAULT now(),
+            expires TIMESTAMP NOT NULL
+        )""")
+        c.execute("""CREATE TABLE IF NOT EXISTS open_matches (
+            id SERIAL PRIMARY KEY,
+            creator_email TEXT NOT NULL,
+            date TEXT NOT NULL,
+            heure TEXT NOT NULL,
+            club TEXT NOT NULL,
+            format TEXT NOT NULL DEFAULT 'classique',
+            niveau_min INTEGER DEFAULT 3,
+            niveau_max INTEGER DEFAULT 7,
+            zone TEXT,
+            nb_slots INTEGER DEFAULT 4,
+            statut TEXT DEFAULT 'ouvert',
+            created TIMESTAMP DEFAULT now()
+        )""")
+        c.execute("""CREATE TABLE IF NOT EXISTS open_match_joueurs (
+            match_id INTEGER NOT NULL,
+            email TEXT NOT NULL,
+            joined TIMESTAMP DEFAULT now(),
+            PRIMARY KEY (match_id, email)
+        )""")
+        c.execute("""CREATE TABLE IF NOT EXISTS open_match_scores (
+            match_id INTEGER PRIMARY KEY,
+            score TEXT NOT NULL,
+            saisi_par TEXT NOT NULL,
+            saisi_le TIMESTAMP DEFAULT now()
+        )""")
+    _jeu_ready = True
+
+
+def _now():
+    return datetime.datetime.utcnow()
+
+
+# ---------------------------------------------------------------------------
+# AUTH — lien magique (magic link) + sessions
+# Flux : POST /connexion (email) → email avec lien → GET /connexion/lien?t=TOKEN
+# → session cookie (session_jeu) valable 30 jours → accès aux pages protégées.
+# Toutes les fonctions tombent en no-op si PG_URL n'est pas défini.
+# ---------------------------------------------------------------------------
+
+def creer_magic_token(email):
+    """Génère un token de connexion (15 min). Retourne le token string."""
+    if not PG_URL:
+        return None
+    _pg_ensure_jeu()
+    token = secrets.token_urlsafe(32)
+    expires = _now() + datetime.timedelta(minutes=15)
+    with _pg() as c:
+        c.execute("INSERT INTO magic_tokens(token,email,expires) VALUES(%s,%s,%s)",
+                  (token, email, expires))
+    return token
+
+
+def valider_magic_token(token):
+    """Valide le token et le marque utilisé. Retourne l'email ou None."""
+    if not PG_URL or not token:
+        return None
+    _pg_ensure_jeu()
+    with _pg() as c:
+        row = c.execute(
+            "SELECT email, expires, used FROM magic_tokens WHERE token=%s",
+            (token,)).fetchone()
+        if not row or row["used"] or row["expires"] < _now():
+            return None
+        c.execute("UPDATE magic_tokens SET used=TRUE WHERE token=%s", (token,))
+        return row["email"]
+
+
+def creer_session(email):
+    """Crée une session persistante (30 jours). Retourne le token."""
+    if not PG_URL:
+        return None
+    _pg_ensure_jeu()
+    token = secrets.token_urlsafe(32)
+    expires = _now() + datetime.timedelta(days=30)
+    with _pg() as c:
+        c.execute("INSERT INTO sessions(token,email,expires) VALUES(%s,%s,%s)",
+                  (token, email, expires))
+    return token
+
+
+def get_session_email(token):
+    """Retourne l'email de la session si valide, sinon None."""
+    if not PG_URL or not token:
+        return None
+    _pg_ensure_jeu()
+    with _pg() as c:
+        row = c.execute(
+            "SELECT email, expires FROM sessions WHERE token=%s", (token,)).fetchone()
+        if not row or row["expires"] < _now():
+            return None
+        return row["email"]
+
+
+def supprimer_session(token):
+    if not PG_URL or not token:
+        return
+    _pg_ensure_jeu()
+    with _pg() as c:
+        c.execute("DELETE FROM sessions WHERE token=%s", (token,))
+
+
+def waitlist_par_email(email):
+    """Retourne la ligne waitlist pour cet email (ou None)."""
+    if not email:
+        return None
+    if PG_URL:
+        _pg_ensure()
+        with _pg() as c:
+            return c.execute(
+                "SELECT * FROM waitlist WHERE lower(email)=%s",
+                (email.lower(),)).fetchone()
+    conn = db()
+    row = conn.execute(
+        "SELECT * FROM waitlist WHERE lower(email)=?", (email.lower(),)).fetchone()
+    conn.close()
+    return row
+
+
+# ---------------------------------------------------------------------------
+# OPEN MATCH — créer / rejoindre / scorer un créneau de jeu
+# ---------------------------------------------------------------------------
+
+def ouvrir_match(creator_email, date, heure, club, format_, niveau_min, niveau_max, zone):
+    """Crée un open match et inscrit le créateur. Retourne l'id."""
+    _pg_ensure_jeu()
+    with _pg() as c:
+        row = c.execute(
+            """INSERT INTO open_matches
+               (creator_email, date, heure, club, format, niveau_min, niveau_max, zone)
+               VALUES(%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+            (creator_email, date, heure, club, format_, int(niveau_min), int(niveau_max), zone)
+        ).fetchone()
+        mid = row["id"]
+        c.execute("INSERT INTO open_match_joueurs(match_id,email) VALUES(%s,%s)",
+                  (mid, creator_email))
+    return mid
+
+
+def rejoindre_match(match_id, email):
+    """Inscrit un joueur à un open match. Retourne None si OK, message d'erreur sinon."""
+    _pg_ensure_jeu()
+    with _pg() as c:
+        m = c.execute("SELECT * FROM open_matches WHERE id=%s", (match_id,)).fetchone()
+        if not m or m["statut"] == "annulé":
+            return "Match introuvable ou annulé."
+        if m["statut"] == "complet":
+            return "Ce match est déjà complet."
+        deja = c.execute(
+            "SELECT 1 FROM open_match_joueurs WHERE match_id=%s AND email=%s",
+            (match_id, email)).fetchone()
+        if deja:
+            return "Tu es déjà inscrit(e) à ce match."
+        pris = c.execute(
+            "SELECT COUNT(*) AS n FROM open_match_joueurs WHERE match_id=%s",
+            (match_id,)).fetchone()["n"]
+        if pris >= m["nb_slots"]:
+            return "Match complet."
+        c.execute("INSERT INTO open_match_joueurs(match_id,email) VALUES(%s,%s)",
+                  (match_id, email))
+        if pris + 1 >= m["nb_slots"]:
+            c.execute("UPDATE open_matches SET statut='complet' WHERE id=%s", (match_id,))
+    return None
+
+
+def get_open_match(match_id):
+    _pg_ensure_jeu()
+    with _pg() as c:
+        return c.execute("SELECT * FROM open_matches WHERE id=%s", (match_id,)).fetchone()
+
+
+def lister_open_matchs():
+    _pg_ensure_jeu()
+    with _pg() as c:
+        return c.execute(
+            """SELECT m.*,
+               (SELECT COUNT(*) FROM open_match_joueurs j WHERE j.match_id=m.id) AS nb_inscrits
+               FROM open_matches m
+               WHERE m.statut IN ('ouvert', 'complet')
+               ORDER BY m.date ASC, m.heure ASC"""
+        ).fetchall()
+
+
+def get_joueurs_match(match_id):
+    _pg_ensure_jeu()
+    with _pg() as c:
+        return c.execute(
+            """SELECT j.email, w.prenom, w.profession, w.zone, w.niveau
+               FROM open_match_joueurs j
+               LEFT JOIN waitlist w ON lower(w.email)=lower(j.email)
+               WHERE j.match_id=%s ORDER BY j.joined""",
+            (match_id,)).fetchall()
+
+
+def est_inscrit_match(match_id, email):
+    _pg_ensure_jeu()
+    with _pg() as c:
+        return bool(c.execute(
+            "SELECT 1 FROM open_match_joueurs WHERE match_id=%s AND email=%s",
+            (match_id, email)).fetchone())
+
+
+def get_score_open(match_id):
+    _pg_ensure_jeu()
+    with _pg() as c:
+        return c.execute(
+            "SELECT * FROM open_match_scores WHERE match_id=%s", (match_id,)).fetchone()
+
+
+def saisir_score_open(match_id, score, email):
+    _pg_ensure_jeu()
+    with _pg() as c:
+        c.execute(
+            """INSERT INTO open_match_scores(match_id, score, saisi_par)
+               VALUES(%s,%s,%s)
+               ON CONFLICT(match_id) DO UPDATE SET score=%s, saisi_par=%s, saisi_le=now()""",
+            (match_id, score, email, score, email))
+
+
 def _new_code(existe):
     """Génère un code de parrainage unique. `existe(code)` -> bool."""
-    import secrets
     alpha = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # sans caractères ambigus
     while True:
         code = "".join(secrets.choice(alpha) for _ in range(6))
@@ -654,6 +893,32 @@ def email_confirmation_html(prenom, ref_code):
       désinscrire ou toute question : <a href="mailto:{EMAIL_FROM}"
       style="color:#6b7a8c">{EMAIL_FROM}</a>.</p>
     </div>
+  </div>
+</div>"""
+
+
+def email_magic_link_html(prenom, magic_url):
+    """Email contenant le lien de connexion (valable 15 min)."""
+    bonjour = f"Bonjour {e(prenom)} !" if prenom else "Bonjour !"
+    return f"""
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#070b10;color:#e2eaf0;border-radius:12px;overflow:hidden">
+  <div style="background:#0b141d;padding:28px 36px;border-bottom:1px solid #1e2f3d">
+    <p style="margin:0;font-size:20px;font-weight:900;font-style:italic;
+       text-transform:uppercase;color:#c6ff00">Ligue Padel Santé · IDF</p>
+  </div>
+  <div style="padding:36px">
+    <p style="margin:0 0 18px;font-size:17px;font-weight:700">{bonjour}</p>
+    <p style="margin:0 0 24px;color:#9baab5">Clique sur le bouton ci-dessous pour
+    te connecter à ton espace Ligue Padel Santé. Ce lien est valable <strong
+    style="color:#e2eaf0">15 minutes</strong>.</p>
+    <a href="{magic_url}" style="display:inline-block;background:#c6ff00;color:#06120a;
+       font-weight:900;font-style:italic;text-transform:uppercase;font-size:16px;
+       padding:16px 32px;border-radius:10px;text-decoration:none">
+      Me connecter →
+    </a>
+    <p style="margin:28px 0 0;font-size:12px;color:#6b7a8c">Si tu n'es pas à
+    l'origine de cette demande, ignore cet email. Ton compte reste sécurisé.</p>
+    <p style="margin:8px 0 0;font-size:12px;color:#6b7a8c">Lien : {magic_url}</p>
   </div>
 </div>"""
 
@@ -2536,6 +2801,269 @@ def page_admin(flash=None):
 # SERVEUR HTTP
 # ===========================================================================
 
+# ---------------------------------------------------------------------------
+# PAGES — ESPACE JOUEUR (auth + open match)
+# ---------------------------------------------------------------------------
+
+def page_connexion(flash=None, sent=False):
+    if sent:
+        corps = """<div class="card" style="max-width:480px;margin:0 auto;text-align:center">
+        <p style="font-size:40px;margin:0 0 12px">📬</p>
+        <h2>Vérifie ta boîte mail</h2>
+        <p class="muted">Un lien de connexion valable 15 minutes vient d'être envoyé.
+        Clique dessus pour accéder à ton espace.</p>
+        <p class="muted" style="margin-top:16px;font-size:12px">Pas reçu ? Vérifie
+        le dossier spam, ou <a href="/connexion">recommence</a>.</p>
+        </div>"""
+        return page("Connexion", corps)
+
+    corps = f"""<div class="card" style="max-width:480px;margin:0 auto">
+    <h2>Se connecter</h2>
+    <p class="muted">Entre l'email avec lequel tu t'es pré-inscrit(e). On t'envoie
+    un lien de connexion instantané — pas de mot de passe.</p>
+    <form method="post" action="/connexion">
+      <label>Email</label>
+      <input name="email" type="email" required placeholder="toi@exemple.fr" autofocus>
+      <br><br>
+      <button class="btn" style="width:100%">Recevoir mon lien de connexion</button>
+    </form>
+    <p class="muted" style="margin-top:16px;font-size:13px">Pas encore inscrit(e) ?
+    <a href="/#rejoindre">Rejoindre la liste d'attente</a></p>
+    </div>"""
+    return page("Connexion", corps, flash)
+
+
+def page_profil(joueur, flash=None):
+    prenom = joueur.get("prenom") or ""
+    email = joueur.get("email") or ""
+    profession = joueur.get("profession") or "—"
+    zone = joueur.get("zone") or "—"
+    niv = joueur.get("niveau") or ""
+    badge = badge_niveau(niv) if niv else '<span class="muted">—</span>'
+    corps = f"""
+    <div class="card" style="max-width:620px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+        <div style="width:56px;height:56px;border-radius:50%;background:#1e2f3d;
+             display:flex;align-items:center;justify-content:center;font-size:26px;
+             font-weight:900;color:var(--lime)">{e(prenom[:1].upper()) if prenom else "?"}</div>
+        <div>
+          <h2 style="margin:0">{e(prenom or email)}</h2>
+          <p class="muted" style="margin:4px 0 0">{e(email)}</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px">
+          <p class="muted" style="margin:0 0 4px;font-size:11px;text-transform:uppercase;
+             font-weight:800;letter-spacing:.6px">Profession</p>
+          <p style="margin:0;font-weight:700">{e(profession)}</p>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px">
+          <p class="muted" style="margin:0 0 4px;font-size:11px;text-transform:uppercase;
+             font-weight:800;letter-spacing:.6px">Zone</p>
+          <p style="margin:0;font-weight:700">{e(zone)}</p>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px">
+          <p class="muted" style="margin:0 0 4px;font-size:11px;text-transform:uppercase;
+             font-weight:800;letter-spacing:.6px">Niveau</p>
+          <p style="margin:0">{badge}</p>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px">
+          <p class="muted" style="margin:0 0 4px;font-size:11px;text-transform:uppercase;
+             font-weight:800;letter-spacing:.6px">Partenaire</p>
+          <p style="margin:0;font-weight:700">{e(joueur.get("a_partenaire") or "—")}</p>
+        </div>
+      </div>
+      <a href="/matchs" class="btn" style="display:inline-block;margin-right:12px">
+        Voir les matchs ouverts</a>
+      <a href="/match/ouvrir" class="btn sec" style="display:inline-block">
+        Ouvrir un match</a>
+      <p style="margin-top:24px"><a href="/deconnexion" style="color:var(--muted);
+         font-size:13px">Se déconnecter</a></p>
+    </div>"""
+    return page("Mon profil", corps, flash)
+
+
+def page_matchs(joueur, flash=None):
+    email = joueur["email"]
+    matchs = lister_open_matchs() if PG_URL else []
+
+    def carte_match(m):
+        inscrits = m["nb_inscrits"]
+        slots = m["nb_slots"]
+        complet = m["statut"] == "complet"
+        statut_badge = ('<span class="badge" style="background:#1e3a1e;color:var(--lime)">'
+                        f'{inscrits}/{slots} joueur(s)</span>'
+                        if not complet else
+                        '<span class="badge" style="background:#1a0a1a;color:var(--mag)">Complet</span>')
+        niv_range = (f'Niveau {m["niveau_min"]}→{m["niveau_max"]}'
+                     if m["niveau_min"] != 3 or m["niveau_max"] != 7
+                     else "Tous niveaux")
+        return f"""<div class="card" style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+            <div>
+              <strong style="font-size:17px">{e(m['date'])} à {e(m['heure'])}</strong>
+              <br><span class="muted">{e(m['club'])}</span>
+            </div>
+            {statut_badge}
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            <span class="badge zone">{e(m['zone'] or '—')}</span>
+            <span class="badge">{e(niv_range)}</span>
+            <span class="badge">{e(m['format'].capitalize())}</span>
+          </div>
+          <div style="margin-top:14px">
+            <a href="/match?id={m['id']}" class="btn sec" style="padding:8px 16px;font-size:13px">
+              Voir le match →</a>
+          </div>
+        </div>"""
+
+    liste = "".join(carte_match(m) for m in matchs) if matchs else (
+        '<p class="muted">Aucun match ouvert pour l\'instant. '
+        'Sois le premier à en créer un !</p>')
+
+    corps = f"""
+    <div style="display:flex;justify-content:space-between;align-items:center;
+         margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <h2 style="margin:0">Matchs ouverts</h2>
+      <a href="/match/ouvrir" class="btn">+ Ouvrir un match</a>
+    </div>
+    {liste}
+    <p style="margin-top:20px"><a href="/profil" class="muted">← Mon profil</a></p>"""
+    return page("Matchs ouverts", corps, flash)
+
+
+def page_ouvrir_match(joueur, flash=None):
+    niv = joueur.get("niveau") or 4
+    zone = joueur.get("zone") or "Centre"
+    niv_min = max(3, niv - 1)
+    niv_max = min(7, niv + 1)
+    # Semaine prochaine comme date par défaut
+    default_date = (datetime.date.today() + datetime.timedelta(days=7)).isoformat()
+
+    zones_opts = "".join(
+        f'<option value="{e(z)}"{"selected" if z == zone else ""}>{e(z)}</option>'
+        for z in ZONES)
+    niv_opts = lambda sel: "".join(
+        f'<option value="{n}"{"selected" if n == sel else ""}>{n}</option>'
+        for n in range(3, 8))
+
+    corps = f"""<div class="card" style="max-width:560px;margin:0 auto">
+    <h2>Ouvrir un match</h2>
+    <p class="muted">Propose un créneau. Les joueurs compatibles (niveau, zone) pourront
+    te rejoindre.</p>
+    <form method="post" action="/match/ouvrir">
+      <div class="grid2">
+        <div><label>Date</label>
+          <input name="date" type="date" required value="{default_date}"></div>
+        <div><label>Heure</label>
+          <input name="heure" type="time" required value="19:00"></div>
+      </div>
+      <label>Club / terrain</label>
+      <input name="club" required placeholder="ex. 4Padel Boulogne — Terrain 3">
+      <div class="row">
+        <div><label>Zone</label><select name="zone">{zones_opts}</select></div>
+        <div><label>Format</label>
+          <select name="format">
+            <option value="classique">Classique (2 vs 2 fixe)</option>
+            <option value="americano">Américano (partenaires tournants)</option>
+          </select>
+        </div>
+      </div>
+      <fieldset>
+        <legend>Niveau accepté</legend>
+        <div class="grid2">
+          <div><label>Niveau min</label><select name="niveau_min">{niv_opts(niv_min)}</select></div>
+          <div><label>Niveau max</label><select name="niveau_max">{niv_opts(niv_max)}</select></div>
+        </div>
+      </fieldset>
+      <br>
+      <button class="btn" style="width:100%">Ouvrir ce match</button>
+    </form>
+    <p style="margin-top:16px"><a href="/matchs" class="muted">← Retour aux matchs</a></p>
+    </div>"""
+    return page("Ouvrir un match", corps, flash)
+
+
+def page_match(match_id, joueur, flash=None):
+    m = get_open_match(match_id)
+    if not m:
+        return page("Match introuvable", '<div class="card">Match introuvable.</div>')
+    email = joueur["email"]
+    inscrit = est_inscrit_match(match_id, email)
+    joueurs = get_joueurs_match(match_id)
+    score = get_score_open(match_id)
+
+    inscrits_html = ""
+    for j in joueurs:
+        p = j.get("prenom") or j["email"].split("@")[0]
+        niv_b = badge_niveau(j["niveau"]) if j.get("niveau") else ""
+        inscrits_html += f"""<div style="display:flex;align-items:center;gap:10px;
+          padding:10px 0;border-bottom:1px solid var(--line)">
+          <div style="width:36px;height:36px;border-radius:50%;background:#1e2f3d;
+               display:flex;align-items:center;justify-content:center;font-weight:900;
+               color:var(--lime);font-size:16px">{e(p[:1].upper())}</div>
+          <div>
+            <strong>{e(p)}</strong>
+            <br><span class="muted">{e(j.get('profession') or '')}</span>
+          </div>
+          <div style="margin-left:auto">{niv_b}</div>
+        </div>"""
+
+    slots = m["nb_slots"]
+    nb = len(joueurs)
+    complet = m["statut"] == "complet"
+
+    action_html = ""
+    if score:
+        action_html = f"""<div class="flash" style="margin-top:16px">
+          Score enregistré : <strong>{e(score['score'])}</strong></div>"""
+    elif inscrit and complet:
+        sets_fields = "".join(
+            f"""<div class="grid2">
+              <div><label>Set {i} — vous</label>
+                <input name="s{i}a" type="number" min="0" max="7" placeholder="0"></div>
+              <div><label>Set {i} — adversaires</label>
+                <input name="s{i}b" type="number" min="0" max="7" placeholder="0"></div>
+            </div>""" for i in range(1, 4))
+        action_html = f"""<div class="card" style="margin-top:16px;background:var(--bg2)">
+          <h3 style="margin-top:0">Saisir le score</h3>
+          <form method="post" action="/match/score">
+            <input type="hidden" name="match_id" value="{match_id}">
+            {sets_fields}
+            <br><button class="btn">Enregistrer le score</button>
+          </form>
+        </div>"""
+    elif not inscrit and not complet:
+        action_html = f"""<form method="post" action="/match/rejoindre" style="margin-top:16px">
+          <input type="hidden" name="match_id" value="{match_id}">
+          <button class="btn">Rejoindre ce match ({nb}/{slots})</button>
+        </form>"""
+    elif complet and not inscrit:
+        action_html = '<p class="muted" style="margin-top:12px">Match complet.</p>'
+
+    niv_range = (f"Niveau {m['niveau_min']}→{m['niveau_max']}"
+                 if m['niveau_min'] != 3 or m['niveau_max'] != 7 else "Tous niveaux")
+
+    corps = f"""
+    <div style="max-width:620px;margin:0 auto">
+      <div class="card">
+        <h2 style="margin-top:0">{e(m['date'])} à {e(m['heure'])}</h2>
+        <p style="font-size:17px;font-weight:700;margin:0 0 12px">{e(m['club'])}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+          <span class="badge zone">{e(m['zone'] or '—')}</span>
+          <span class="badge">{e(niv_range)}</span>
+          <span class="badge">{e(m['format'].capitalize())}</span>
+          <span class="badge">{nb}/{slots} joueur(s)</span>
+        </div>
+        <h3 style="margin-bottom:8px">Joueur(s) inscrit(s)</h3>
+        {inscrits_html or '<p class="muted">—</p>'}
+        {action_html}
+      </div>
+      <p style="margin-top:16px"><a href="/matchs" class="muted">← Retour aux matchs</a></p>
+    </div>"""
+    return page(f"Match du {m['date']}", corps, flash)
+
+
 class Handler(http.server.BaseHTTPRequestHandler):
     def _send(self, body, code=200):
         data = body.encode("utf-8")
@@ -2571,8 +3099,28 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     # Pages accessibles sans déverrouillage (pré-lancement : seule la préinscription).
     PUBLIC_GET = {"/", "/confidentialite", "/apercu", "/favicon.svg",
-                  "/favicon.ico", "/carte", "/carte.svg"}
-    PUBLIC_POST = {"/rejoindre", "/auth/google", "/apercu"}
+                  "/favicon.ico", "/carte", "/carte.svg",
+                  # Espace joueur réel — gèrent eux-mêmes l'auth session
+                  "/connexion", "/connexion/lien", "/deconnexion",
+                  "/profil", "/matchs", "/match/ouvrir", "/match"}
+    PUBLIC_POST = {"/rejoindre", "/auth/google", "/apercu",
+                   "/connexion", "/match/ouvrir", "/match/rejoindre", "/match/score"}
+
+    def _joueur(self):
+        """Retourne la ligne waitlist du joueur connecté, ou None."""
+        token = self._cookie("session_jeu")
+        if not token:
+            return None
+        email = get_session_email(token)
+        if not email:
+            return None
+        return waitlist_par_email(email)
+
+    def _set_session(self, token):
+        """Pose le cookie de session (30 jours)."""
+        self.send_header(
+            "Set-Cookie",
+            f"session_jeu={token}; Path=/; HttpOnly; Max-Age=2592000; SameSite=Lax")
 
     def do_GET(self):
         u = urllib.parse.urlparse(self.path)
@@ -2627,6 +3175,54 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(svg)))
                 self.end_headers()
                 self.wfile.write(svg)
+            elif u.path == "/connexion":
+                self._send(page_connexion(flash))
+            elif u.path == "/connexion/lien":
+                token = q.get("t", [None])[0]
+                email = valider_magic_token(token) if token else None
+                if not email:
+                    self._send(page_connexion("Lien invalide ou expiré. Recommence."))
+                    return
+                session = creer_session(email)
+                self.send_response(303)
+                self.send_header("Location", "/profil")
+                self._set_session(session)
+                self.end_headers()
+            elif u.path == "/deconnexion":
+                token = self._cookie("session_jeu")
+                if token:
+                    supprimer_session(token)
+                self.send_response(303)
+                self.send_header("Location", "/connexion?flash=" + urllib.parse.quote(
+                    "Tu es déconnecté(e)."))
+                self.send_header("Set-Cookie",
+                    "session_jeu=; Path=/; HttpOnly; Max-Age=0; SameSite=Lax")
+                self.end_headers()
+            elif u.path == "/profil":
+                joueur = self._joueur()
+                if not joueur:
+                    self._redirect("/connexion")
+                    return
+                self._send(page_profil(joueur, flash))
+            elif u.path == "/matchs":
+                joueur = self._joueur()
+                if not joueur:
+                    self._redirect("/connexion")
+                    return
+                self._send(page_matchs(joueur, flash))
+            elif u.path == "/match/ouvrir":
+                joueur = self._joueur()
+                if not joueur:
+                    self._redirect("/connexion")
+                    return
+                self._send(page_ouvrir_match(joueur, flash))
+            elif u.path == "/match":
+                joueur = self._joueur()
+                if not joueur:
+                    self._redirect("/connexion")
+                    return
+                mid = int(q.get("id", [0])[0])
+                self._send(page_match(mid, joueur, flash))
             elif u.path == "/confidentialite":
                 self._send(page_confidentialite())
             elif u.path == "/classement":
@@ -2670,7 +3266,80 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._redirect("/")
             return
 
-        if u.path == "/inscription":
+        if u.path == "/connexion":
+            email = g("email").lower()
+            joueur = waitlist_par_email(email)
+            if not joueur:
+                self._send(page_connexion(
+                    "Email non reconnu. Inscris-toi d'abord sur la liste d'attente."))
+                return
+            token = creer_magic_token(email)
+            if token and peut_envoyer_email(email):
+                magic_url = f"{BASE_URL}/connexion/lien?t={token}"
+                import threading
+                threading.Thread(
+                    target=envoyer_email,
+                    args=(email, "Ton lien de connexion — Ligue Padel Santé",
+                          email_magic_link_html(joueur.get("prenom"), magic_url),
+                          joueur.get("prenom")),
+                    daemon=True).start()
+            self._send(page_connexion(sent=True))
+
+        elif u.path == "/match/ouvrir":
+            joueur = self._joueur()
+            if not joueur:
+                self._redirect("/connexion")
+                return
+            date = g("date")
+            heure = g("heure")
+            club = g("club")
+            if not (date and heure and club):
+                self._send(page_ouvrir_match(joueur,
+                    "Remplis la date, l'heure et le club."))
+                return
+            format_ = g("format") or "classique"
+            niveau_min = int(g("niveau_min") or 3)
+            niveau_max = int(g("niveau_max") or 7)
+            zone = g("zone") or joueur.get("zone") or "Centre"
+            mid = ouvrir_match(joueur["email"], date, heure, club,
+                               format_, niveau_min, niveau_max, zone)
+            self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(
+                "Match ouvert ! Les joueurs compatibles peuvent maintenant te rejoindre."))
+
+        elif u.path == "/match/rejoindre":
+            joueur = self._joueur()
+            if not joueur:
+                self._redirect("/connexion")
+                return
+            mid = int(g("match_id") or 0)
+            err = rejoindre_match(mid, joueur["email"])
+            if err:
+                self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(err))
+            else:
+                self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(
+                    "Inscrit(e) ! À très vite sur le terrain."))
+
+        elif u.path == "/match/score":
+            joueur = self._joueur()
+            if not joueur:
+                self._redirect("/connexion")
+                return
+            mid = int(g("match_id") or 0)
+            sets = []
+            for a, b in (("s1a", "s1b"), ("s2a", "s2b"), ("s3a", "s3b")):
+                va, vb = g(a), g(b)
+                if va != "" and vb != "":
+                    sets.append(f"{int(va)}-{int(vb)}")
+            if not sets:
+                self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(
+                    "Score vide."))
+                return
+            score_str = " / ".join(sets)
+            saisir_score_open(mid, score_str, joueur["email"])
+            self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(
+                "Score enregistré !"))
+
+        elif u.path == "/inscription":
             zone = g("zone")
             if zone in ("", "auto"):
                 zone = zone_from_cp(g("cp")) or "Centre"  # détection par code postal
