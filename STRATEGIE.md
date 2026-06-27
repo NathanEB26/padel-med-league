@@ -85,6 +85,47 @@ l'officiel (qui fait vivre la ligue). Gate basé sur « avoir **honoré** son of
 **Dépendance** : s'appuie sur le **modèle open match (S2)** → à implémenter après lui.
 **Statut** : backlog produit, **non prioritaire** (mode de travail asynchrone).
 
+### S12 — Échéance « phase de test matchs amicaux » début août 2026 — *27/06/2026* ✅ validé
+**Décision** : le **modèle open match (S2)** et les **matchs amicaux (S8)** doivent
+être **fonctionnels début août 2026**, pour une **phase de test en conditions réelles
+en août** — avant le lancement officiel de la Saison 1 le **1er septembre 2026** (S3).
+**Pourquoi** : valider le mécanisme de coordination (ouverture de créneau +
+sollicitation des compatibles) et le système d'engagement (amical débloqué après
+l'officiel honoré) **avec de vrais joueurs avant** le lancement, pour arriver le 1er
+septembre avec un moteur de jeu testé plutôt qu'une démo.
+**Implication** : S2 et S8 sortent du backlog « non prioritaire » et deviennent
+**prioritaires avec échéance ferme** (début août). Reste dépendant l'un de l'autre :
+S8 a besoin de S2. Spéc à détailler dans PLAN.md avant l'implémentation.
+**Statut** : ✅ **IMPLÉMENTÉ (27/06/2026)**. Open match MVP complet et déployé sur Render.
+Voir S15 pour le détail de ce qui est en production.
+
+### S13 — Priorité repositionnée : la communication d'abord — *27/06/2026* ✅ validé
+**Décision** : la **campagne de communication** repasse priorité **n°1**, devant
+l'implémentation produit (S12, open match/amicaux). Avancées du jour : **chaîne
+WhatsApp créée et live** (canal « Ligue Padel Santé · IDF »), **mail SIHP envoyé**
+(25/06), **post Instagram 01 publié** (1er post, compte `@padelmedleague` live).
+**Pourquoi** : décision de Nathan — pousser la traction/communauté avant de
+construire le moteur de jeu réel.
+**Implication** : l'échéance ferme de S12 (open match/amicaux fonctionnels début
+août) **reste valable** — réserver du temps dessus avant fin juillet pour ne pas la
+manquer, mais le travail immédiat se concentre sur la com'.
+**Statut** : validé, top priorité actuelle.
+
+### S14 — LinkedIn via une Page dédiée (anonymat de Nathan préservé) — *27/06/2026* ✅ validé
+**Décision** : créer une **Page LinkedIn dédiée** « Ligue Padel Santé Île-de-France »
+(pas le compte perso de Nathan) pour tous les posts LinkedIn de la campagne. Détails de
+création + stratégie de portée → [CALENDRIER-COMM.md](CALENDRIER-COMM.md) §2 bis.
+**Pourquoi** : un post publié depuis le compte perso de Nathan afficherait son nom/photo
+publiquement, ce qui contredit sa demande d'anonymat dans la campagne (cf. règle
+anonymat, 27/06). Une Page publie sous l'identité du projet, jamais celle de l'admin.
+**Implication** : audience à reconstruire depuis zéro (pas d'abonnés existants) →
+compter sur les invitations 1ᵉʳ degré + repartage par les relais, pas sur la portée
+organique d'un profil perso. **Statut** : décision prise, **Page pas encore créée**
+(action Nathan).
+**Plan ICPC associé** : contacter **Séverine Sebagh (CTO)** + la chargée de
+communication de l'ICPC pour (1) un relais interne et (2) un post LinkedIn — coordonnées
+de la chargée de com à identifier. Suivi → `CONTACTS-RELAIS.md` (ligne ICPC).
+
 ### S10 — Stratégie d'événements physiques (IRL) — *24/06/2026* 🟡 brainstorm validé, en backlog
 **Décision** : programmer des temps forts « en vrai » tout au long de l'année — ils
 convertissent la liste d'attente, nourrissent l'Instagram et fidélisent. Programme :
@@ -184,10 +225,15 @@ remplir des appariements crédibles au lancement.
 
 ## 3. Priorités du moment (top 3)
 
-1. **🔴 Conformité RGPD de la page** — bloquant pour toute promo (on collecte des
-   emails). Mention de confidentialité + case de consentement.
-2. **🔴 Site responsive mobile** — le trafic vient d'Instagram = mobile. Landing
-   parfaite sur smartphone avant de pousser la com'. *(S6)*
+1. **🔴 Campagne de communication** *(S13, priorité n°1)* — chaîne WhatsApp live,
+   mail SIHP envoyé, post Instagram 01 publié. Reste : démarcher les autres relais
+   (`CONTACTS-RELAIS.md` ; CGOS abandonné), dérouler le calendrier Instagram (02 →
+   03), calendrier 15 jours agressif → mode entretien jusqu'au 1er sept, **en
+   gardant en tête de maximiser l'automatisation/l'agentique** (Claude doit pouvoir
+   exécuter le plus possible seul, pas juste planifier).
+2. **🟠 Open match (S2) + matchs amicaux (S8) fonctionnels début août** *(S12,
+   échéance ferme)* — passe en n°2 pendant que la com' est traitée, mais
+   l'échéance début août reste ferme : ne pas la perdre de vue.
 3. **✅ Domaine `padel-med-league.fr`** — acheté, branché sur Render, HTTPS actif,
    `BASE_URL`/OG sur le `.fr`. Reste la bio Instagram (Nathan). Débloque l'email (S7).
 
@@ -214,10 +260,10 @@ remplir des appariements crédibles au lancement.
       déployé & vérifié. ✅ *fait.* → reste : **bio Instagram** à passer en `.fr` (Nathan).
 - [x] **Compte à rebours 1er sept 2026** sur la landing *(S3)* — countdown live dans le
       hero, responsive, « C'est parti ! » à l'échéance. ✅ *fait & déployé.*
-- [ ] **Communauté WhatsApp** : la créer → fournir le lien → définir `WHATSAPP_URL`.
-      → *Nathan.* (Penser confidentialité : communauté vs canal pour des soignants.)
-- [ ] **Publier le post Instagram 01** (annonce) ; photo de profil = `logo-icon.jpg` ;
-      mettre l'URL **onrender** en bio tant que le `.fr` n'est pas branché. → *Nathan.*
+- [x] **Chaîne WhatsApp créée et live** (« Ligue Padel Santé · IDF », ✅ 27/06) — lien
+      déjà codé en dur dans `app.py` comme défaut (voir §6 `WHATSAPP_URL`).
+- [x] **Post Instagram 01 publié** (✅ 27/06, compte `@padelmedleague` live). Reste :
+      photo de profil = `logo-icon.jpg` (à vérifier), puis dérouler 03 → 02.
 
 ### Emails *(S7)* — ✅ **ACTIFS** (testé le 24/06/2026)
 - [x] Câblé dans `app.py` : confirmation d'inscription brandée (avec lien de parrainage)
@@ -236,9 +282,16 @@ remplir des appariements crédibles au lancement.
       seule communication : newsletter internes + Insta/Facebook). Mail angle
       bénévole/lien/sport + texte à relayer + visuel `01-annonce-newsletter`, lien
       `?from=sihp`. → *Suivi : surveiller les inscrits `from=sihp` dans `/admin`.*
-- [ ] **Démarcher les relais** par profession → `CONTACTS-RELAIS.md` (vérifier coord.,
-      envoyer, relancer, suivre le tableau). → *Nathan.*
-- [ ] Dérouler le **calendrier Instagram** (01 épinglé → 03 à J+2-3 → 02 pour l'urgence).
+- [x] **Démarcher les relais Vague 1 (jeunes/viral)** : tous envoyés (27/06) — SIHP,
+      SRP-IMG, FNSIP-BM, FNEK, FNESI, ANEMF, UNECD, ANESF, ANEPF, FNEO. ✅ *Vague 1
+      bouclée.* Reste les **relances** (~10j après envoi) → suivre `CONTACTS-RELAIS.md`.
+- [ ] **Vague 2 / cibles restantes** : Assos sportives AP-HP/GHT (contact pas encore
+      identifié) ; ICPC (contacter Séverine Sebagh, CTO, + chargée de com — coord. à
+      trouver) → `CONTACTS-RELAIS.md`. → *Nathan.*
+- [ ] **Créer la Page LinkedIn dédiée** « Ligue Padel Santé Île-de-France » *(S14)* —
+      marche à suivre détaillée → `CALENDRIER-COMM.md` §2 bis. → *Nathan.*
+- [x] **Post 01 publié** (27/06). Reste à dérouler le **calendrier Instagram** :
+      épingler 01 → 03 à J+2-3 → 02 pour l'urgence.
 - [x] **Kit ambassadeur** (textes + one-pager + mail SIHP + cibles + objections) →
       `KIT-AMBASSADEUR.md`. ✅ *fait.*
 - [x] **Suivi de source** `?from=` (mesure des relais) visible dans l'admin. ✅ *fait.*
@@ -251,11 +304,15 @@ remplir des appariements crédibles au lancement.
       (« Prénom t'invite… »). Reste en backlog : classement ambassadeurs *public*
       (volontairement écarté tant qu'on n'a pas d'opt-in nominatif — cf. RGPD).
 
-### 🟢 Backlog produit (Saison 1+)
+### 🔴 Priorité produit — échéance début août *(S12)*
 - [ ] **Modèle « open match »** *(S2)* : ouverture de match par un joueur + sollicitation
       des compatibles + fenêtre d'élargissement + sièges solo/duo. Spéc → PLAN.md.
+      **Doit être fonctionnel début août 2026.**
 - [ ] **Matchs amicaux + cote fantôme** *(S8)* : débloqués après l'officiel, hors
       classement, comptés en stats fun + shadow rating privé. Dépend de S2.
+      **Doit être fonctionnel début août 2026** (phase de test friendly-match en août).
+
+### 🟢 Backlog produit (Saison 1+)
 - [ ] **Statistiques joueur/groupe** *(S9)* : dashboard perso (A) → social/fun (B) →
       battles de groupe (C). Construit sur l'existant `stats_joueurs`/`classement_par`.
 - [ ] **Profil : côté G/D + tolérance 0-10** *(S4)* → schéma joueur + moteur d'appariement.
@@ -301,8 +358,8 @@ remplir des appariements crédibles au lancement.
 | 1b | ~~Passer la **bio Instagram** sur `padel-med-league.fr`~~ | ✅ en ligne (`/?from=ig`, vérifiée 25/06) |
 | 2 | ~~Alias OVH `contact@` + compte Brevo + auth domaine + env Render~~ | ✅ **emails actifs (testé)** |
 | 3 | ~~Définir **`APERCU_CODE`** dans Render~~ | ✅ fait |
-| 4 | **Créer la CHAÎNE WhatsApp** (anti-spam, numéros privés) → coller le lien `whatsapp.com/channel/…` dans `WHATSAPP_URL` (Render). Mode d'emploi : [COMMUNAUTE-WHATSAPP.md](COMMUNAUTE-WHATSAPP.md) §2 | ⏳ (remplace l'ancien groupe) |
-| 5 | Envoyer le **mail SIHP** (`/?from=sihp`) + publier **post 01** + photo de profil = nouveau `logo-icon` | ⏳ |
+| 4 | ~~Créer la CHAÎNE WhatsApp~~ | ✅ créée et live (27/06) |
+| 5 | ~~Envoyer le mail SIHP~~ (25/06) + ~~publier post 01~~ (27/06) | ✅ fait — reste : vérifier photo de profil = `logo-icon` |
 
 > 📧 **Email** : `padelmedleague@gmail.com` créé = bon **inbox/ops**. Public/envoi : utiliser
 > `contact@padel-med-league.fr` (alias OVH → ce Gmail) pour rester pro et **authentifiable**
@@ -362,3 +419,27 @@ Coûts évités en restant malin : **PWA** (pas de natif), **terrains payés par
 > Tant que les emails de confirmation ne sont pas activés (Brevo), on **peut** déjà
 > promouvoir (l'inscription marche), mais l'inscrit ne reçoit pas d'accusé de réception.
 > **Reco : activer Brevo AVANT la promo** (c'était la demande).
+
+### S15 — Moteur de jeu bêta (open match) — *27/06/2026* ✅ LIVRÉ
+
+**Ce qui est en production (commits 47e916f → bd53339) :**
+- **Auth magic link** : `/connexion` → email Brevo → token 15 min → session cookie 30j
+- **Open match MVP** : créer un créneau (date, heure, club, zone, niveau, format), rejoindre, annuler, scorer
+- **Notifications auto** : email magic-link aux joueurs compatibles (zone + niveau) à chaque ouverture de match
+- **Email match complet** : récap à tous les 4 joueurs quand le dernier slot est pris
+- **Elo K=32** : calculé après chaque score (teams = joueurs[0-1] vs [2-3]), appliqué sur `waitlist.elo`
+- **Classement bêta** : `/classement-beta` — ranking Elo en temps réel, delta vs base 1000
+- **PWA** : installable écran d'accueil iOS/Android (`manifest.json` + meta Apple)
+- **Admin** : bouton "Invitations bêta" (magic links → toute la waitlist en 1 clic) + tableau des matchs
+- **Mobile responsive** : classes CSS dédiées `.jeu-stats`, `.match-card`, `.joueur-ligne`
+- **Neon** : 5 nouvelles tables (`magic_tokens`, `sessions`, `open_matches`, `open_match_joueurs`, `open_match_scores`) + colonnes `elo` et `nb_matchs` sur `waitlist`
+
+**Flux complet opérationnel :**
+`/admin` → "Invitations bêta" → pré-inscrits reçoivent un lien → `/matchs` → ouvre créneau → autres notifiés → jouent → score → Elo mis à jour → `/classement-beta`
+
+**Ce qui reste pour la Saison 1 (après bêta août) :**
+- Appariement automatique hebdomadaire (le vrai moteur de ligue)
+- Comptes joueurs complets (au-delà de la waitlist : binôme fixe, profil validé)
+- Matchs amicaux (S8) : gate "officiel honoré" → débloque l'amical
+- Push notifications (S6 PWA avancé)
+- Stats et historique (S9)
