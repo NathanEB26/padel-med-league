@@ -310,6 +310,8 @@ def _pg_ensure():
         c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS "
                   "consent BOOLEAN DEFAULT FALSE")
         c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS source TEXT")
+        c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS elo INTEGER DEFAULT 1000")
+        c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS nb_matchs INTEGER DEFAULT 0")
     _pg_ready = True
 
 
@@ -556,6 +558,87 @@ def saisir_score_open(match_id, score, email):
                VALUES(%s,%s,%s)
                ON CONFLICT(match_id) DO UPDATE SET score=%s, saisi_par=%s, saisi_le=now()""",
             (match_id, score, email, score, email))
+
+
+def _parse_score_open(score_str):
+    """Parse '6-4 / 3-6 / 6-2' → (sets_A, sets_B). Retourne None si illisible."""
+    sa = sb = 0
+    for part in score_str.replace(" ", "").split("/"):
+        try:
+            a, b = part.split("-")
+            if int(a) > int(b):
+                sa += 1
+            else:
+                sb += 1
+        except (ValueError, AttributeError):
+            return None
+    return (sa, sb)
+
+
+def _elo_delta(ra, rb, score_a, k=32):
+    """Retourne (delta_a, delta_b) pour les deux équipes."""
+    ea = 1 / (1 + 10 ** ((rb - ra) / 400))
+    eb = 1 - ea
+    return round(k * (score_a - ea)), round(k * ((1 - score_a) - eb))
+
+
+def calculer_elo_open_match(match_id):
+    """Calcule et applique le delta Elo suite à un score d'open match.
+    Teams : joueurs[0-1] (Équipe A) vs joueurs[2-3] (Équipe B).
+    Le score stocké est toujours du point de vue de l'Équipe A."""
+    if not PG_URL:
+        return
+    _pg_ensure_jeu()
+    score_row = get_score_open(match_id)
+    if not score_row:
+        return
+    joueurs = get_joueurs_match(match_id)
+    if len(joueurs) < 4:
+        return  # match incomplet, pas de calcul
+    parsed = _parse_score_open(score_row["score"])
+    if parsed is None:
+        return
+    sa, sb = parsed
+    if sa == sb:
+        return  # nul indécidable (ne devrait pas arriver au padel)
+    score_a = 1 if sa > sb else 0
+
+    # Récupérer les Elos courants
+    emails = [j["email"].lower() for j in joueurs]
+    with _pg() as c:
+        rows = c.execute(
+            "SELECT email, elo FROM waitlist WHERE lower(email) = ANY(%s)",
+            (emails,)).fetchall()
+    elo_map = {r["email"].lower(): (r["elo"] or 1000) for r in rows}
+
+    elo_A = [elo_map.get(emails[0], 1000), elo_map.get(emails[1], 1000)]
+    elo_B = [elo_map.get(emails[2], 1000), elo_map.get(emails[3], 1000)]
+    ra = (elo_A[0] + elo_A[1]) / 2
+    rb = (elo_B[0] + elo_B[1]) / 2
+    da, db = _elo_delta(ra, rb, score_a)
+
+    with _pg() as c:
+        for em in emails[:2]:
+            c.execute(
+                "UPDATE waitlist SET elo = COALESCE(elo,1000) + %s, nb_matchs = COALESCE(nb_matchs,0) + 1 WHERE lower(email)=%s",
+                (da, em))
+        for em in emails[2:]:
+            c.execute(
+                "UPDATE waitlist SET elo = COALESCE(elo,1000) + %s, nb_matchs = COALESCE(nb_matchs,0) + 1 WHERE lower(email)=%s",
+                (db, em))
+
+
+def classement_beta():
+    """Retourne les joueurs ayant disputé au moins un open match, triés par Elo."""
+    if not PG_URL:
+        return []
+    _pg_ensure()
+    with _pg() as c:
+        return c.execute(
+            """SELECT prenom, email, profession, zone, elo, nb_matchs
+               FROM waitlist WHERE nb_matchs > 0
+               ORDER BY elo DESC, nb_matchs DESC"""
+        ).fetchall()
 
 
 def _new_code(existe):
@@ -2063,7 +2146,11 @@ def page(titre, corps, flash=None, nav=True, og_title=None, og_desc=None):
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Padel Santé">
+<meta name="theme-color" content="#070b10">
 <style>{CSS}</style></head>
 <body><header>
 <div class="brand">{MARK_SVG}
@@ -3294,15 +3381,25 @@ def page_match(match_id, joueur, flash=None):
         action_html = f"""<div class="flash" style="margin-top:16px">
           Score enregistré : <strong>{e(score['score'])}</strong></div>"""
     elif inscrit and complet:
+        # Teams : joueurs[0-1] = Équipe A, joueurs[2-3] = Équipe B
+        nom_A = " + ".join(
+            (j.get("prenom") or j["email"].split("@")[0]) for j in joueurs[:2])
+        nom_B = " + ".join(
+            (j.get("prenom") or j["email"].split("@")[0]) for j in joueurs[2:])
         sets_fields = "".join(
             f"""<div class="grid2">
-              <div><label>Set {i} — vous</label>
+              <div><label>Set {i} — {e(nom_A)}</label>
                 <input name="s{i}a" type="number" min="0" max="7" placeholder="0"></div>
-              <div><label>Set {i} — adversaires</label>
+              <div><label>Set {i} — {e(nom_B)}</label>
                 <input name="s{i}b" type="number" min="0" max="7" placeholder="0"></div>
             </div>""" for i in range(1, 4))
         action_html = f"""<div class="card" style="margin-top:16px;background:var(--bg2)">
           <h3 style="margin-top:0">Saisir le score</h3>
+          <div style="margin-bottom:14px;font-size:13px;color:var(--muted)">
+            <span class="badge">Équipe A</span> {e(nom_A)} &nbsp;
+            <span class="vs">vs</span> &nbsp;
+            <span class="badge">Équipe B</span> {e(nom_B)}
+          </div>
           <form method="post" action="/match/score">
             <input type="hidden" name="match_id" value="{match_id}">
             {sets_fields}
@@ -3353,6 +3450,67 @@ def page_match(match_id, joueur, flash=None):
     return page(f"Match du {m['date']}", corps, flash)
 
 
+def page_classement_beta(joueur, flash=None):
+    rows = classement_beta()
+    email_co = joueur["email"].lower()
+
+    def ligne(i, r):
+        moi = r["email"].lower() == email_co
+        style = "font-weight:800;background:rgba(198,255,0,.07)" if moi else ""
+        p = r.get("prenom") or r["email"].split("@")[0]
+        elo = r.get("elo") or 1000
+        delta = elo - 1000
+        delta_s = (f'<span style="color:var(--lime)">+{delta}</span>' if delta > 0
+                   else f'<span style="color:var(--mag)">{delta}</span>' if delta < 0
+                   else '<span class="muted">—</span>')
+        return (f'<tr style="{style}"><td style="font-weight:900;color:var(--muted)">{i}</td>'
+                f'<td><strong>{e(p)}</strong>{"&nbsp;<span class=badge_moi>Moi</span>" if moi else ""}</td>'
+                f'<td style="font-size:13px">{e(r.get("profession") or "—")}</td>'
+                f'<td><span class="badge zone">{e(r.get("zone") or "—")}</span></td>'
+                f'<td style="font-weight:900;font-size:17px">{elo}</td>'
+                f'<td>{delta_s}</td>'
+                f'<td class="muted">{r.get("nb_matchs") or 0}</td></tr>')  # noqa
+
+    if rows:
+        rows_html = "".join(ligne(i + 1, r) for i, r in enumerate(rows))
+        tableau = f"""<table style="width:100%">
+          <tr><th>#</th><th>Joueur(se)</th><th>Profession</th><th>Zone</th>
+          <th>Elo</th><th>Δ</th><th>Matchs</th></tr>
+          {rows_html}</table>"""
+    else:
+        tableau = '<p class="muted">Aucun match enregistré pour l\'instant.<br>Ouvre ou rejoins un match pour apparaître ici !</p>'
+
+    corps = f"""
+    <div style="display:flex;justify-content:space-between;align-items:center;
+         margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <h2 style="margin:0">Classement bêta</h2>
+      <a href="/match/ouvrir" class="btn">+ Ouvrir un match</a>
+    </div>
+    <div class="card">
+      <p class="muted" style="margin-top:0">Classement Elo calculé sur les open matchs de la phase bêta.
+      Base : 1000 pts. K=32 par match.</p>
+      {tableau}
+    </div>
+    <p style="margin-top:16px"><a href="/matchs" class="muted">← Matchs ouverts</a></p>"""
+    return page("Classement bêta", corps, flash)
+
+
+MANIFEST_JSON = """{
+  "name": "Ligue Padel Santé",
+  "short_name": "Padel Santé",
+  "description": "Le championnat de padel des soignants d'Île-de-France",
+  "theme_color": "#070b10",
+  "background_color": "#070b10",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/connexion",
+  "scope": "/",
+  "icons": [
+    {"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}"""
+
+
 class Handler(http.server.BaseHTTPRequestHandler):
     def _send(self, body, code=200):
         data = body.encode("utf-8")
@@ -3388,10 +3546,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     # Pages accessibles sans déverrouillage (pré-lancement : seule la préinscription).
     PUBLIC_GET = {"/", "/confidentialite", "/apercu", "/favicon.svg",
-                  "/favicon.ico", "/carte", "/carte.svg",
+                  "/favicon.ico", "/carte", "/carte.svg", "/manifest.json",
                   # Espace joueur réel — gèrent eux-mêmes l'auth session
                   "/connexion", "/connexion/lien", "/deconnexion",
-                  "/profil", "/matchs", "/match/ouvrir", "/match"}
+                  "/profil", "/matchs", "/match/ouvrir", "/match",
+                  "/classement-beta"}
     PUBLIC_POST = {"/rejoindre", "/auth/google", "/apercu",
                    "/connexion", "/match/ouvrir", "/match/rejoindre", "/match/score",
                    "/match/annuler"}
@@ -3436,8 +3595,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         f'padding:10px 20px;text-align:center;font-size:13px;backdrop-filter:blur(6px)">'
                         f'Connecté(e) : <strong style="color:var(--lime)">{e(p)}</strong> · '
                         f'<a href="/matchs">Matchs</a> · '
+                        f'<a href="/classement-beta">Classement</a> · '
                         f'<a href="/profil">Profil</a> · '
-                        f'<a href="/deconnexion" style="color:var(--muted)">Déconnexion</a></div>')
+                        f'<a href="/deconnexion" style="color:var(--muted)">Déco</a></div>')
                 self._send(page_landing(sent_code=ok,
                                         ref_from=waitlist_par_code(ref),
                                         error=err, source=src,
@@ -3478,6 +3638,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(svg)))
                 self.end_headers()
                 self.wfile.write(svg)
+            elif u.path == "/manifest.json":
+                data = MANIFEST_JSON.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/manifest+json")
+                self.send_header("Cache-Control", "max-age=86400")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+            elif u.path == "/classement-beta":
+                joueur = self._joueur()
+                if not joueur:
+                    self._redirect("/connexion")
+                    return
+                self._send(page_classement_beta(joueur, flash))
             elif u.path == "/connexion":
                 self._send(page_connexion(flash))
             elif u.path == "/connexion/lien":
@@ -3653,8 +3827,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             score_str = " / ".join(sets)
             saisir_score_open(mid, score_str, joueur["email"])
+            import threading
+            threading.Thread(target=calculer_elo_open_match,
+                             args=(mid,), daemon=True).start()
             self._redirect(f"/match?id={mid}&flash=" + urllib.parse.quote(
-                "Score enregistré !"))
+                "Score enregistré ! Les cotes Elo ont été mises à jour."))
 
         elif u.path == "/inscription":
             zone = g("zone")
