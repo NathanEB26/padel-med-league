@@ -71,7 +71,8 @@ NIVEAUX = {
 PROFESSIONS = [
     "Médecin", "Chirurgien-dentiste", "Pharmacien", "Sage-femme",
     "Infirmier(ère)", "Masseur-kinésithérapeute", "Orthophoniste", "Orthoptiste",
-    "Psychologue", "Pédicure-podologue", "Ergothérapeute", "Diététicien(ne)",
+    "Audioprothésiste", "Psychologue", "Pédicure-podologue", "Ergothérapeute",
+    "Diététicien(ne)",
     "Manipulateur radio", "Ostéopathe", "Aide-soignant(e)", "Ambulancier",
     "Étudiant en santé", "Autre profession de santé",
 ]
@@ -632,7 +633,7 @@ def email_confirmation_html(prenom, ref_code):
       <div style="background:#eafaf0;border:1px solid #bfe9cf;border-radius:10px;
            padding:16px 18px;margin:0 0 24px">
         <p style="font-size:14px;color:#0b1118;line-height:1.6;margin:0 0 4px">
-        <strong>📌 Pour être sûr·e de ne rien rater :</strong></p>
+        <strong>📌 Pour être sûr(e) de ne rien rater :</strong></p>
         <p style="font-size:14px;color:#3a4654;line-height:1.6;margin:0 0 12px">
         ajoute <strong>{EMAIL_FROM}</strong> à tes contacts (sinon nos prochains emails
         risquent les spams ou l'onglet Promotions){whatsapp_phrase}.</p>
@@ -649,7 +650,7 @@ def email_confirmation_html(prenom, ref_code):
 
       <p style="font-size:13px;color:#8595a6;line-height:1.6;margin:0;border-top:1px solid #eef2f6;
       padding-top:16px">
-      Tu reçois cet email car tu t'es inscrit·e sur padel-med-league.fr. Pour te
+      Tu reçois cet email car tu t'es inscrit(e) sur padel-med-league.fr. Pour te
       désinscrire ou toute question : <a href="mailto:{EMAIL_FROM}"
       style="color:#6b7a8c">{EMAIL_FROM}</a>.</p>
     </div>
@@ -1510,7 +1511,7 @@ def page_carte(ref_from):
     lien = f"{BASE_URL}/?ref={e(code)}" if code else BASE_URL
     corps = f"""
     <div class="card" style="max-width:560px;margin:0 auto;text-align:center">
-      <h1 style="margin:.2em 0">Ta carte de fondateur·rice</h1>
+      <h1 style="margin:.2em 0">Ta carte de fondateur(rice)</h1>
       <p class="muted">Fais une capture d'écran et partage-la en story Instagram ou
       sur WhatsApp pour inviter tes collègues. Ton lien de parrainage est dessous.</p>
       <div style="max-width:340px;margin:18px auto;border-radius:18px;overflow:hidden;
@@ -1624,16 +1625,16 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
                       'email (et de renseigner un email valide).</div>')
     if n >= SEUIL_COMPTEUR:
         compteur = (f'<span class="lp-counter"><span class="dot"></span>'
-                    f'{n} soignant·e·s déjà sur la liste</span>')
+                    f'{n} soignant(e)s déjà sur la liste</span>')
     else:
         compteur = ('<span class="lp-counter"><span class="dot"></span>'
-                    'Inscription ouverte — sois parmi les premiers</span>')
+                    'Inscription ouverte — sois parmi les premier(ère)s</span>')
 
     # Bandeau d'invitation si on arrive via un lien de parrainage
     ref_banner = ""
     referred_field = ""
     if ref_from:
-        qui = e(ref_from["prenom"]) if ref_from["prenom"] else "Un·e collègue"
+        qui = e(ref_from["prenom"]) if ref_from["prenom"] else "Un(e) collègue"
         ref_banner = (f'<div class="ref-banner">👋 {qui} t\'invite à rejoindre la '
                       f'Ligue Padel Santé — vous pourrez jouer ensemble !</div>')
         referred_field = (f'<input type="hidden" name="referred_by" '
@@ -1698,7 +1699,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
                       f'<span class="muted">— {detail}</span></span></div>')
         if prochain:
             reste = prochain[0] - nb_f
-            entete = (f'<strong>Tu as parrainé {nb_f} personne·s.</strong> Plus que '
+            entete = (f'<strong>Tu as parrainé {nb_f} personne(s).</strong> Plus que '
                       f'<strong>{reste}</strong> pour débloquer « {e(prochain[1])} » 🔓')
         else:
             entete = f'<strong>🏆 Tu as tout débloqué ({nb_f} parrainages) — merci !</strong>'
@@ -1714,7 +1715,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
             'WhatsApp</strong></p>'
             '<p class="muted" style="margin:0 0 12px;font-size:14px">'
             '⚠️ <strong>Nos emails peuvent tomber dans tes spams ou l\'onglet '
-            'Promotions.</strong> Sur le canal WhatsApp, tu es sûr·e d\'être prévenu·e à '
+            'Promotions.</strong> Sur le canal WhatsApp, tu es sûr(e) d\'être prévenu(e) à '
             'l\'ouverture (date, créneaux, clubs). Diffusion seulement — '
             '<strong>ton numéro reste privé</strong>, personne ne le voit.</p>'
             f'<a class="btn share-wa btn-xl" target="_blank" rel="noopener" href="{e(WHATSAPP_URL)}">💬 Suivre le canal '
@@ -1749,7 +1750,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
             onclick="navigator.clipboard.writeText('{lien}');this.textContent='✓ Copié !'">📋 Copier le lien</button>
         </div>
         <p style="margin-top:12px"><a class="btn sec" target="_blank" rel="noopener" href="/carte?ref={e(sent_code)}">🎴
-        Voir ma carte de fondateur·rice à partager</a></p>
+        Voir ma carte de fondateur(rice) à partager</a></p>
         <p class="muted" style="margin-top:10px;font-size:13px">📸 <strong>Instagram :</strong>
         ouvre ta carte, capture-la et partage-la en story avec ton lien.</p></div>"""
     else:
@@ -1799,7 +1800,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
         <p class="muted" style="text-align:center;margin:14px 0 0;font-size:12px">
         On ne partage et ne revend jamais ton email. Désinscription en 1 clic.</p>
         <p class="muted" style="text-align:center;margin:8px 0 0;font-size:12px">
-        💡 Déjà inscrit·e et tu as perdu ton email ? Re-saisis la même adresse :
+        💡 Déjà inscrit(e) et tu as perdu ton email ? Re-saisis la même adresse :
         on te renvoie ton accès (espace, canal, carte).</p></div>"""
 
     corps = f"""<div class="lp">
@@ -1807,8 +1808,8 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
     <div class="lp-hero">
       <span class="lp-eyebrow">Pré-lancement · Saison 1</span>
       <h1>Le championnat de padel des <em>soignants</em> d'Île-de-France</h1>
-      <p class="lp-sub"><strong>Débutant qui se lance</strong> ou <strong>joueur
-      confirmé</strong> : on t'apparie avec des partenaires et adversaires
+      <p class="lp-sub"><strong>Débutant(e) qui se lance</strong> ou <strong>joueur(se)
+      confirmé(e)</strong> : on t'apparie avec des partenaires et adversaires
       <strong>exactement à ton niveau</strong>, près de chez toi, toutes les 2 semaines.
       Tu trouves le créneau, tu joues — on gère tout le reste.</p>
       <div class="lp-cta-row">
@@ -1832,7 +1833,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
     </div>
 
     <div class="lp-section">
-      <h2>Débutant ou confirmé : toujours à <em>ton</em> niveau</h2>
+      <h2>Débutant(e) ou confirmé(e) : toujours à <em>ton</em> niveau</h2>
       <p class="lead">La hantise au padel, c'est de tomber sur des joueurs trop forts —
       ou trop faibles. Ici, l'appariement par niveau (et une cote qui s'affine à chaque
       match) te garantit des parties <strong>serrées et plaisantes</strong>, quel que
@@ -1931,7 +1932,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
           infirmiers, dentistes, pharmaciens, sages-femmes, étudiants en santé…</p></div>
         <div class="faq-item"><h3>Je n'ai pas de partenaire.</h3><p>Aucun problème :
           tu peux jouer <strong>en solo</strong> — à chaque journée, on t'attribue
-          un·e partenaire (et des adversaires) à ton niveau. Tu as un binôme ?
+          un(e) partenaire (et des adversaires) à ton niveau. Tu as un binôme ?
           Inscrivez-vous en <strong>équipe</strong>. Et tu peux <strong>changer de
           formule à chaque journée</strong> : c'est une seule et même ligue, avec
           un classement individuel <em>et</em> un classement par équipe.</p></div>
@@ -1956,7 +1957,7 @@ def page_landing(sent_code=None, ref_from=None, error=None, source=None):
     # OG personnalisé quand on arrive via un lien de parrainage (aperçu partagé).
     og_title = og_desc = None
     if ref_from:
-        qui = (ref_from["prenom"] or "").strip() or "Un·e collègue"
+        qui = (ref_from["prenom"] or "").strip() or "Un(e) collègue"
         og_title = f"{qui} t'invite dans la Ligue Padel Santé"
         og_desc = ("Le championnat de padel des soignants d'Île-de-France. "
                    "Inscris-toi gratuitement et jouez ensemble.")
@@ -2118,7 +2119,7 @@ def page_classements(par="equipe", flash=None):
             cls = f"lead-{i}" if i <= 3 else ""
             rows += (f'<tr class="{cls}"><td class="rank">{i}</td>'
                      f'<td><span class="tname">{e(g["nom"])}</span> '
-                     f'<span class="tag">{g["joueurs"]} joueur·s · {g["v"]} victoires</span></td>'
+                     f'<span class="tag">{g["joueurs"]} joueur(s) · {g["v"]} victoires</span></td>'
                      f'<td>{g["cote_moy"]}</td><td class="pts">{g["pts_par_tete"]}</td></tr>')
         if not rows:
             rows = '<tr><td colspan="4" class="muted">Pas encore de résultats dans cette catégorie.</td></tr>'
@@ -2185,7 +2186,7 @@ def page_tournant(flash=None):
     <strong>partenaire</strong> et des <strong>adversaires différents</strong>,
     regroupés par niveau (4 joueurs par terrain). Ton score est individuel — tu
     grimpes à <a href="/classements?par=individuel">La Cote d'Or</a>.
-    <br><strong>{nb_solo}</strong> joueur·s inscrits en solo.
+    <br><strong>{nb_solo}</strong> joueur(s) inscrits en solo.
     <a href="/inscription">S'inscrire en solo →</a></p></div>"""
     corps = intro
     if not journees:
