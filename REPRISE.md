@@ -74,6 +74,8 @@ depuis son téléphone en dehors d'une session — c'est une vraie source d'entr
    de proposer de contacter une structure déjà contactée, ou de reprogrammer un
    post déjà publié.
 
+5. **Dérouler §C** (briefing + mode d'exécution autonome).
+
 ---
 
 ## §B — Claude Code : mise en place technique du site
@@ -106,6 +108,46 @@ depuis son téléphone en dehors d'une session — c'est une vraie source d'entr
 4. **Ne pas refaire un travail déjà fait** : vérifier l'état actuel du code
    avant de proposer une implémentation (ex. ne pas ré-implémenter une feature
    déjà en place).
+
+5. **Dérouler §C** (briefing + mode d'exécution autonome).
+
+---
+
+## §C — Briefing du jour + mode d'exécution autonome (commun §A et §B)
+
+### 1. Briefing du jour — actions Nathan en attente
+
+Produire systématiquement ce bloc à la fin du point rapide :
+
+```
+## Tes actions du jour (côté toi)
+1. [action prioritaire Nathan — ex. créer la Page LinkedIn]
+2. [action bloquante — ex. acheter le domaine]
+3. …
+```
+
+**Source** : lire **STRATEGIE.md §6 « Actions Nathan en attente »** + les items
+marqués *→ Nathan* dans la TODO (🟠/🟡). Trier par priorité du jour, pas par
+ordre d'apparition dans le fichier. Ne garder que ce qui est **réellement en
+attente** (pas les cases déjà cochées).
+
+### 2. Mode d'exécution autonome
+
+**Règle** : après le point rapide et le briefing, **attaquer d'office la
+première tâche non bloquante non sensible** identifiée dans la session.
+
+- **Proposer l'approche** (1-2 phrases : ce qu'on va faire, pourquoi), puis
+  **exécuter sans relance intermédiaire**.
+- Ne remonter à Nathan **que** :
+  - les arbitrages stratégiques non décidés,
+  - les actions qui lui sont réservées (achat, création de compte, saisie de
+    mot de passe, contact à démarcher, validation légale).
+- Pour tout le reste : coder, commiter, déployer, mettre à jour les docs — et
+  signaler ce qui a été fait **en fin d'action**, pas avant.
+
+**Seuil** : « proposer puis exécuter » — pas « demander si c'est ok », pas
+« attendre une confirmation » entre deux sous-tâches d'un même chantier. Si
+Nathan veut stopper ou pivoter, il le dit.
 
 ---
 

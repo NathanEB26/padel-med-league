@@ -12,6 +12,27 @@
 
 ## 0. Décisions stratégiques (journal)
 
+### S16 — Mode de travail : automatisation maximale + briefing matinal — *28/06/2026* 🟡 orientation validée
+**Demande de Nathan** (via boîte à idées Notion, 28/06), deux volets liés :
+1. **Briefing matinal** : en début de session (ou chaque matin), recevoir un point
+   clair des **to-do que lui** doit faire de son côté pour la journée (achats,
+   créations de comptes/Pages, démarchages, validations) — séparé de ce que Claude
+   exécute seul.
+2. **Enchaîner sans lui** : pousser l'**automatisation/agentique** au maximum, pour
+   qu'au lancement d'une session Code ou Cowork, Claude **enchaîne les tâches non
+   bloquantes seul** sans attendre une action de Nathan à chaque étape.
+**Pourquoi** : Nathan veut rester sur les seules décisions stratégiques et les actions
+qui lui sont propres (cf. règle « pas d'actions sensibles à sa place ») ; tout le reste
+doit avancer sans lui. Prolonge S13 (« maximiser l'automatisation/l'agentique »).
+**Implication concrète** :
+- Le **briefing matinal** = livrable à produire en début de session — la liste « Actions
+  Nathan en attente » (§6) en est déjà la matière première ; à formaliser comme premier
+  réflexe de reprise (candidat à intégrer dans REPRISE.md).
+- L'**enchaînement autonome** = en session, traiter d'office les tâches non bloquantes
+  et non sensibles, ne remonter que les arbitrages stratégiques et les actions réservées
+  à Nathan.
+**Statut** : orientation validée, à opérationnaliser (pas encore figée dans les rituels).
+
 ### S1 — Hébergement & domaine découplés : Render (hébergement) + OVH (domaine) — *23/06/2026*
 **Décision** : garder le **site sur Render** et acheter **le domaine `padel-med-league.fr`
 chez OVH** (registrar). Les deux sont indépendants ; on branche le domaine OVH sur
