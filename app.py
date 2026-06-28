@@ -312,6 +312,8 @@ def _pg_ensure():
         c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS source TEXT")
         c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS elo INTEGER DEFAULT 1000")
         c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS nb_matchs INTEGER DEFAULT 0")
+        c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS shadow_elo INTEGER DEFAULT 1000")
+        c.execute("ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS shadow_matchs INTEGER DEFAULT 0")
     _pg_ready = True
 
 
@@ -359,6 +361,8 @@ def _pg_ensure_jeu():
             saisi_par TEXT NOT NULL,
             saisi_le TIMESTAMP DEFAULT now()
         )""")
+        # Migration : colonnes ajoutées après le déploiement initial
+        c.execute("ALTER TABLE open_matches ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'officiel'")
     # Nettoyage paresseux : purge les tokens/sessions expirés à chaque démarrage
     try:
         with _pg() as c:
@@ -463,15 +467,17 @@ def waitlist_par_email(email):
 # OPEN MATCH — créer / rejoindre / scorer un créneau de jeu
 # ---------------------------------------------------------------------------
 
-def ouvrir_match(creator_email, date, heure, club, format_, niveau_min, niveau_max, zone):
+def ouvrir_match(creator_email, date, heure, club, format_, niveau_min, niveau_max, zone,
+                 type_match='officiel'):
     """Crée un open match et inscrit le créateur. Retourne l'id."""
     _pg_ensure_jeu()
     with _pg() as c:
         row = c.execute(
             """INSERT INTO open_matches
-               (creator_email, date, heure, club, format, niveau_min, niveau_max, zone)
-               VALUES(%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-            (creator_email, date, heure, club, format_, int(niveau_min), int(niveau_max), zone)
+               (creator_email, date, heure, club, format, niveau_min, niveau_max, zone, type)
+               VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+            (creator_email, date, heure, club, format_, int(niveau_min), int(niveau_max), zone,
+             type_match)
         ).fetchone()
         mid = row["id"]
         c.execute("INSERT INTO open_match_joueurs(match_id,email) VALUES(%s,%s)",
@@ -585,10 +591,18 @@ def _elo_delta(ra, rb, score_a, k=32):
 def calculer_elo_open_match(match_id):
     """Calcule et applique le delta Elo suite à un score d'open match.
     Teams : joueurs[0-1] (Équipe A) vs joueurs[2-3] (Équipe B).
-    Le score stocké est toujours du point de vue de l'Équipe A."""
+    Le score stocké est toujours du point de vue de l'Équipe A.
+    Officiels → elo public. Amicaux → shadow_elo seulement (classement intact).
+    TODO Saison 1 : gate amical = avoir honoré son officiel de la période."""
     if not PG_URL:
         return
     _pg_ensure_jeu()
+    match = get_open_match(match_id)
+    if not match:
+        return
+    type_match = match.get("type") or "officiel"
+    amical = (type_match == "amical")
+
     score_row = get_score_open(match_id)
     if not score_row:
         return
@@ -603,13 +617,13 @@ def calculer_elo_open_match(match_id):
         return  # nul indécidable (ne devrait pas arriver au padel)
     score_a = 1 if sa > sb else 0
 
-    # Récupérer les Elos courants
     emails = [j["email"].lower() for j in joueurs]
+    elo_col = "shadow_elo" if amical else "elo"
     with _pg() as c:
         rows = c.execute(
-            "SELECT email, elo FROM waitlist WHERE lower(email) = ANY(%s)",
+            f"SELECT email, {elo_col} FROM waitlist WHERE lower(email) = ANY(%s)",
             (emails,)).fetchall()
-    elo_map = {r["email"].lower(): (r["elo"] or 1000) for r in rows}
+    elo_map = {r["email"].lower(): (r[elo_col] or 1000) for r in rows}
 
     elo_A = [elo_map.get(emails[0], 1000), elo_map.get(emails[1], 1000)]
     elo_B = [elo_map.get(emails[2], 1000), elo_map.get(emails[3], 1000)]
@@ -617,14 +631,21 @@ def calculer_elo_open_match(match_id):
     rb = (elo_B[0] + elo_B[1]) / 2
     da, db = _elo_delta(ra, rb, score_a)
 
+    if amical:
+        matchs_col = "shadow_matchs"
+    else:
+        matchs_col = "nb_matchs"
+
     with _pg() as c:
         for em in emails[:2]:
             c.execute(
-                "UPDATE waitlist SET elo = COALESCE(elo,1000) + %s, nb_matchs = COALESCE(nb_matchs,0) + 1 WHERE lower(email)=%s",
+                f"UPDATE waitlist SET {elo_col} = COALESCE({elo_col},1000) + %s,"
+                f" {matchs_col} = COALESCE({matchs_col},0) + 1 WHERE lower(email)=%s",
                 (da, em))
         for em in emails[2:]:
             c.execute(
-                "UPDATE waitlist SET elo = COALESCE(elo,1000) + %s, nb_matchs = COALESCE(nb_matchs,0) + 1 WHERE lower(email)=%s",
+                f"UPDATE waitlist SET {elo_col} = COALESCE({elo_col},1000) + %s,"
+                f" {matchs_col} = COALESCE({matchs_col},0) + 1 WHERE lower(email)=%s",
                 (db, em))
 
 
@@ -3211,7 +3232,19 @@ def page_profil(joueur, flash=None):
         <div class="jeu-stat"><p class="label">Partenaire</p>
           <p class="val">{e(joueur.get("a_partenaire") or "—")}</p></div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="jeu-stats" style="margin-top:12px;border-top:1px solid #1e2a38;padding-top:12px">
+        <div class="jeu-stat">
+          <p class="label">Elo officiel</p>
+          <p class="val" style="color:var(--lime)">{joueur.get("elo") or 1000}</p>
+          <p class="muted" style="font-size:11px;margin:2px 0 0">{joueur.get("nb_matchs") or 0} match(s)</p>
+        </div>
+        <div class="jeu-stat">
+          <p class="label">Elo fantôme <span class="muted" style="font-size:11px">(privé)</span></p>
+          <p class="val" style="color:var(--gold)">{joueur.get("shadow_elo") or 1000}</p>
+          <p class="muted" style="font-size:11px;margin:2px 0 0">{joueur.get("shadow_matchs") or 0} amical(aux)</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
         <a href="/matchs" class="btn">Matchs ouverts</a>
         <a href="/match/ouvrir" class="btn sec">+ Ouvrir un match</a>
       </div>
@@ -3279,7 +3312,7 @@ def page_matchs(joueur, flash=None):
             <span class="badge zone">{e(m['zone'] or '—')}</span>
             <span class="badge">{e(niv_range)}</span>
             <span class="badge">{e(m['format'].capitalize())}</span>
-          </div>
+            {'<span class="badge" style="background:#1a1a0a;color:#ffce3a">Amical</span>' if m.get('type') == 'amical' else ''}</div>
           <div class="match-actions">
             <a href="/match?id={m['id']}" class="btn sec" style="padding:8px 16px;font-size:13px">
               Voir →</a>
@@ -3343,6 +3376,19 @@ def page_ouvrir_match(joueur, flash=None):
         <div class="grid2">
           <div><label>Niveau min</label><select name="niveau_min">{niv_opts(niv_min)}</select></div>
           <div><label>Niveau max</label><select name="niveau_max">{niv_opts(niv_max)}</select></div>
+        </div>
+      </fieldset>
+      <fieldset style="margin-top:16px">
+        <legend>Type de match</legend>
+        <div style="display:flex;gap:24px;padding:8px 0">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="radio" name="type_match" value="officiel" checked>
+            <span><strong>Officiel</strong> — compte dans le classement Elo</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="radio" name="type_match" value="amical">
+            <span><strong>Amical</strong> — hors classement, juste pour le fun</span>
+          </label>
         </div>
       </fieldset>
       <br>
@@ -3785,8 +3831,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             niveau_min = int(g("niveau_min") or 3)
             niveau_max = int(g("niveau_max") or 7)
             zone = g("zone") or joueur.get("zone") or "Centre"
+            type_match = g("type_match") if g("type_match") in ("officiel", "amical") else "officiel"
             mid = ouvrir_match(joueur["email"], date, heure, club,
-                               format_, niveau_min, niveau_max, zone)
+                               format_, niveau_min, niveau_max, zone, type_match)
             import threading
             threading.Thread(target=notifier_joueurs_compatibles,
                              args=(mid,), daemon=True).start()
