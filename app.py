@@ -3252,12 +3252,16 @@ def page_profil(joueur, flash=None):
     mes_matchs = matchs_joueur(email) if PG_URL else []
     if mes_matchs:
         statut_col = {"ouvert": "var(--lime)", "complet": "var(--mag)", "annulé": "var(--muted)"}
-        rows_html = "".join(
-            f'<tr><td><a href="/match?id={m["id"]}">{e(m["date"])} {e(m["heure"])}</a></td>'
-            f'<td style="font-size:13px">{e(m["club"])}</td>'
-            f'<td><span class="badge zone">{e(m["zone"] or "—")}</span></td>'
-            f'<td style="color:{statut_col.get(m["statut"],"var(--muted)")}">{e(m["statut"])}</td></tr>'
-            for m in mes_matchs)
+        rows_html = ""
+        for m in mes_matchs:
+            type_badge = (' <span class="badge" style="background:#1a1a0a;color:#ffce3a;'
+                          'font-size:11px">Amical</span>' if m.get("type") == "amical" else "")
+            rows_html += (
+                f'<tr><td><a href="/match?id={m["id"]}">{e(m["date"])} {e(m["heure"])}</a></td>'
+                f'<td style="font-size:13px">{e(m["club"])}</td>'
+                f'<td><span class="badge zone">{e(m["zone"] or "—")}</span></td>'
+                f'<td style="color:{statut_col.get(m["statut"],"var(--muted)")}">'
+                f'{e(m["statut"])}{type_badge}</td></tr>')
         corps += f"""<div class="card" style="max-width:620px;margin:14px auto 0">
           <h3 style="margin-top:0">Mes matchs</h3>
           <table><tr><th>Date</th><th>Club</th><th>Zone</th><th>Statut</th></tr>
