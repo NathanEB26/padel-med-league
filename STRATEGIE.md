@@ -86,7 +86,7 @@ Instagram = mobile). **(b)** « l'app » = **PWA** (installable écran d'accueil
 iOS+Android, réutilise le code web, coût quasi nul). **(c)** app **native iOS** repoussée
 en phase Croissance (compte dev Apple 99 $/an + App Store + maintenance = prématuré).
 
-### S8 — Matchs amicaux + cote fantôme (shadow rating) — *23/06/2026* ✅ validé, en backlog
+### S8 — Matchs amicaux + cote fantôme (shadow rating) — *23/06/2026* ✅ validé — **bêta LIVRÉE 28/06/2026**
 **Décision** : garder **1 match officiel / 15 jours** pour tout le monde (cadence qui
 préserve l'équité du classement), mais permettre des **matchs amicaux** en plus. **Gate
 clé** : on ne peut **ouvrir ou rejoindre un amical que si on a honoré son officiel** de
@@ -329,9 +329,10 @@ remplir des appariements crédibles au lancement.
 - [ ] **Modèle « open match »** *(S2)* : ouverture de match par un joueur + sollicitation
       des compatibles + fenêtre d'élargissement + sièges solo/duo. Spéc → PLAN.md.
       **Doit être fonctionnel début août 2026.**
-- [ ] **Matchs amicaux + cote fantôme** *(S8)* : débloqués après l'officiel, hors
-      classement, comptés en stats fun + shadow rating privé. Dépend de S2.
-      **Doit être fonctionnel début août 2026** (phase de test friendly-match en août).
+- [x] **Matchs amicaux + cote fantôme** *(S8)* : ✅ **bêta livrée 28/06** — radio
+      officiel/amical à la création, Elo officiel vs shadow Elo (privé), badge amical
+      sur les cartes + historique profil. Gate "officiel honoré → amical débloqué" :
+      TODO Saison 1 (pas de cadence officielle imposée en bêta).
 
 ### 🟢 Backlog produit (Saison 1+)
 - [ ] **Statistiques joueur/groupe** *(S9)* : dashboard perso (A) → social/fun (B) →
